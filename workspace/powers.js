@@ -96,6 +96,7 @@ function createPowerSystem() {
         if (picked || !canPick(id)) return;
         picked = true;
         off(modal, "show");
+        removeEventListener("keydown", onKey);
         setTimeout(() => modal.remove(), 750);
         for (const pid of POWER_IDS) if (upgradeSkip[pid] > 0) upgradeSkip[pid]--;
         const skip = skips[id] ?? 0;
@@ -122,6 +123,15 @@ function createPowerSystem() {
         if (ok) btn.onclick = () => commit(id);
         return btn;
       });
+
+      const onKey = (e) => {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        const id = POWER_KEY[e.key.toLowerCase()];
+        if (!id) return;
+        e.preventDefault();
+        commit(id);
+      };
+      addEventListener("keydown", onKey);
 
       const modal = div(
         { className: "pmod" },
