@@ -1,0 +1,13 @@
+{
+  "name": "js13k2026",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:max": "node scripts/build.mjs --opt 2",
+    "size": "node scripts/build.mjs"
+  },
+  "devDependencies": {
+    "roadroller": "^2.1.0"
+  }
+}

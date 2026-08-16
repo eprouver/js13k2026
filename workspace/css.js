@@ -1,0 +1,839 @@
+function addCSSRulesToHead(cssRules) {
+  const styleElement = document.createElement('style');
+  styleElement.appendChild(document.createTextNode(cssRules));
+  document.head.appendChild(styleElement);
+}
+const css = `* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+:root {
+  --dist: 50vmin;
+  --gap: 10vmin;
+  --face: calc(2 * var(--dist) - var(--gap));
+  --radius: 32%;
+  --pill-radius: 2rem;
+  --persp: 40vmin;
+  --span: calc(2 * var(--dist));
+  --inset: 1px;
+  --inspect-zoom: 16vmin;
+  --bg: #0a0614;
+  --fg: #f8e8ff;
+  --ink: #1a0a2e;
+  --mute: #888;
+  --cam-ms: 550ms;
+  --walk-ms: 700ms;
+  --ease: cubic-bezier(0.4, 0.05, 0.2, 1);
+  --ease2: var(--ease2);
+  --side-orb: 7.25vmin;
+  --orb-font: calc(var(--side-orb) * 0.3);
+  --orb-r: calc(var(--side-orb) * 3);
+  --dim: grayscale(1) brightness(0.55);
+}
+
+html,
+body {
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  font-family: Arial;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* Repeated layout atoms — identical declarations pack well. */
+.z3 {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+
+.ov {
+  position: fixed;
+  inset: 0;
+}
+
+.abs {
+  position: absolute;
+  inset: 0;
+}
+
+@supports (corner-shape: squircle) {
+  *,
+  *::before,
+  *::after {
+    corner-shape: squircle;
+  }
+}
+
+/* Pills opt out of squircle (tabs, action, upgrade card). */
+#controls [data-act="action"],
+.ct,
+.pmc {
+  border-radius: var(--pill-radius);
+  corner-shape: round;
+}
+
+#viewport {
+  position: absolute;
+  inset: 0;
+  perspective: var(--persp);
+  overflow: hidden;
+  background: var(--bg, #0a0614);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+#viewport.inspecting {
+  pointer-events: none;
+  cursor: default;
+}
+
+#camera {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: translateZ(0);
+  transition: transform var(--cam-ms) var(--ease);
+}
+
+#camera.na,
+#world.na {
+  transition: none;
+}
+
+#viewport.inspecting #camera {
+  transform: translateZ(var(--inspect-zoom));
+}
+
+#pivot,
+#world,
+.room,
+.wall {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+
+#pivot {
+  left: 50%;
+  top: 50%;
+  transform-origin: 0 0;
+}
+
+#world {
+  transition: transform var(--walk-ms) var(--ease);
+}
+
+.room,
+.wall {
+  backface-visibility: hidden;
+}
+
+.wall {
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))
+    translateZ(calc(-1 * var(--dist) + var(--inset)));
+}
+.wall.face-n { --ry: 0deg; }
+.wall.face-s { --ry: 180deg; }
+.wall.face-e { --ry: -90deg; }
+.wall.face-w { --ry: 90deg; }
+.wall.face-u { --rx: 90deg; }
+.wall.face-d { --rx: -90deg; }
+
+.face {
+  position: absolute;
+  width: var(--face);
+  height: var(--face);
+  left: calc(var(--face) / -2);
+  top: calc(var(--face) / -2);
+  backface-visibility: hidden;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #1a1a1a;
+  transform-origin: 50% 50%;
+  transition: scale 0.55s var(--ease);
+}
+
+.face .wm,
+.face .cl,
+.face svg {
+  backface-visibility: hidden;
+}
+
+#viewport.lx .face,
+#viewport.le .face {
+  scale: 0 0;
+}
+
+#viewport.le .face {
+  transition: none;
+}
+
+#viewport.le.li .face {
+  transition: scale 0.65s var(--ease2);
+}
+
+.face .wm,
+.cl svg,
+.tpw svg,
+.tp svg,
+.pentagon .content .pwm {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.face .wm {
+  pointer-events: none;
+}
+
+.cl {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cl svg {
+  overflow: visible;
+  pointer-events: none;
+}
+
+#viewport.inspecting .face.it .cl,
+.face.it .cl.hiding,
+.cl.prv {
+  opacity: 1;
+}
+
+.cl.prv .ctri {
+  opacity: 0;
+}
+
+.face.it .cl.hot .ctri,
+.face.it .ctri.hot {
+  filter: brightness(1.25);
+}
+
+#istage {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+#istage[hidden],
+#proot.hidden,
+.pm[hidden] {
+  display: none !important;
+}
+
+
+
+#istage .ihit {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+#controls {
+  position: absolute;
+  bottom: 4.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: grid;
+  grid-template-columns: repeat(3, 3.2rem);
+  grid-template-rows: 3.2rem 3.2rem 2.35rem;
+  gap: 0.45rem;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+#controls button {
+  pointer-events: auto;
+  font: inherit;
+  border: none;
+  border-radius: var(--orb-r);
+  cursor: pointer;
+  color: var(--ink);
+  font-size: 1.25rem;
+  background: var(--mute);
+}
+
+body.po #controls,
+body.rewarding #controls {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#controls button:hover:not(:disabled):not([data-act="action"]) {
+  background: #ff6ec7;
+  color: #fff;
+}
+
+#controls button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+#controls [data-act="left"] { grid-area: 2 / 1; }
+#controls [data-act="up"] { grid-area: 1 / 2; }
+#controls [data-act="down"] { grid-area: 2 / 2; }
+#controls [data-act="right"] { grid-area: 2 / 3; }
+#controls [data-act="action"] {
+  grid-area: 3 / 1 / 4 / 4;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  background: var(--mute);
+  color: var(--ink);
+}
+
+#proot {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  z-index: 60;
+  width: max-content;
+  max-width: 100%;
+  pointer-events: none;
+}
+
+
+
+#ctabs {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.ct {
+  pointer-events: auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0.55rem 0.85rem 0.65rem;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  background: var(--tab-dark, #2a2a32);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tab, #888) 45%, transparent);
+  transform: translateY(0);
+  transition: transform 0.4s var(--ease), padding 0.4s ease, box-shadow 0.25s ease;
+}
+
+.ct.ready:not(.raised) {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--tab, #888) 45%, transparent),
+    0 0 0 2px var(--tab, #f90);
+}
+
+.ct.raised {
+  transform: translateY(-7.5rem);
+  padding: 0.7rem 0.9rem;
+  z-index: 62;
+  cursor: default;
+}
+
+.ct.shake {
+  animation: tab-shake 0.45s ease;
+}
+
+.ct.raised.shake {
+  --shake-y: -7.5rem;
+}
+
+@keyframes tab-shake {
+  0%,
+  100% { transform: translateY(var(--shake-y, 0)); }
+  25% { transform: translateY(var(--shake-y, 0)) translateX(-6px); }
+  50% { transform: translateY(var(--shake-y, 0)) translateX(6px); }
+  75% { transform: translateY(var(--shake-y, 0)) translateX(-3px); }
+}
+
+.tps {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ct.raised .tps {
+  display: none;
+}
+
+.tpw {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: 0 0 auto;
+}
+
+.tb {
+  display: none;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.ct.raised .tb {
+  display: flex;
+}
+
+.tp {
+  width: 3.2rem;
+  height: 3.2rem;
+  flex: 0 0 auto;
+  cursor: grab;
+  touch-action: none;
+  pointer-events: auto;
+}
+
+.tp:active,
+.tp.dragging {
+  cursor: grabbing;
+}
+
+.dg {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 80;
+  pointer-events: none;
+  opacity: 0.95;
+}
+
+.pm {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+}
+
+
+
+.pm:not([hidden]) {
+  pointer-events: auto;
+}
+
+.pb {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--tab-dark, #2a2a32) 42%, transparent);
+}
+
+.pp {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  transform: translate(-50%, -50%);
+  width: min(72vmin, 420px);
+  aspect-ratio: 1;
+}
+
+body.pf .pp {
+  top: 50%;
+  width: min(82vmin, 480px);
+  transition: top 0.35s ease, width 0.35s ease;
+}
+
+.pentagon {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.pentagon .slot {
+  position: absolute;
+  inset: 0;
+  transform: rotate(var(--base));
+  pointer-events: none;
+}
+
+.pentagon .wedge {
+  pointer-events: auto;
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(50% 50%, 16% 4%, 84% 4%);
+  cursor: default;
+  background: color-mix(in srgb, var(--tab, #f90) 22%, transparent);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--tab, #f90) 70%, #fff);
+}
+
+.pentagon .wedge.empty {
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      color-mix(in srgb, var(--tab, #f90) 28%, transparent) 0 6px,
+      color-mix(in srgb, var(--tab, #f90) 10%, transparent) 6px 12px
+    );
+}
+
+.pentagon .wedge.dh {
+  background: color-mix(in srgb, var(--tab, #f90) 55%, transparent);
+  box-shadow: inset 0 0 0 2px #fff;
+}
+
+.pentagon .wedge.filled {
+  cursor: pointer;
+  background: transparent;
+  box-shadow: none;
+  filter: grayscale(1);
+  transition: filter 0.3s ease;
+}
+
+.pentagon .wedge.filled.aligned,
+.pentagon.solved .wedge.filled {
+  cursor: default;
+  filter: grayscale(0);
+}
+
+.pentagon .wedge.empty .content {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.pentagon .wedge.filled .content {
+  visibility: visible;
+  opacity: 1;
+}
+
+.pentagon .content {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 180%;
+  height: 180%;
+  margin: -90% 0 0 -90%;
+  transform-origin: 50% 50%;
+  transform: rotate(var(--spin, 0deg));
+  transition: transform 0.3s linear;
+  pointer-events: none;
+}
+
+.pentagon .content .pwm {
+  position: absolute;
+  inset: 0;
+}
+
+.wm polygon,
+.pwm polygon {
+  stroke: none;
+}
+
+.pwm polygon {
+  filter: brightness(0.85);
+}
+
+.fly {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 120;
+  pointer-events: none;
+  offset-anchor: center;
+  offset-rotate: 0deg;
+  offset-distance: 0%;
+  background: var(--fly, gold);
+  clip-path: polygon(50% 8%, 0% 100%, 100% 100%);
+  animation: path-fly linear forwards;
+}
+
+.flyn {
+  width: 1px;
+  height: 1px;
+  background: none;
+  clip-path: none;
+}
+
+.pb.to-gem {
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+
+.pp.to-gem {
+  transition: transform 0.65s var(--ease);
+  transform: translate(-50%, -50%) scale(0.1);
+}
+
+.pentagon.to-gem .slot {
+  opacity: 0;
+  transition: opacity 0.28s ease;
+  pointer-events: none;
+}
+
+.pentagon.to-gem::after,
+.gem,
+.dface {
+  clip-path: polygon(50% 4%, 96% 38%, 79% 96%, 21% 96%, 4% 38%);
+}
+
+.pentagon.to-gem::after {
+  content: "";
+  position: absolute;
+  inset: 6%;
+  z-index: 6;
+  background: var(--gem, var(--tab, gold));
+  animation: gem-form 0.55s ease forwards;
+}
+
+@keyframes gem-form {
+  from { opacity: 0; transform: scale(1.15); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.gem {
+  position: relative;
+  flex-shrink: 0;
+  transition: width 0.55s ease, height 0.55s ease;
+}
+
+.flyn .gem {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes path-fly {
+  to { offset-distance: 100%; }
+}
+
+#drk,
+#prk {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  align-items: center;
+  pointer-events: none;
+}
+
+#drk { left: 0.35rem; }
+#prk { right: 0.35rem; }
+
+.ds,
+.ps {
+  width: var(--side-orb);
+  height: var(--side-orb);
+  font-size: var(--orb-font);
+  display: grid;
+  place-items: center;
+  border-radius: var(--orb-r);
+  background: var(--orb-base, #333);
+  box-shadow: inset 0 0 0 0.11em var(--orb-ring, transparent);
+}
+
+.ds {
+  --orb-base: var(--slot-dark, #2a2a32);
+  --orb-ring: color-mix(in srgb, var(--slot, #888) 50%, transparent);
+}
+
+.ds:not(:has(.dode)) {
+  opacity: 0.45;
+}
+
+.ds .dode {
+  font-size: 1.2vmin;
+}
+
+.dode {
+  position: relative;
+  width: 1px;
+  height: 1px;
+  perspective: 8000px;
+  transform-style: preserve-3d;
+  animation: dode-spin 12.3s linear infinite;
+}
+
+.dhold,
+.dface {
+  transform-style: preserve-3d;
+}
+
+.dface {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  backface-visibility: visible;
+  opacity: 0.7;
+  transition: background 0.45s ease, opacity 0.45s ease;
+}
+
+.dface.pending { opacity: 0.85; }
+.dface.lit { opacity: 1; }
+.dface.lit.ignite { animation: dode-ignite 0.6s ease; }
+
+@keyframes dode-ignite {
+  35% { filter: brightness(1.65); }
+}
+
+@keyframes dode-spin {
+  to { transform: rotateX(360deg) rotateY(720deg); }
+}
+
+#win {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  background: rgba(8, 4, 18, 0.78);
+  color: var(--fg);
+  font-size: clamp(2.5rem, 12vmin, 6rem);
+  letter-spacing: 0.06em;
+  pointer-events: none;
+}
+
+.ps {
+  pointer-events: auto;
+  position: relative;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  --orb-base: var(--pow-dark, #333);
+  --orb-ring: var(--pow, #888);
+  transition: transform 0.4s ease, filter 0.3s ease, opacity 0.3s ease;
+}
+
+.ps.locked,
+body.po .ps:not([data-power="assembly"]),
+body.rewarding .ps:not([data-power="assembly"]) {
+  filter: var(--dim);
+  opacity: 0.5;
+  cursor: default;
+}
+
+body.po .ps:not([data-power="assembly"]),
+body.rewarding .ps:not([data-power="assembly"]) {
+  pointer-events: none;
+}
+
+.ps.active,
+.ps.cooling:not(.active) {
+  transform: translateX(50%);
+  cursor: default;
+}
+
+.ps.active {
+  filter: none;
+  opacity: 1;
+}
+
+.ps.cooling:not(.active) {
+  filter: grayscale(1) brightness(0.7);
+  opacity: 0.55;
+}
+
+.pg {
+  font-size: 0.75em;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.pl {
+  position: absolute;
+  left: -0.15em;
+  bottom: -0.1em;
+  min-width: 1.2em;
+  padding: 0.1em 0.25em;
+  border-radius: var(--radius);
+  font-size: 0.95em;
+  background: #111;
+  box-shadow: 0 0 0 1px var(--pow, #888);
+}
+
+.pmod {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  background: rgba(6, 4, 12, 0.55);
+  opacity: 0;
+  transition: opacity 0.75s ease;
+}
+
+.pmod.show {
+  opacity: 1;
+}
+
+.pmc {
+  padding: 1.2rem 1.4rem;
+  background: var(--mute);
+  transform: translateY(0.6rem);
+  transition: transform 0.75s var(--ease2);
+}
+
+.pmod.show .pmc {
+  transform: none;
+}
+
+.ppks {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.7rem;
+}
+
+.ppk {
+  width: 4.6rem;
+  padding: 0.7rem 0.35rem 0.55rem;
+  border: none;
+  border-radius: var(--orb-r);
+  cursor: pointer;
+  color: #f5f0ff;
+  background: var(--pow-dark, #333);
+  box-shadow: inset 0 0 0 2px var(--pow, #888);
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.ppk:hover:not(:disabled):not(.locked) {
+  transform: translateY(-3px);
+  filter: brightness(1.12);
+}
+
+.ppk.locked,
+.ppk:disabled {
+  filter: var(--dim);
+  opacity: 0.5;
+  cursor: default;
+  transform: none;
+}
+
+.ppk-glyph {
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.ppk-lvl {
+  margin-top: 0.2rem;
+  text-align: center;
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+`;
+addCSSRulesToHead(css);

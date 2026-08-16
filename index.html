@@ -1,0 +1,3423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>js13k 2026</title>
+</head>
+<body>
+<script>
+function addCSSRulesToHead(cssRules) {
+  const styleElement = document.createElement('style');
+  styleElement.appendChild(document.createTextNode(cssRules));
+  document.head.appendChild(styleElement);
+}
+const css = `* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+:root {
+  --dist: 50vmin;
+  --gap: 10vmin;
+  --face: calc(2 * var(--dist) - var(--gap));
+  --radius: 32%;
+  --pill-radius: 2rem;
+  --persp: 40vmin;
+  --span: calc(2 * var(--dist));
+  --inset: 1px;
+  --inspect-zoom: 16vmin;
+  --bg: #0a0614;
+  --fg: #f8e8ff;
+  --ink: #1a0a2e;
+  --mute: #888;
+  --cam-ms: 550ms;
+  --walk-ms: 700ms;
+  --ease: cubic-bezier(0.4, 0.05, 0.2, 1);
+  --ease2: var(--ease2);
+  --side-orb: 7.25vmin;
+  --orb-font: calc(var(--side-orb) * 0.3);
+  --orb-r: calc(var(--side-orb) * 3);
+  --dim: grayscale(1) brightness(0.55);
+}
+
+html,
+body {
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  font-family: Arial;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* Repeated layout atoms — identical declarations pack well. */
+.z3 {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+
+.ov {
+  position: fixed;
+  inset: 0;
+}
+
+.abs {
+  position: absolute;
+  inset: 0;
+}
+
+@supports (corner-shape: squircle) {
+  *,
+  *::before,
+  *::after {
+    corner-shape: squircle;
+  }
+}
+
+/* Pills opt out of squircle (tabs, action, upgrade card). */
+#controls [data-act="action"],
+.ct,
+.pmc {
+  border-radius: var(--pill-radius);
+  corner-shape: round;
+}
+
+#viewport {
+  position: absolute;
+  inset: 0;
+  perspective: var(--persp);
+  overflow: hidden;
+  background: var(--bg, #0a0614);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+#viewport.inspecting {
+  pointer-events: none;
+  cursor: default;
+}
+
+#camera {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: translateZ(0);
+  transition: transform var(--cam-ms) var(--ease);
+}
+
+#camera.na,
+#world.na {
+  transition: none;
+}
+
+#viewport.inspecting #camera {
+  transform: translateZ(var(--inspect-zoom));
+}
+
+#pivot,
+#world,
+.room,
+.wall {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+
+#pivot {
+  left: 50%;
+  top: 50%;
+  transform-origin: 0 0;
+}
+
+#world {
+  transition: transform var(--walk-ms) var(--ease);
+}
+
+.room,
+.wall {
+  backface-visibility: hidden;
+}
+
+.wall {
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))
+    translateZ(calc(-1 * var(--dist) + var(--inset)));
+}
+.wall.face-n { --ry: 0deg; }
+.wall.face-s { --ry: 180deg; }
+.wall.face-e { --ry: -90deg; }
+.wall.face-w { --ry: 90deg; }
+.wall.face-u { --rx: 90deg; }
+.wall.face-d { --rx: -90deg; }
+
+.face {
+  position: absolute;
+  width: var(--face);
+  height: var(--face);
+  left: calc(var(--face) / -2);
+  top: calc(var(--face) / -2);
+  backface-visibility: hidden;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #1a1a1a;
+  transform-origin: 50% 50%;
+  transition: scale 0.55s var(--ease);
+}
+
+.face .wm,
+.face .cl,
+.face svg {
+  backface-visibility: hidden;
+}
+
+#viewport.lx .face,
+#viewport.le .face {
+  scale: 0 0;
+}
+
+#viewport.le .face {
+  transition: none;
+}
+
+#viewport.le.li .face {
+  transition: scale 0.65s var(--ease2);
+}
+
+.face .wm,
+.cl svg,
+.tpw svg,
+.tp svg,
+.pentagon .content .pwm {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.face .wm {
+  pointer-events: none;
+}
+
+.cl {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cl svg {
+  overflow: visible;
+  pointer-events: none;
+}
+
+#viewport.inspecting .face.it .cl,
+.face.it .cl.hiding,
+.cl.prv {
+  opacity: 1;
+}
+
+.cl.prv .ctri {
+  opacity: 0;
+}
+
+.face.it .cl.hot .ctri,
+.face.it .ctri.hot {
+  filter: brightness(1.25);
+}
+
+#istage {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+#istage[hidden],
+#proot.hidden,
+.pm[hidden] {
+  display: none !important;
+}
+
+
+
+#istage .ihit {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+#controls {
+  position: absolute;
+  bottom: 4.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: grid;
+  grid-template-columns: repeat(3, 3.2rem);
+  grid-template-rows: 3.2rem 3.2rem 2.35rem;
+  gap: 0.45rem;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+#controls button {
+  pointer-events: auto;
+  font: inherit;
+  border: none;
+  border-radius: var(--orb-r);
+  cursor: pointer;
+  color: var(--ink);
+  font-size: 1.25rem;
+  background: var(--mute);
+}
+
+body.po #controls,
+body.rewarding #controls {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#controls button:hover:not(:disabled):not([data-act="action"]) {
+  background: #ff6ec7;
+  color: #fff;
+}
+
+#controls button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+#controls [data-act="left"] { grid-area: 2 / 1; }
+#controls [data-act="up"] { grid-area: 1 / 2; }
+#controls [data-act="down"] { grid-area: 2 / 2; }
+#controls [data-act="right"] { grid-area: 2 / 3; }
+#controls [data-act="action"] {
+  grid-area: 3 / 1 / 4 / 4;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  background: var(--mute);
+  color: var(--ink);
+}
+
+#proot {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  z-index: 60;
+  width: max-content;
+  max-width: 100%;
+  pointer-events: none;
+}
+
+
+
+#ctabs {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.ct {
+  pointer-events: auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0.55rem 0.85rem 0.65rem;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  background: var(--tab-dark, #2a2a32);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tab, #888) 45%, transparent);
+  transform: translateY(0);
+  transition: transform 0.4s var(--ease), padding 0.4s ease, box-shadow 0.25s ease;
+}
+
+.ct.ready:not(.raised) {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--tab, #888) 45%, transparent),
+    0 0 0 2px var(--tab, #f90);
+}
+
+.ct.raised {
+  transform: translateY(-7.5rem);
+  padding: 0.7rem 0.9rem;
+  z-index: 62;
+  cursor: default;
+}
+
+.ct.shake {
+  animation: tab-shake 0.45s ease;
+}
+
+.ct.raised.shake {
+  --shake-y: -7.5rem;
+}
+
+@keyframes tab-shake {
+  0%,
+  100% { transform: translateY(var(--shake-y, 0)); }
+  25% { transform: translateY(var(--shake-y, 0)) translateX(-6px); }
+  50% { transform: translateY(var(--shake-y, 0)) translateX(6px); }
+  75% { transform: translateY(var(--shake-y, 0)) translateX(-3px); }
+}
+
+.tps {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ct.raised .tps {
+  display: none;
+}
+
+.tpw {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: 0 0 auto;
+}
+
+.tb {
+  display: none;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.ct.raised .tb {
+  display: flex;
+}
+
+.tp {
+  width: 3.2rem;
+  height: 3.2rem;
+  flex: 0 0 auto;
+  cursor: grab;
+  touch-action: none;
+  pointer-events: auto;
+}
+
+.tp:active,
+.tp.dragging {
+  cursor: grabbing;
+}
+
+.dg {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 80;
+  pointer-events: none;
+  opacity: 0.95;
+}
+
+.pm {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+}
+
+
+
+.pm:not([hidden]) {
+  pointer-events: auto;
+}
+
+.pb {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--tab-dark, #2a2a32) 42%, transparent);
+}
+
+.pp {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  transform: translate(-50%, -50%);
+  width: min(72vmin, 420px);
+  aspect-ratio: 1;
+}
+
+body.pf .pp {
+  top: 50%;
+  width: min(82vmin, 480px);
+  transition: top 0.35s ease, width 0.35s ease;
+}
+
+.pentagon {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.pentagon .slot {
+  position: absolute;
+  inset: 0;
+  transform: rotate(var(--base));
+  pointer-events: none;
+}
+
+.pentagon .wedge {
+  pointer-events: auto;
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(50% 50%, 16% 4%, 84% 4%);
+  cursor: default;
+  background: color-mix(in srgb, var(--tab, #f90) 22%, transparent);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--tab, #f90) 70%, #fff);
+}
+
+.pentagon .wedge.empty {
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      color-mix(in srgb, var(--tab, #f90) 28%, transparent) 0 6px,
+      color-mix(in srgb, var(--tab, #f90) 10%, transparent) 6px 12px
+    );
+}
+
+.pentagon .wedge.dh {
+  background: color-mix(in srgb, var(--tab, #f90) 55%, transparent);
+  box-shadow: inset 0 0 0 2px #fff;
+}
+
+.pentagon .wedge.filled {
+  cursor: pointer;
+  background: transparent;
+  box-shadow: none;
+  filter: grayscale(1);
+  transition: filter 0.3s ease;
+}
+
+.pentagon .wedge.filled.aligned,
+.pentagon.solved .wedge.filled {
+  cursor: default;
+  filter: grayscale(0);
+}
+
+.pentagon .wedge.empty .content {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.pentagon .wedge.filled .content {
+  visibility: visible;
+  opacity: 1;
+}
+
+.pentagon .content {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 180%;
+  height: 180%;
+  margin: -90% 0 0 -90%;
+  transform-origin: 50% 50%;
+  transform: rotate(var(--spin, 0deg));
+  transition: transform 0.3s linear;
+  pointer-events: none;
+}
+
+.pentagon .content .pwm {
+  position: absolute;
+  inset: 0;
+}
+
+.wm polygon,
+.pwm polygon {
+  stroke: none;
+}
+
+.pwm polygon {
+  filter: brightness(0.85);
+}
+
+.fly {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 120;
+  pointer-events: none;
+  offset-anchor: center;
+  offset-rotate: 0deg;
+  offset-distance: 0%;
+  background: var(--fly, gold);
+  clip-path: polygon(50% 8%, 0% 100%, 100% 100%);
+  animation: path-fly linear forwards;
+}
+
+.flyn {
+  width: 1px;
+  height: 1px;
+  background: none;
+  clip-path: none;
+}
+
+.pb.to-gem {
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+
+.pp.to-gem {
+  transition: transform 0.65s var(--ease);
+  transform: translate(-50%, -50%) scale(0.1);
+}
+
+.pentagon.to-gem .slot {
+  opacity: 0;
+  transition: opacity 0.28s ease;
+  pointer-events: none;
+}
+
+.pentagon.to-gem::after,
+.gem,
+.dface {
+  clip-path: polygon(50% 4%, 96% 38%, 79% 96%, 21% 96%, 4% 38%);
+}
+
+.pentagon.to-gem::after {
+  content: "";
+  position: absolute;
+  inset: 6%;
+  z-index: 6;
+  background: var(--gem, var(--tab, gold));
+  animation: gem-form 0.55s ease forwards;
+}
+
+@keyframes gem-form {
+  from { opacity: 0; transform: scale(1.15); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.gem {
+  position: relative;
+  flex-shrink: 0;
+  transition: width 0.55s ease, height 0.55s ease;
+}
+
+.flyn .gem {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes path-fly {
+  to { offset-distance: 100%; }
+}
+
+#drk,
+#prk {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  align-items: center;
+  pointer-events: none;
+}
+
+#drk { left: 0.35rem; }
+#prk { right: 0.35rem; }
+
+.ds,
+.ps {
+  width: var(--side-orb);
+  height: var(--side-orb);
+  font-size: var(--orb-font);
+  display: grid;
+  place-items: center;
+  border-radius: var(--orb-r);
+  background: var(--orb-base, #333);
+  box-shadow: inset 0 0 0 0.11em var(--orb-ring, transparent);
+}
+
+.ds {
+  --orb-base: var(--slot-dark, #2a2a32);
+  --orb-ring: color-mix(in srgb, var(--slot, #888) 50%, transparent);
+}
+
+.ds:not(:has(.dode)) {
+  opacity: 0.45;
+}
+
+.ds .dode {
+  font-size: 1.2vmin;
+}
+
+.dode {
+  position: relative;
+  width: 1px;
+  height: 1px;
+  perspective: 8000px;
+  transform-style: preserve-3d;
+  animation: dode-spin 12.3s linear infinite;
+}
+
+.dhold,
+.dface {
+  transform-style: preserve-3d;
+}
+
+.dface {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  backface-visibility: visible;
+  opacity: 0.7;
+  transition: background 0.45s ease, opacity 0.45s ease;
+}
+
+.dface.pending { opacity: 0.85; }
+.dface.lit { opacity: 1; }
+.dface.lit.ignite { animation: dode-ignite 0.6s ease; }
+
+@keyframes dode-ignite {
+  35% { filter: brightness(1.65); }
+}
+
+@keyframes dode-spin {
+  to { transform: rotateX(360deg) rotateY(720deg); }
+}
+
+#win {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  background: rgba(8, 4, 18, 0.78);
+  color: var(--fg);
+  font-size: clamp(2.5rem, 12vmin, 6rem);
+  letter-spacing: 0.06em;
+  pointer-events: none;
+}
+
+.ps {
+  pointer-events: auto;
+  position: relative;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  --orb-base: var(--pow-dark, #333);
+  --orb-ring: var(--pow, #888);
+  transition: transform 0.4s ease, filter 0.3s ease, opacity 0.3s ease;
+}
+
+.ps.locked,
+body.po .ps:not([data-power="assembly"]),
+body.rewarding .ps:not([data-power="assembly"]) {
+  filter: var(--dim);
+  opacity: 0.5;
+  cursor: default;
+}
+
+body.po .ps:not([data-power="assembly"]),
+body.rewarding .ps:not([data-power="assembly"]) {
+  pointer-events: none;
+}
+
+.ps.active,
+.ps.cooling:not(.active) {
+  transform: translateX(50%);
+  cursor: default;
+}
+
+.ps.active {
+  filter: none;
+  opacity: 1;
+}
+
+.ps.cooling:not(.active) {
+  filter: grayscale(1) brightness(0.7);
+  opacity: 0.55;
+}
+
+.pg {
+  font-size: 0.75em;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.pl {
+  position: absolute;
+  left: -0.15em;
+  bottom: -0.1em;
+  min-width: 1.2em;
+  padding: 0.1em 0.25em;
+  border-radius: var(--radius);
+  font-size: 0.95em;
+  background: #111;
+  box-shadow: 0 0 0 1px var(--pow, #888);
+}
+
+.pmod {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  background: rgba(6, 4, 12, 0.55);
+  opacity: 0;
+  transition: opacity 0.75s ease;
+}
+
+.pmod.show {
+  opacity: 1;
+}
+
+.pmc {
+  padding: 1.2rem 1.4rem;
+  background: var(--mute);
+  transform: translateY(0.6rem);
+  transition: transform 0.75s var(--ease2);
+}
+
+.pmod.show .pmc {
+  transform: none;
+}
+
+.ppks {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.7rem;
+}
+
+.ppk {
+  width: 4.6rem;
+  padding: 0.7rem 0.35rem 0.55rem;
+  border: none;
+  border-radius: var(--orb-r);
+  cursor: pointer;
+  color: #f5f0ff;
+  background: var(--pow-dark, #333);
+  box-shadow: inset 0 0 0 2px var(--pow, #888);
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.ppk:hover:not(:disabled):not(.locked) {
+  transform: translateY(-3px);
+  filter: brightness(1.12);
+}
+
+.ppk.locked,
+.ppk:disabled {
+  filter: var(--dim);
+  opacity: 0.5;
+  cursor: default;
+  transform: none;
+}
+
+.ppk-glyph {
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.ppk-lvl {
+  margin-top: 0.2rem;
+  text-align: center;
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+`;
+addCSSRulesToHead(css);
+
+;
+const OPTS = {
+  time: {
+    turnMs: 450,
+    camMs: 550,
+    inspectOutMs: 550,
+    walkMs: 700,
+    levelExitMs: 580,
+    levelEnterPadMs: 40,
+    levelEnterMs: 700,
+    solveHoldMs: 1100,
+  },
+  fly: {
+    ms: 1100,
+    trophyMs: 1400,
+  },
+  powers: {
+    perceptionBaseMs: 5e3,
+    perceptionPerLevelMs: 2500,
+    perceptionStaggerMs: 550,
+    huntCdL1Ms: 24e3,
+    huntCdPerStepMs: 4e3,
+    huntCdMinMs: 8e3,
+    washL1Pct: 120,
+    washShrinkPct: 28,
+    washMinPct: 32,
+    assemblyFromLevel: 2,
+    radianceFromLevel: 3,
+    radianceEveryN: 3,
+    upgradeSkipAfter: { perception: 0, extraction: 1, assembly: 0, radiance: 2 },
+    radianceCdMs: 12e4,
+    solveCheckMs: 480,
+  },
+  reveal: { revealMs: 4e3, hideMs: 4e3, rMax: 80 },
+  level: {
+    perColor: 5,
+    maxMazeSize: 4,
+    defs: [
+      { mazeSize: 0, colorCount: 1 },
+      { mazeSize: 2, colorCount: 2 },
+      { mazeSize: 3, colorCount: 3 },
+      { mazeSize: 4, colorCount: 4 },
+    ],
+  },
+  dode: { sideEm: 2, facePush: 0.76, minLightness: 58 },
+};
+
+(() => {
+  const r = document.documentElement.style;
+  const t = OPTS.time;
+  r.setProperty("--cam-ms", t.camMs + "ms");
+  r.setProperty("--walk-ms", t.walkMs + "ms");
+})();
+
+;
+// SFX engine only — ambient music lives in music.deferred.js (not in build)
+// ZzFXMicro - Zuper Zmall Zound Zynth - v1.3.2 by Frank Force
+let zzfxV = 0.3, // volume
+  zzfxX = new AudioContext(), // audio context
+  zzfx = // play sound
+  (
+    p = 1,
+    k = 0.05,
+    b = 220,
+    e = 0,
+    r = 0,
+    t = 0.1,
+    q = 0,
+    D = 1,
+    u = 0,
+    y = 0,
+    v = 0,
+    z = 0,
+    l = 0,
+    E = 0,
+    A = 0,
+    F = 0,
+    c = 0,
+    w = 1,
+    m = 0,
+    B = 0,
+    N = 0
+  ) => {
+    let M = Math,
+      d = 2 * M.PI,
+      R = 44100,
+      G = (u *= (500 * d) / R / R),
+      C = (b *= (1 - k + 2 * k * M.random((k = []))) * d) / R,
+      g = 0,
+      H = 0,
+      a = 0,
+      n = 1,
+      I = 0,
+      J = 0,
+      f = 0,
+      h = N < 0 ? -1 : 1,
+      x = (d * h * N * 2) / R,
+      L = M.cos(x),
+      Z = M.sin,
+      K = Z(x) / 4,
+      O = 1 + K,
+      X = (-2 * L) / O,
+      Y = (1 - K) / O,
+      P = (1 + h * L) / 2 / O,
+      Q = -(h + L) / O,
+      S = P,
+      T = 0,
+      U = 0,
+      V = 0,
+      W = 0;
+    e = R * e + 9;
+    m *= R;
+    r *= R;
+    t *= R;
+    c *= R;
+    y *= (500 * d) / R ** 3;
+    A *= d / R;
+    v *= d / R;
+    z *= R;
+    l = (R * l) | 0;
+    p *= zzfxV;
+    for (h = (e + m + r + t + c) | 0; a < h; k[a++] = f * p)
+      ++J % ((100 * F) | 0) ||
+        ((f = q
+          ? 1 < q
+            ? 2 < q
+              ? 3 < q
+                ? 4 < q
+                  ? ((g / d) % 1 < D / 2) * 2 - 1
+                  : Z(g ** 3)
+                : M.max(M.min(M.tan(g), 1), -1)
+              : 1 - (((2 * g) / d) % 2 + 2) % 2
+            : 1 - 4 * M.abs(M.round(g / d) - g / d)
+          : Z(g)),
+        (f =
+          (l ? 1 - B + B * Z((d * a) / l) : 1) *
+          (4 < q ? f : (f < 0 ? -1 : 1) * M.abs(f) ** D) *
+          (a < e
+            ? a / e
+            : a < e + m
+              ? 1 - ((a - e) / m) * (1 - w)
+              : a < e + m + r
+                ? w
+                : a < h - c
+                  ? ((h - a - c) / t) * w
+                  : 0)),
+        (f = c
+          ? f / 2 +
+            (c > a ? 0 : ((a < h - c ? 1 : (h - a) / c) * k[(a - c) | 0]) / 2 / p)
+          : f),
+        N
+          ? (f = W = S * T + Q * (T = U) + P * (U = f) - Y * V - X * (V = W))
+          : 0,
+        (x = (b += u += y) * M.cos(A * H++)),
+        (g += x + x * E * Z(a ** 5)),
+        n && ++n > z && ((b += v), (C += v), (n = 0)),
+        !l || ++I % l || ((b = C), (u = G), (n = n || 1)));
+    X = zzfxX;
+    p = X.createBuffer(1, h, R);
+    p.getChannelData(0).set(k);
+    b = X.createBufferSource();
+    b.buffer = p;
+    b.connect(X.destination);
+    b.start();
+  };
+
+
+function toggleMute() { return true; }
+function triggerReward() {}
+const armMusicStart = () => {
+  const go = () => {
+    window.removeEventListener("pointerdown", go, true);
+    window.removeEventListener("keydown", go, true);
+    if (zzfxX.state === "suspended") zzfxX.resume();
+  };
+  window.addEventListener("pointerdown", go, true);
+  window.addEventListener("keydown", go, true);
+};
+armMusicStart();
+
+;
+/** Only path-landing sting — all other SFX removed. */
+const sfxLand = () =>
+  zzfx(1, 0, 492, 0.03, 0.06, 0.09, 0, 1.1, -2, 88, 152, 0.09, 0, 0, 0, 0, 0, 0.55, 0.03);
+
+;
+const v = new Proxy(
+  {},
+  {
+    get: (_, t) =>
+      (...args) => {
+        const e = document.createElement(t);
+        args.flat(0xff).forEach((a) => {
+          if (a?.constructor == Object && !a.nodeType) {
+            let { style, ...r } = a;
+            Object.assign(e, r);
+            if (style)
+              for (let k in style)
+                k[0] == "-"
+                  ? e.style.setProperty(k, style[k])
+                  : (e.style[k] = style[k]);
+          } else if (a != null) {
+            e.append(a);
+          }
+        });
+        return e;
+      },
+  }
+);
+
+;
+
+const { div, button } = v;
+const qs = (s, r = document) => r.querySelector(s);
+const qsa = (s, r = document) => [...(r || document).querySelectorAll(s)];
+const on = (el, ...c) => el && el.classList.add(...c);
+const off = (el, ...c) => el && el.classList.remove(...c);
+const tog = (el, c, v) => el && el.classList.toggle(c, v);
+const bodyOn = (...c) => on(document.body, ...c);
+const bodyOff = (...c) => off(document.body, ...c);
+const has = (el, c) => !!el?.classList.contains(c);
+const bodyHas = (c) => has(document.body, c);
+const px = (n) => n + "px";
+const box = (el, o) => {
+  if (!el) return;
+  if (o.w != null) el.style.width = px(o.w);
+  if (o.h != null) el.style.height = px(o.h);
+  if (o.x != null) el.style.left = px(o.x);
+  if (o.y != null) el.style.top = px(o.y);
+  if (o.z != null) el.style.zIndex = o.z;
+};
+const SVG100 = {
+  viewBox: "0 0 100 100",
+  width: "100%",
+  height: "100%",
+};
+
+const inspectFace = () => qs(".face.it");
+const faceLayers = (face) => (face ? qsa(".cl", face) : []);
+const layerById = (id) => qs(`.cl[data-id="${id}"]`);
+
+;
+const RAINBOW = [
+  { name: "Red", h: 0, s: 80, l: 55 },
+  { name: "Orange", h: 28, s: 85, l: 52 },
+  { name: "Yellow", h: 52, s: 85, l: 55 },
+  { name: "Green", h: 112, s: 75, l: 48 },
+  { name: "Blue", h: 224, s: 80, l: 55 },
+  { name: "Purple", h: 280, s: 70, l: 55 },
+];
+
+const colorHsl = ({ h, s, l }) => `hsl(${h} ${s}% ${l}%)`;
+
+const colorPair = (c) => ({ ...c, l: 33 });
+
+const toneStyle = (prefix, color, dark = colorPair(color)) => ({
+  [`--${prefix}`]: colorHsl(color),
+  [`--${prefix}-dark`]: colorHsl(dark),
+});
+
+const toRainbow = (c) => {
+  let best = RAINBOW[0];
+  let bestD = 1e9;
+  for (const r of RAINBOW) {
+    let d = Math.abs(c.h - r.h) % 360;
+    if (d > 180) d = 360 - d;
+    if (d < bestD) {
+      bestD = d;
+      best = r;
+    }
+  }
+  return best;
+};
+
+;
+
+const generatePathData = (x1, y1, x2, y2) => {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const len = Math.hypot(dx, dy) || 80;
+  const j = len * 0.28;
+  const nx = -dy / len;
+  const ny = dx / len;
+  const side = Math.random() < 0.5 ? 1 : -1;
+  const c1x = x1 + dx * 0.3 + nx * j * side * (0.4 + Math.random() * 0.6);
+  const c1y = y1 + dy * 0.3 + ny * j * side * (0.4 + Math.random() * 0.6);
+  const c2x = x1 + dx * 0.7 + nx * j * -side * (0.3 + Math.random() * 0.5);
+  const c2y = y1 + dy * 0.7 + ny * j * -side * (0.3 + Math.random() * 0.5);
+  return `M ${x1} ${y1} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${x2} ${y2}`;
+};
+
+const offscreenUpperThird = () => {
+  const W = innerWidth;
+  const H = innerHeight;
+  return Math.random() < 0.5
+    ? { x: W * (0.35 + Math.random() * 0.65), y: -56 }
+    : { x: W + 56, y: H * (0.02 + Math.random() * 0.31) };
+};
+
+const flyStartPoint = (fromEl, opts, node) => {
+  if (opts.fromOffscreen) return offscreenUpperThird();
+  const origin = fromEl || node;
+  if (!origin?.getBoundingClientRect) return offscreenUpperThird();
+  const a = origin.getBoundingClientRect();
+  const x = a.left + a.width / 2;
+  const y = a.top + a.height / 2;
+  const tiny = a.width < 4 || a.height < 4;
+  const offView =
+    !node &&
+    (y < -20 || y > innerHeight + 20 || x < -20 || x > innerWidth + 20);
+  if (tiny || offView) return offscreenUpperThird();
+  return { x, y };
+};
+
+const flyOnPath = (fromEl, toEl, opts = {}) =>
+  new Promise((resolve) => {
+    const node = opts.node;
+    if (!toEl || (node != null && !node)) {
+      if (!node) fromEl?.remove?.();
+      resolve();
+      return;
+    }
+
+    const b = toEl.getBoundingClientRect();
+    const { x: x1, y: y1 } = flyStartPoint(fromEl, opts, node);
+    const x2 = b.left + b.width / 2;
+    const y2 = b.top + b.height / 2;
+    const ms = opts.ms ?? (node ? OPTS.fly.trophyMs : OPTS.fly.ms);
+    const delay = opts.delay ?? 0;
+
+    const mover = div({
+      className: node ? "fly flyn" : "fly",
+    });
+    mover.style.offsetPath = `path("${generatePathData(x1, y1, x2, y2)}")`;
+    mover.style.offsetDistance = "0%";
+    mover.style.animationDuration = `${ms}ms`;
+    mover.style.animationDelay = `${delay}ms`;
+
+    if (node) {
+      if (node.style) {
+        node.style.position = "";
+        node.style.left = "";
+        node.style.top = "";
+        node.style.zIndex = "";
+      }
+      mover.append(node);
+    } else {
+      const size = opts.fromOffscreen ? 34 : 28;
+      mover.style.setProperty("--fly", opts.fill || "gold");
+      mover.style.width = `${size}px`;
+      mover.style.height = `${size}px`;
+      if (fromEl) fromEl.style.visibility = "hidden";
+    }
+
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      mover.remove();
+      if (!node) fromEl?.remove?.();
+      sfxLand();
+      resolve();
+    };
+    mover.addEventListener("animationend", finish, { once: true });
+    setTimeout(finish, delay + ms + 120);
+    document.body.append(mover);
+  });
+
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const nextFrame = () => new Promise((r) => requestAnimationFrame(() => r()));
+
+const onceEndOrTimeout = (el, ms, onDone, filter) => {
+  let done = false;
+  const finish = (e) => {
+    if (done) return;
+    if (filter && e && !filter(e)) return;
+    done = true;
+    el?.removeEventListener?.("transitionend", finish);
+    el?.removeEventListener?.("animationend", finish);
+    onDone();
+  };
+  el?.addEventListener?.("transitionend", finish);
+  el?.addEventListener?.("animationend", finish);
+  setTimeout(() => finish(), ms);
+};
+
+const flyThen = (fromEl, toEl, opts, onLand) =>
+  flyOnPath(fromEl, toEl, opts).then(() => onLand?.());
+
+;
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+const mulberry32 = (a) => () => {
+  a |= 0;
+  a = (a + 0x6d2b79f5) | 0;
+  let t = Math.imul(a ^ (a >>> 15), 1 | a);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
+
+const svgEl = (name, attrs = {}, ...kids) => {
+  const e = document.createElementNS(SVG_NS, name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  for (const c of kids.flat(0xff)) if (c != null) e.append(c);
+  return e;
+};
+
+const ISO_PTS = "50,8 1.802,74.339 98.198,74.339";
+
+const isoTriSvg = (fill, opts = {}) => {
+  const { polyClass = "iso-tri", svgClass } = opts;
+  return svgEl(
+    "svg",
+    {
+      ...SVG100,
+      ...(svgClass ? { class: svgClass } : {}),
+    },
+    svgEl("polygon", { class: polyClass, points: ISO_PTS, fill })
+  );
+};
+
+const buildMesh = (rand, n = 3) => {
+  const xs = [0];
+  const ys = [0];
+  const xw = [];
+  const yw = [];
+  let wx = 0;
+  let wy = 0;
+  for (let i = 0; i < n; i++) {
+    const a = 0.5 + rand();
+    const b = 0.5 + rand();
+    xw.push(a);
+    yw.push(b);
+    wx += a;
+    wy += b;
+  }
+  for (let i = 0; i < n; i++) {
+    xs.push(xs[i] + xw[i] / wx);
+    ys.push(ys[i] + yw[i] / wy);
+  }
+  xs[n] = ys[n] = 1;
+  const pts = [];
+  for (let j = 0; j <= n; j++)
+    for (let i = 0; i <= n; i++) {
+      let x = xs[i];
+      let y = ys[j];
+      if (i && i < n) x += (rand() - 0.5) * (xs[i] - xs[i - 1]) * 0.45;
+      if (j && j < n) y += (rand() - 0.5) * (ys[j] - ys[j - 1]) * 0.45;
+      pts.push([Math.min(1, Math.max(0, x)), Math.min(1, Math.max(0, y))]);
+    }
+  const at = (i, j) => pts[j * (n + 1) + i];
+  const tris = [];
+  for (let j = 0; j < n; j++)
+    for (let i = 0; i < n; i++) {
+      const a = at(i, j);
+      const b = at(i + 1, j);
+      const c = at(i + 1, j + 1);
+      const d = at(i, j + 1);
+      if (rand() < 0.5) tris.push([a, b, c], [a, c, d]);
+      else tris.push([a, b, d], [b, c, d]);
+    }
+  return tris;
+};
+
+const createMeshData = (seed, opts = {}) => {
+  const tint = opts.color;
+  const rand = mulberry32(seed >>> 0);
+  const tris = buildMesh(rand, opts.cols || 3);
+  const svg = svgEl("svg", {
+    ...SVG100,
+    preserveAspectRatio: "none",
+    class: tint ? "wm pwm" : "wm",
+  });
+  svg.append(
+    svgEl("rect", {
+      width: 100,
+      height: 100,
+      fill: tint
+        ? colorHsl({ h: tint.h, s: tint.s, l: Math.max(8, tint.l * 0.35) })
+        : "#444",
+    })
+  );
+  for (const [a, b, c] of tris) {
+    const g = 0x33 + ((rand() * 0x34) | 0);
+    const pts = [a, b, c].map(([x, y]) => `${x * 100},${y * 100}`).join(" ");
+    svg.append(
+      svgEl("polygon", {
+        points: pts,
+        fill: tint
+          ? colorHsl({
+              h: tint.h,
+              s: tint.s,
+              l: Math.max(18, Math.min(78, tint.l - 18 + ((g - 0x33) / 0x33) * 40)),
+            })
+          : `rgb(${g},${g},${g})`,
+      })
+    );
+  }
+  return { svg, tris };
+};
+
+const triCentroid = ([[x1, y1], [x2, y2], [x3, y3]]) => [
+  (x1 + x2 + x3) / 3,
+  (y1 + y2 + y3) / 3,
+];
+
+const pickCollectTris = (tris, seed, count) => {
+  if (count < 1 || !tris.length) return [];
+  const pick = mulberry32((seed ^ 0xc0ffee) >>> 0);
+  let pool = tris.filter((t) => {
+    const [cx, cy] = triCentroid(t);
+    return cx > 0.18 && cx < 0.82 && cy > 0.18 && cy < 0.82;
+  });
+  if (!pool.length) pool = tris.slice();
+  const chosen = [];
+  const rest = pool.slice();
+  while (chosen.length < count && rest.length)
+    chosen.push(rest.splice((pick() * rest.length) | 0, 1)[0]);
+  while (chosen.length < count) chosen.push(chosen[chosen.length - 1] || tris[0]);
+  return chosen;
+};
+
+const createCollectLayer = (id, tri, color) => {
+  const maskId = `cm-${id}`;
+  const pts = tri.map(([x, y]) => `${x * 100},${y * 100}`).join(" ");
+  const [cx, cy] = triCentroid(tri);
+  const mask = svgEl("mask", {
+    id: maskId,
+    maskUnits: "userSpaceOnUse",
+    x: 0,
+    y: 0,
+    width: 100,
+    height: 100,
+  });
+  mask.append(
+    svgEl("circle", {
+      class: "rc",
+      cx: cx * 100,
+      cy: cy * 100,
+      r: 0,
+      fill: "#fff",
+      filter: "url(#df)",
+    })
+  );
+  const layer = div({ className: "cl" });
+  layer.dataset.id = id;
+  layer.append(
+    svgEl(
+      "svg",
+      {
+        ...SVG100,
+        preserveAspectRatio: "none",
+      },
+      svgEl("defs", {}, mask),
+      svgEl("polygon", {
+        class: "ctri",
+        points: pts,
+        fill: colorHsl(color),
+        mask: `url(#${maskId})`,
+      })
+    )
+  );
+  return layer;
+};
+
+const paintWallMesh = (
+  face,
+  seed = (Math.random() * 0xffffffff) >>> 0,
+  opts = {}
+) => {
+  const { svg, tris } = createMeshData(seed);
+  face.replaceChildren(svg);
+  const items = opts.collectibles || [];
+  if (!items.length) return;
+  const shapes = pickCollectTris(tris, seed, items.length);
+  items.forEach((it, i) => face.append(createCollectLayer(it.id, shapes[i], it.color)));
+};
+
+;
+let revealRaf = null;
+let revealLayers = [];
+
+const REVEAL_MS = OPTS.reveal.revealMs;
+const HIDE_MS = OPTS.reveal.hideMs;
+const R_MAX = OPTS.reveal.rMax;
+const easeOut3 = (t) => 1 - (1 - t) ** 3;
+
+const runTween = (ms, { onTick, onDone, setRaf }) => {
+  const start = performance.now();
+  const tick = (now) => {
+    const t = Math.min(1, (now - start) / ms);
+    onTick(easeOut3(t), t);
+    if (t < 1) setRaf(requestAnimationFrame(tick));
+    else {
+      setRaf(null);
+      onDone?.();
+    }
+  };
+  setRaf(requestAnimationFrame(tick));
+};
+
+const setCircleR = (circle, r) =>
+  circle?.setAttribute?.("r", String(Math.max(0, r)));
+const readCircleR = (circle, fallback = 0) => {
+  const v = parseFloat(circle?.getAttribute?.("r"));
+  return Number.isFinite(v) ? Math.max(0, v) : fallback;
+};
+
+function ensureRevealDefs() {
+  if (document.getElementById("reveal-defs")) return;
+  const wrap = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  wrap.id = "reveal-defs";
+  wrap.setAttribute("aria-hidden", "true");
+  wrap.style.cssText =
+    "position:absolute;width:0;height:0;overflow:hidden;pointer-events:none";
+  wrap.innerHTML =
+    `<defs><filter id="df" x="-50%" y="-50%" width="200%" height="200%">` +
+    `<feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="2" result="n"/>` +
+    `<feDisplacementMap in="SourceGraphic" in2="n" scale="48" xChannelSelector="R" yChannelSelector="G"/>` +
+    `</filter></defs>`;
+  document.body.prepend(wrap);
+}
+
+function stopRevealRaf() {
+  if (revealRaf != null) {
+    cancelAnimationFrame(revealRaf);
+    revealRaf = null;
+  }
+}
+
+function resetLayerMask(layer) {
+  if (!layer) return;
+  stopHintRaf(layer);
+  setCircleR(layer.querySelector(".rc"), 0);
+  off(layer, "revealing", "hiding", "revealed");
+}
+
+function resetRevealMask() {
+  stopRevealRaf();
+  revealLayers.forEach(resetLayerMask);
+  revealLayers = [];
+}
+
+const asLayers = (x) => (Array.isArray(x) ? x : [x]).filter(Boolean);
+
+function playRevealMask(layerOrLayers) {
+  ensureRevealDefs();
+  stopRevealRaf();
+  const layers = asLayers(layerOrLayers);
+  for (const prev of revealLayers) if (!layers.includes(prev)) resetLayerMask(prev);
+  if (!layers.length) {
+    revealLayers = [];
+    return;
+  }
+  revealLayers = layers;
+  const circles = layers.map((layer) => {
+    stopHintRaf(layer);
+    off(layer, "revealed", "hiding");
+    on(layer, "revealing");
+    return layer.querySelector(".rc");
+  });
+  if (circles.some((c) => !c)) return;
+  const r0s = circles.map((c) => readCircleR(c, 0));
+  runTween(REVEAL_MS, {
+    setRaf: (id) => {
+      revealRaf = id;
+    },
+    onTick: (eased) =>
+      circles.forEach((c, i) => setCircleR(c, r0s[i] + (R_MAX - r0s[i]) * eased)),
+    onDone: () =>
+      layers.forEach((layer, i) => {
+        setCircleR(circles[i], R_MAX);
+        off(layer, "revealing");
+        on(layer, "revealed");
+      }),
+  });
+}
+
+function playHideMask(layerOrLayers, onDone) {
+  ensureRevealDefs();
+  stopRevealRaf();
+  const layers = asLayers(layerOrLayers);
+  if (!layers.length) return void onDone?.();
+  revealLayers = layers;
+  const circles = layers.map((layer) => {
+    off(layer, "revealed", "revealing");
+    on(layer, "hiding");
+    return layer.querySelector(".rc");
+  });
+  if (circles.some((c) => !c)) return void onDone?.();
+  const r0s = circles.map((c) => readCircleR(c, R_MAX));
+  const dur = Math.max(400, HIDE_MS * (Math.max(...r0s, 1) / R_MAX));
+  runTween(dur, {
+    setRaf: (id) => {
+      revealRaf = id;
+    },
+    onTick: (eased) =>
+      circles.forEach((c, i) => setCircleR(c, r0s[i] * (1 - eased))),
+    onDone: () => {
+      layers.forEach(resetLayerMask);
+      revealLayers = [];
+      onDone?.();
+    },
+  });
+}
+
+function stopHintRaf(layer) {
+  if (layer?._hintRaf != null) {
+    cancelAnimationFrame(layer._hintRaf);
+    layer._hintRaf = null;
+  }
+}
+
+function addWashRect(layer, fill) {
+  const svg = layer.querySelector("svg");
+  const poly = layer.querySelector(".ctri");
+  if (!svg || !poly) return;
+  layer.querySelectorAll(".wr").forEach((r) => r.remove());
+  svg.insertBefore(
+    svgEl("rect", {
+      class: "wr",
+      width: 100,
+      height: 100,
+      fill,
+      "fill-opacity": 0.55,
+      mask: poly.getAttribute("mask"),
+    }),
+    poly
+  );
+}
+
+function playHintMask(layer, rTarget, ms = REVEAL_MS) {
+  ensureRevealDefs();
+  const circle = layer?.querySelector?.(".rc");
+  if (!circle) return;
+  stopHintRaf(layer);
+  on(layer, "prv");
+  const r0 = readCircleR(circle, 0);
+  const target = Math.max(0, rTarget);
+  runTween(ms, {
+    setRaf: (id) => {
+      layer._hintRaf = id;
+    },
+    onTick: (eased) => setCircleR(circle, r0 + (target - r0) * eased),
+    onDone: () => setCircleR(circle, target),
+  });
+}
+
+function clearHintMask(layer) {
+  if (!layer) return;
+  stopHintRaf(layer);
+  off(layer, "prv");
+  layer.querySelectorAll(".wr").forEach((r) => r.remove());
+  setCircleR(layer.querySelector(".rc"), 0);
+}
+
+function clearAllHintMasks() {
+  document
+    .querySelectorAll(".cl.prv")
+    .forEach(clearHintMask);
+}
+
+const clearFaceHints = (face) =>
+  face?.querySelectorAll?.(".cl.prv").forEach(clearHintMask);
+
+;
+const indexToRC = (index, cols) => ({
+  row: (index / cols) | 0,
+  col: index % cols,
+});
+
+const generateMaze = (size = 5) => {
+  const n = size * size;
+  const doors = Array.from({ length: n }, () => ({}));
+  const seen = new Uint8Array(n);
+  const stack = [0];
+  seen[0] = 1;
+  const dirs = [
+    [-1, 0, "N", "S"],
+    [1, 0, "S", "N"],
+    [0, -1, "W", "E"],
+    [0, 1, "E", "W"],
+  ];
+  while (stack.length) {
+    const cur = stack[stack.length - 1];
+    const { row, col } = indexToRC(cur, size);
+    const opts = [];
+    for (const [dr, dc, d, opp] of dirs) {
+      const r = row + dr;
+      const c = col + dc;
+      if (r < 0 || c < 0 || r >= size || c >= size) continue;
+      const id = r * size + c;
+      if (!seen[id]) opts.push([id, d, opp]);
+    }
+    if (!opts.length) {
+      stack.pop();
+      continue;
+    }
+    const [id, d, opp] = opts[(Math.random() * opts.length) | 0];
+    doors[cur][d] = id;
+    doors[id][opp] = cur;
+    seen[id] = 1;
+    stack.push(id);
+  }
+  return { size, doors };
+};
+
+;
+const PER_COLOR = OPTS.level.perColor;
+
+const LEVEL_DEFS = OPTS.level.defs;
+
+const shuffle = (a) => {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = (Math.random() * (i + 1)) | 0;
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+const tutorialRooms = () => [
+  { id: 0, x: 0, z: 0, doors: { N: 1 } },
+  { id: 1, x: 0, z: -1, doors: { S: 0 } },
+];
+
+const mazeRooms = (size) => {
+  const { doors } = generateMaze(size);
+  return doors.map((d, id) => {
+    const { row, col } = indexToRC(id, size);
+    return {
+      id,
+      x: col,
+      z: row,
+      doors: { ...d },
+    };
+  });
+};
+
+const pickLevelColors = (count, excludeNames = []) => {
+  const ban = new Set(excludeNames);
+  const pool = RAINBOW.filter((c) => !ban.has(c.name));
+  return shuffle(pool.slice()).slice(0, Math.min(count, pool.length));
+};
+
+const placeTriangles = (rooms, colors, perColor = PER_COLOR) => {
+  const slots = [];
+  for (const r of rooms) {
+    for (const face of ["N", "E", "S", "W"]) {
+      if (face in r.doors) continue;
+      slots.push({ room: r.id, face });
+    }
+  }
+  shuffle(slots);
+  const tris = [];
+  let i = 0;
+  for (const color of colors) {
+    for (let n = 0; n < perColor; n++) {
+      const s = slots[i % slots.length];
+      i++;
+      tris.push({
+        id: `t${tris.length}`,
+        room: s.room,
+        face: s.face,
+        color,
+      });
+    }
+  }
+  return tris;
+};
+
+const buildLevel = (index, excludeNames = []) => {
+  const maxSize = OPTS.level.maxMazeSize;
+  const raw =
+    LEVEL_DEFS[index] || {
+      mazeSize: Math.min(maxSize, 2 + index),
+      colorCount: Math.min(6, 1 + index),
+    };
+  const mazeSize =
+    raw.mazeSize <= 0 ? 0 : Math.min(maxSize, raw.mazeSize);
+  const ban = new Set(excludeNames);
+  const pool = RAINBOW.filter((c) => !ban.has(c.name));
+  const colorCount = Math.min(
+    pool.length,
+    Math.min(6, Math.max(1, raw.colorCount || 1))
+  );
+  const rooms = mazeSize <= 0 ? tutorialRooms() : mazeRooms(mazeSize);
+  const colors = pickLevelColors(colorCount, excludeNames);
+  return {
+    index,
+    mazeSize,
+    rooms,
+    colors,
+    triangles: colors.length
+      ? placeTriangles(rooms, colors, PER_COLOR)
+      : [],
+    perColor: PER_COLOR,
+  };
+};
+
+;
+const dodeFill = (c) =>
+  colorHsl({ ...c, l: Math.max(c.l, OPTS.dode.minLightness) });
+
+const makeGem = (color, slot) => {
+  const fill = dodeFill(color);
+  const endSize = Math.max(
+    28,
+    (slot?.getBoundingClientRect?.().width || 52) * 0.72
+  );
+  const gem = div({ className: "gem" });
+  gem.style.setProperty("--fly", fill);
+  gem.style.background = fill;
+  box(gem, { w: endSize, h: endSize });
+  return { gem, fill, endSize };
+};
+
+function createDodecahedron(opts) {
+  const {
+    color,
+    sideLength = 4.5,
+    unlockedFace = 0,
+    unlockedFaces,
+    pendingFaces = [],
+  } = opts;
+  const lit = new Set(
+    unlockedFaces ?? (unlockedFace != null ? [unlockedFace] : [0])
+  );
+  const pending = new Set(pendingFaces);
+  const fill = dodeFill(color);
+  const tilt = 26.565;
+  const z = sideLength * OPTS.dode.facePush;
+  const faces = [];
+
+  for (let i = 0; i < 12; i++) {
+    const top = i < 6;
+    const pole = i === 0 || i === 11;
+    const rx = pole ? (top ? 90 : -90) : top ? tilt : -tilt;
+    const ry = pole ? (top ? 0 : 9) : top ? (i - 1) * 72 : (i - 6) * 72 + 36;
+    const rz = pole ? (top ? 0 : -9) : top ? 180 : 0;
+    const isPending = pending.has(i);
+    const on = lit.has(i) && !isPending;
+    const face = div({
+      className: on
+        ? "dface lit"
+        : isPending
+          ? "dface pending"
+          : "dface",
+      style: {
+        width: `${sideLength}em`,
+        height: `${sideLength}em`,
+        marginLeft: `${-sideLength / 2}em`,
+        marginTop: `${-sideLength / 2}em`,
+        background: on ? fill : "#3a3a42",
+        transform: `rotateY(${ry}deg) rotateX(${rx}deg) translateZ(${z}em) rotateZ(${rz}deg)`,
+      },
+    });
+    face.dataset.i = String(i);
+    faces.push(div({ className: "dhold" }, face));
+  }
+
+  const el = div({ className: "dode", style: { "--dode": fill } }, ...faces);
+  el.dataset.color = color.name;
+  return el;
+}
+
+function createDodeRack() {
+  const litByColor = Object.fromEntries(
+    RAINBOW.map((c) => [c.name, new Set()])
+  );
+
+  const slots = RAINBOW.map((c) => {
+    const slot = div({
+      className: "ds",
+      style: toneStyle("slot", c),
+    });
+    slot.dataset.color = c.name;
+    return slot;
+  });
+
+  const rack = div({ id: "drk" }, ...slots);
+  document.body.append(rack);
+
+  const slotFor = (color) =>
+    slots[RAINBOW.indexOf(toRainbow(color))] || null;
+
+  function paint(rainbow, pendingFaces = []) {
+    const slot = slots[RAINBOW.indexOf(rainbow)];
+    if (!slot) return null;
+    const lit = litByColor[rainbow.name];
+    if (!lit.size && !pendingFaces.length) {
+      slot.replaceChildren();
+      return slot;
+    }
+    const pending = new Set(pendingFaces);
+    slot.replaceChildren(
+      createDodecahedron({
+        color: rainbow,
+        unlockedFaces: [...new Set([...lit, ...pending])].sort((a, b) => a - b),
+        pendingFaces: [...pending],
+        sideLength: OPTS.dode.sideEm,
+      })
+    );
+    return slot;
+  }
+
+  const nextFace = (colorName) => {
+    const lit = litByColor[colorName];
+    for (let i = 0; i < 12; i++) if (!lit.has(i)) return i;
+    return -1;
+  };
+
+  function igniteFace(slot, faceIndex) {
+    const face = slot?.querySelector?.(`.dface[data-i="${faceIndex}"]`);
+    if (!face) return;
+    off(face, "pending");
+    void face.offsetWidth;
+    on(face, "lit", "ignite");
+    const fill = slot.querySelector(".dode")?.style.getPropertyValue("--dode");
+    if (fill) face.style.background = fill;
+  }
+
+  const retireFull = (rainbow, slot, gemEl) => {
+    paint(rainbow);
+    gemEl?.remove?.();
+    retireColorFromLevel?.(rainbow.name);
+    return slot;
+  };
+
+  async function deliver(color, gemEl) {
+    const rainbow = toRainbow(color);
+    const slot = slotFor(rainbow);
+    if (!slot) return null;
+    if (litByColor[rainbow.name].size >= 12) return retireFull(rainbow, slot, gemEl);
+    const face = nextFace(rainbow.name);
+    if (face < 0) return retireFull(rainbow, slot, gemEl);
+    await flyThen(gemEl, slot, { node: gemEl, ms: OPTS.fly.trophyMs });
+    return settleFace(rainbow, face);
+  }
+
+  async function settleFace(rainbow, faceIndex) {
+    litByColor[rainbow.name].add(faceIndex);
+    const slot = paint(rainbow, [faceIndex]);
+    await nextFrame();
+    igniteFace(slot, faceIndex);
+    if (litByColor[rainbow.name].size >= 12) retireColorFromLevel?.(rainbow.name);
+    if (allComplete()) endGameWon?.();
+    return slot;
+  }
+
+  async function flyInFace(rainbow, faceIndex, delay = 0) {
+    if (litByColor[rainbow.name].size >= 12) return false;
+    const slot = slotFor(rainbow);
+    if (!slot || faceIndex < 0) return false;
+    const { gem } = makeGem(rainbow, slot);
+    await flyThen(null, slot, {
+      node: gem,
+      fromOffscreen: true,
+      delay,
+      ms: OPTS.fly.trophyMs,
+    });
+    await settleFace(rainbow, faceIndex);
+    return true;
+  }
+
+  async function addFaces(n) {
+    let done = 0;
+    for (let i = 0; i < Math.max(0, n); i++) {
+      const targets = RAINBOW.filter(
+        (c) => litByColor[c.name].size > 0 && litByColor[c.name].size < 12
+      );
+      if (!targets.length) break;
+      const c = shuffle(targets.slice())[0];
+      const f = nextFace(c.name);
+      if (f < 0) continue;
+      await flyInFace(c, f, i === 0 ? 0 : 80);
+      done++;
+    }
+    return done;
+  }
+
+  function openFaceCount() {
+    let n = 0;
+    for (const c of RAINBOW) {
+      const s = litByColor[c.name].size;
+      if (s > 0 && s < 12) n += 12 - s;
+    }
+    return n;
+  }
+
+  const isColorComplete = (color) =>
+    litByColor[toRainbow(color).name].size >= 12;
+  const completedNames = () =>
+    RAINBOW.filter((c) => litByColor[c.name].size >= 12).map((c) => c.name);
+  const allComplete = () =>
+    RAINBOW.every((c) => litByColor[c.name].size >= 12);
+
+  return {
+    rack,
+    slots,
+    deliver,
+    addFaces,
+    openFaceCount,
+    slotFor,
+    isColorComplete,
+    completedNames,
+    allComplete,
+  };
+}
+
+;
+const STEP = 72;
+const MOD = 5;
+const mod5 = (n) => ((n % MOD) + MOD) % MOD;
+const tinyPipSvg = () => isoTriSvg("#000", { svgClass: "tab-pip" });
+
+function createPuzzleUI(opts) {
+  const { color, total, onComplete, tabsBar } = opts;
+  const fill = colorHsl(color);
+  const pieces = [];
+  let open = false;
+  let solved = false;
+  let lockKey = null;
+  let canLock = false;
+  let pulseTemplate = null;
+  let solveTimer = null;
+  const meshSeed = (Math.random() * 0xffffffff) >>> 0;
+
+  const pips = Array.from({ length: total }, () => {
+    const wrap = div({ className: "tpw" });
+    wrap.append(tinyPipSvg());
+    return wrap;
+  });
+  const tabBank = div({ className: "tb" });
+  const tab = button({ className: "ct", style: toneStyle("tab", color) });
+  tab.dataset.color = color.name;
+  tab.append(div({ className: "tps" }, ...pips), tabBank);
+  tabsBar.append(tab);
+
+  const pentagon = div({ className: "pentagon" });
+  const wedges = [];
+  for (let i = 0; i < 5; i++) {
+    const content = div({ className: "content" });
+    const turns = 1 + ((Math.random() * (MOD - 1)) | 0);
+    content.dataset.spin = String(turns);
+    content.style.setProperty("--spin", `${turns * STEP}deg`);
+    const wedge = div({ className: "wedge empty" }, content);
+    wedge.dataset.slot = String(i);
+    pentagon.append(
+      div({ className: "slot", style: { "--base": `${i * STEP + 36}deg` } }, wedge)
+    );
+    wedges.push({ i, wedge, content, pieceId: null });
+  }
+
+  const modal = div(
+    { className: "pm", style: toneStyle("tab", color) },
+    div({ className: "pb", onclick: () => close() }),
+    div({ className: "pp" }, pentagon)
+  );
+  modal.hidden = true;
+  const root = tabsBar.closest("#proot");
+  document.body.append(modal);
+
+  const setSpin = (c, n) => {
+    c.dataset.spin = String(n);
+    c.style.setProperty("--spin", `${n * STEP}deg`);
+  };
+  const spinOf = (w) => parseInt(w.content.dataset.spin, 10) || 0;
+  const keyOf = (w) => (w.pieceId ? mod5(w.i + spinOf(w)) : null);
+  const isOn = (w) => has(w.wedge, "aligned");
+  const loose = () => pieces.filter((p) => p.placed == null);
+  const full = () => pieces.length >= total;
+  const seated = () => wedges.every((w) => w.pieceId != null);
+  const setWedge = (w, id) => {
+    w.pieceId = id;
+    w.wedge.className = id == null ? "wedge empty" : "wedge filled";
+  };
+  const syncPow = () => powers?.syncAll?.();
+
+  function ensurePulseMeshes() {
+    if (!pulseTemplate)
+      pulseTemplate = createMeshData(meshSeed, { color }).svg;
+    for (const { content } of wedges)
+      if (!content.querySelector(".pwm"))
+        content.append(pulseTemplate.cloneNode(true));
+  }
+
+  function refreshPips() {
+    const L = loose().length;
+    const shown = total - (pieces.length - L);
+    pips.forEach((pip, i) => {
+      pip.hidden = i >= shown;
+      if (i < shown)
+        pip.querySelector("polygon")?.setAttribute("fill", i < L ? fill : "#000");
+    });
+    tog(tab, "ready", full());
+  }
+
+  function layoutBank() {
+    const rem = [];
+    for (const p of pieces) {
+      if (p.placed != null) p.el?.remove();
+      else if (p.el) rem.push(p.el);
+    }
+    tabBank.replaceChildren(...rem);
+    refreshPips();
+    const focus = open && !rem.length && full();
+    tab.hidden = focus;
+    tog(root, "hidden", focus);
+    tog(document.body, "pf", focus);
+    syncPow();
+  }
+
+  function addPieceToTray(id) {
+    if (pieces.some((p) => p.id === id)) return null;
+    const el = div({ className: "tp" });
+    el.dataset.id = id;
+    el.append(isoTriSvg(fill));
+    enableDrag(el, id);
+    pieces.push({ id, el, placed: null });
+    layoutBank();
+    if (
+      full() &&
+      !solved &&
+      !open &&
+      !puzzles?.isOpen?.() &&
+      !bodyHas("po")
+    )
+      openTray();
+    return el;
+  }
+
+  function placeIntoWedge(id, slot) {
+    const piece = pieces.find((p) => p.id === id);
+    const w = wedges[slot];
+    if (!piece || !w || w.pieceId) return false;
+    if (piece.placed != null) setWedge(wedges[piece.placed], null);
+    setWedge(w, id);
+    piece.placed = slot;
+    piece.el?.remove();
+    layoutBank();
+    checkSolved();
+    return true;
+  }
+
+  function seedLock(a, b, k) {
+    canLock = true;
+    lockKey = k;
+    on(a.wedge, "aligned");
+    on(b.wedge, "aligned");
+  }
+
+  function growLocked(budget = 99) {
+    if (lockKey == null || budget < 1) return 0;
+    let done = 0;
+    for (let g = 0; g < MOD && done < budget; g++) {
+      let hit = false;
+      for (const w of wedges) {
+        if (done >= budget || isOn(w) || keyOf(w) !== lockKey) continue;
+        if (isOn(wedges[mod5(w.i - 1)]) || isOn(wedges[mod5(w.i + 1)])) {
+          on(w.wedge, "aligned");
+          done++;
+          hit = true;
+        }
+      }
+      if (!hit) break;
+    }
+    return done;
+  }
+
+  function syncAlignment(spun = null) {
+    for (const w of wedges)
+      if (lockKey == null || keyOf(w) !== lockKey)
+        off(w.wedge, "aligned");
+    if (lockKey == null && canLock && spun != null) {
+      const s = wedges[spun];
+      const k = s && keyOf(s);
+      if (k != null) {
+        const L = wedges[mod5(spun - 1)];
+        const R = wedges[mod5(spun + 1)];
+        if (keyOf(L) === k) seedLock(s, L, k);
+        else if (keyOf(R) === k) seedLock(s, R, k);
+      }
+    }
+    growLocked();
+  }
+
+  function lockAdjacentUpTo(n) {
+    if (n < 1) return 0;
+    let done = 0;
+    if (lockKey == null) {
+      for (let i = 0; i < MOD; i++) {
+        const a = wedges[i];
+        const b = wedges[mod5(i + 1)];
+        const ka = keyOf(a);
+        if (ka == null || ka !== keyOf(b)) continue;
+        seedLock(a, b, ka);
+        done = Math.min(2, n);
+        break;
+      }
+    }
+    return lockKey == null ? 0 : done + growLocked(n - done);
+  }
+
+  const spinToKey = (w, key) => {
+    const turns = mod5(key - w.i);
+    if (mod5(spinOf(w)) === turns) return 0;
+    setSpin(w.content, turns);
+    return 1;
+  };
+
+  function rotateAssist(n) {
+    let done = 0;
+    if (lockKey != null) {
+      for (const w of wedges) {
+        if (done >= n || !w.pieceId || isOn(w)) continue;
+        done += spinToKey(w, lockKey);
+      }
+      return done;
+    }
+    for (let i = 0; i < MOD && done < n; i++) {
+      const a = wedges[i];
+      const b = wedges[mod5(i + 1)];
+      const ka = keyOf(a);
+      const kb = keyOf(b);
+      if (ka == null || kb == null || ka === kb) continue;
+      if (spinToKey(b, ka)) {
+        canLock = true;
+        done++;
+      }
+    }
+    return done;
+  }
+
+  function checkSolved(spun = null) {
+    syncAlignment(spun);
+    if (solved || !seated()) return;
+    if (lockKey == null || !wedges.every((w) => keyOf(w) === lockKey)) return;
+    solved = true;
+    on(pentagon, "solved");
+    onComplete?.();
+  }
+
+  const scheduleSolveCheck = (spun) => {
+    clearTimeout(solveTimer);
+    solveTimer = setTimeout(() => {
+      solveTimer = null;
+      checkSolved(spun);
+    }, OPTS.powers.solveCheckMs);
+  };
+
+  wedges.forEach(({ wedge, content, i }) => {
+    wedge.onclick = (e) => {
+      e.stopPropagation();
+      if (solved || !open) return;
+      const w = wedges[i];
+      if (!w.pieceId || isOn(w)) return;
+            setSpin(content, spinOf(w) + 1);
+      canLock = true;
+      scheduleSolveCheck(i);
+    };
+  });
+
+  const wedgeAt = (x, y) => {
+    const w = document.elementFromPoint(x, y)?.closest?.(".wedge");
+    const idx = w && parseInt(w.dataset.slot || "", 10);
+    return Number.isFinite(idx) ? idx : null;
+  };
+
+  function enableDrag(el, id) {
+    let ox = 0;
+    let oy = 0;
+    let dragging = false;
+    let ghost = null;
+    const clearHot = () =>
+      wedges.forEach((w) => off(w.wedge, "dh"));
+    const onMove = (e) => {
+      if (!dragging || !ghost) return;
+      ghost.style.transform = `translate(${e.clientX - ox}px,${e.clientY - oy}px)`;
+      const idx = wedgeAt(e.clientX, e.clientY);
+      wedges.forEach((w, wi) =>
+        tog(w.wedge, "dh", idx === wi && !w.pieceId)
+      );
+    };
+    const onUp = (e) => {
+      if (!dragging) return;
+      dragging = false;
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      ghost?.remove();
+      ghost = null;
+      off(el, "dragging");
+      el.style.opacity = "";
+      clearHot();
+      const idx = wedgeAt(e.clientX, e.clientY);
+      if (idx != null) placeIntoWedge(id, idx);
+      else layoutBank();
+    };
+    el.addEventListener("pointerdown", (e) => {
+      if (!open || solved) return;
+      const piece = pieces.find((p) => p.id === id);
+      if (!piece || piece.placed != null) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const r = el.getBoundingClientRect();
+      ox = e.clientX - r.left;
+      oy = e.clientY - r.top;
+      dragging = true;
+      on(el, "dragging");
+      ghost = el.cloneNode(true);
+      on(ghost, "dg");
+      ghost.style.width = `${r.width}px`;
+      ghost.style.height = `${r.height}px`;
+      ghost.style.transform = `translate(${r.left}px,${r.top}px)`;
+      document.body.append(ghost);
+      el.style.opacity = "0.35";
+      window.addEventListener("pointermove", onMove);
+      window.addEventListener("pointerup", onUp);
+    });
+    el.addEventListener("click", (e) => e.stopPropagation());
+  }
+
+  const shake = () => {
+    off(tab, "shake");
+    void tab.offsetWidth;
+    on(tab, "shake");
+  };
+
+  function openTray(force) {
+    if (!force && !full()) return void shake();
+    open = true;
+    bodyOn("po");
+    syncPow();
+    modal.hidden = false;
+    ensurePulseMeshes();
+    if (loose().length) on(tab, "raised");
+    layoutBank();
+  }
+
+  function close() {
+    open = false;
+    bodyOff("po", "pf");
+    syncPow();
+    modal.hidden = true;
+    off(tab, "raised");
+    tab.hidden = false;
+    off(root, "hidden");
+    layoutBank();
+  }
+
+  tab.onclick = (e) => {
+    if (e.target.closest(".tp")) return;
+    if (open) close();
+    else openTray();
+  };
+
+  function flyIn(id, layer) {
+    const run = () => {
+      return addPieceToTray(id);
+    };
+    if (!layer || !document.body.contains(layer)) return void run();
+    flyThen(layer, tab, { fill }, run);
+  }
+
+  function reset() {
+    solved = false;
+    lockKey = null;
+    canLock = false;
+    pieces.length = 0;
+    for (const w of wedges) {
+      setWedge(w, null);
+      setSpin(w.content, 1 + ((Math.random() * (MOD - 1)) | 0));
+    }
+    off(pentagon, "solved");
+    off(tab, "ready", "raised");
+    tab.hidden = false;
+    root.hidden = false;
+    off(root, "hidden");
+    tabBank.replaceChildren();
+    refreshPips();
+    close();
+  }
+
+  function removeTab() {
+    close();
+    tab.remove();
+    modal.remove();
+    if (tabsBar && !tabsBar.childElementCount) root?.remove();
+  }
+
+  function seatFromBank(n) {
+    let done = 0;
+    for (const w of wedges) {
+      if (done >= n || w.pieceId) continue;
+      const piece = loose()[0];
+      if (!piece) break;
+      placeIntoWedge(piece.id, w.i);
+      done++;
+    }
+    layoutBank();
+    return done;
+  }
+
+  function assistAssemble(n) {
+    if (solved) return 0;
+    const keepOpen = open;
+    const bank = loose().length;
+    const empty = wedges.some((w) => !w.pieceId);
+    const placed = wedges.some((w) => w.pieceId);
+    let done = 0;
+    if (empty && bank) {
+      if (!open) {
+        shake();
+        done = seatFromBank(n);
+        if (done) openTray(true);
+      } else done = seatFromBank(n);
+      done += lockAdjacentUpTo(n);
+    } else if (open || seated()) {
+      if (!open) openTray(true);
+      if (lockKey == null) {
+        done += lockAdjacentUpTo(n);
+        if (lockKey == null && placed) {
+          done += rotateAssist(Math.max(1, n - done));
+          done += lockAdjacentUpTo(n);
+        }
+      }
+      if (lockKey != null) done += rotateAssist(n);
+    } else shake();
+    checkSolved();
+    layoutBank();
+    if (!keepOpen && open && !solved && pieces.length < total) close();
+    return done;
+  }
+
+  function collapseToGem() {
+    return new Promise((resolve) => {
+      const panel = pentagon.closest(".pp");
+      const backdrop = modal.querySelector(".pb");
+      pentagon.style.setProperty("--gem", fill);
+      on(panel, "to-gem");
+      on(pentagon, "to-gem");
+      on(backdrop, "to-gem");
+      onceEndOrTimeout(
+        panel,
+        750,
+        () => {
+          const r = pentagon.getBoundingClientRect();
+          const { gem, endSize } = makeGem(
+            color,
+            qs(".ds")
+          );
+          const startSize = Math.max(
+            endSize * 1.35,
+            Math.min(r.width, r.height) * 0.7 || endSize * 2
+          );
+          const cx = r.left + r.width / 2;
+          const cy = r.top + r.height / 2;
+          const place = (size) => {
+            gem.style.width = gem.style.height = `${size}px`;
+            gem.style.left = `${cx - size / 2}px`;
+            gem.style.top = `${cy - size / 2}px`;
+          };
+          gem.style.position = "fixed";
+          gem.style.zIndex = "121";
+          place(startSize);
+          document.body.append(gem);
+          nextFrame().then(() => place(endSize));
+          open = false;
+          bodyOff("po", "pf");
+          syncPow();
+          modal.hidden = true;
+          off(tab, "raised");
+          setTimeout(() => resolve(gem), 280);
+        },
+        (e) =>
+          (e.target === panel || e.target === pentagon) &&
+          e.propertyName === "transform"
+      );
+    });
+  }
+
+  refreshPips();
+  return {
+    flyIn,
+    addPieceToTray,
+    isOpen: () => open,
+    isSolved: () => solved,
+    looseCount: () => loose().length,
+    reset,
+    remove: removeTab,
+    assemble: assistAssemble,
+    collapseToGem,
+    close,
+  };
+}
+
+function createPuzzleSet(colors, perColor, onColorComplete) {
+  const root = div({ id: "proot" });
+  const tabsBar = div({ id: "ctabs" });
+  root.append(tabsBar);
+  document.body.append(root);
+  const map = {};
+  for (const c of colors) {
+    map[c.name] = createPuzzleUI({
+      color: c,
+      total: perColor,
+      tabsBar,
+      onComplete: () => onColorComplete(c, map[c.name]),
+    });
+  }
+  window.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    const p = Object.values(map).find((x) => x.isOpen());
+    if (!p) return;
+    e.preventDefault();
+    p.close();
+  });
+  return {
+    map,
+    root,
+    flyIn: (id, layer, color) => map[color.name]?.flyIn(id, layer),
+    isOpen: () => Object.values(map).some((p) => p.isOpen()),
+    destroy() {
+      Object.values(map).forEach((p) => p.remove());
+      root.remove();
+    },
+  };
+}
+
+;
+const POWERS = [
+  ["perception", "W", 210],
+  ["extraction", "E", 32],
+  ["assembly", "A", 145],
+  ["radiance", "R", 48],
+];
+const POWER_IDS = POWERS.map((p) => p[0]);
+const POWER_KEY = { w: "perception", e: "extraction", a: "assembly", r: "radiance" };
+const powStyle = (hue) =>
+  toneStyle("pow", { h: hue, s: 70, l: 55 }, { h: hue, s: 50, l: 28 });
+
+const powerState = Object.fromEntries(
+  POWER_IDS.map((id) => [id, { level: 0, active: false, cooling: false }])
+);
+const upgradeSkip = Object.fromEntries(POWER_IDS.map((id) => [id, 0]));
+let pentagonClears = 0;
+
+const P = () => OPTS.powers;
+const lv1 = (n) => Math.max(1, n | 0);
+const huntCount = (level) => 1 + ((lv1(level) / 2) | 0);
+const perceptionMs = (level) => P().perceptionBaseMs + level * P().perceptionPerLevelMs;
+const huntCdMs = (level) =>
+  Math.max(P().huntCdMinMs, P().huntCdL1Ms - (((lv1(level) - 1) / 2) | 0) * P().huntCdPerStepMs);
+
+const powerCdMs = (level) => Math.max(8e3, 8e3 + (lv1(level) - 1) * 6e3);
+const cdFor = (id, level) =>
+  id === "radiance"
+    ? P().radianceCdMs
+    : id === "assembly"
+      ? powerCdMs(level)
+      : huntCdMs(level);
+
+function createPowerSystem() {
+  const slots = POWERS.map(([id, glyph, hue]) => {
+    const slot = button({
+      className: "ps locked",
+      style: powStyle(hue),
+    });
+    slot.dataset.power = id;
+    slot.append(
+      div({ className: "pg" }, glyph),
+      div({ className: "pl" }, "0")
+    );
+    slot.disabled = true;
+    slot.onclick = () => activatePower(id);
+    return slot;
+  });
+  document.body.append(div({ id: "prk" }, ...slots));
+
+  const gate = (id) =>
+    id === "assembly"
+      ? levelIndex >= P().assemblyFromLevel
+      : id === "radiance"
+        ? levelIndex >= P().radianceFromLevel
+        : true;
+  const unlocked = (id) => powerState[id].level > 0 && gate(id);
+
+  const puzzleHold = () =>
+    bodyHas("po") || bodyHas("pf") || bodyHas("rewarding") ||
+    !!puzzles?.isOpen?.();
+
+  const puzzleList = () => Object.values(puzzles?.map || {});
+  const assemblyHasWork = () =>
+    puzzleList().some((p) => (p.looseCount?.() || 0) > 0 || p.isOpen?.());
+  const huntPool = () => {
+    const names = new Set(levelColors.map((c) => c.name));
+    return triangles.filter((t) => !collected.has(t.id) && names.has(t.color.name));
+  };
+
+  function syncSlot(id) {
+    const st = powerState[id];
+    const slot = slots[POWER_IDS.indexOf(id)];
+    slot.querySelector(".pl").textContent = String(st.level);
+    const lock = !unlocked(id);
+    const empty =
+      (!lock && id === "assembly" && !assemblyHasWork()) ||
+      (!lock && id === "extraction" && !huntPool().length);
+    const held = puzzleHold() && id !== "assembly";
+    tog(slot, "locked", lock || empty);
+    tog(slot, "active", st.active);
+    tog(slot, "cooling", st.cooling);
+    slot.disabled = lock || empty || st.active || st.cooling || held;
+  }
+  const syncAll = () => POWER_IDS.forEach(syncSlot);
+
+  function beginBusy(id, activeMs, cdMs) {
+    const st = powerState[id];
+    st.active = st.cooling = true;
+    syncSlot(id);
+    const cd = cdMs ?? powerCdMs(st.level);
+    setTimeout(() => {
+      st.active = false;
+      syncSlot(id);
+    }, Math.min(activeMs, cd));
+    setTimeout(() => {
+      st.cooling = false;
+      syncSlot(id);
+    }, cd);
+  }
+
+  function offerUpgrade() {
+    return new Promise((resolve) => {
+      pentagonClears++;
+      const everyN = P().radianceEveryN;
+      const skips = P().upgradeSkipAfter;
+      const canPick = (id) =>
+        !(upgradeSkip[id] > 0) &&
+        gate(id) &&
+        (id !== "radiance" || pentagonClears % everyN === 0);
+
+      let picked = false;
+      const commit = (id) => {
+        if (picked || !canPick(id)) return;
+        picked = true;
+                off(modal, "show");
+        setTimeout(() => modal.remove(), 750);
+        for (const pid of POWER_IDS) if (upgradeSkip[pid] > 0) upgradeSkip[pid]--;
+        const skip = skips[id] ?? 0;
+        if (skip) upgradeSkip[id] = skip;
+        const st = powerState[id];
+        st.level++;
+        beginBusy(id, 0, cdFor(id, st.level));
+        syncSlot(id);
+        resolve(id);
+      };
+
+      const choices = POWERS.map(([id, glyph, hue]) => {
+        const st = powerState[id];
+        const ok = canPick(id);
+        const btn = button({
+          className: ok ? "ppk" : "ppk locked",
+          style: powStyle(hue),
+        });
+        btn.disabled = !ok;
+        btn.append(
+          div({ className: "ppk-glyph" }, glyph),
+          div({ className: "ppk-lvl" }, `${st.level}→${st.level + 1}`)
+        );
+        if (ok) btn.onclick = () => commit(id);
+        return btn;
+      });
+
+      const modal = div(
+        { className: "pmod" },
+        div({ className: "pmc" }, div({ className: "ppks" }, ...choices))
+      );
+      document.body.append(modal);
+      nextFrame().then(() => on(modal, "show"));
+    });
+  }
+
+  let perceptionTargets = new Set();
+  let perceptionGen = 0;
+
+  function endPerceptionHints() {
+    perceptionTargets = new Set();
+    clearAllHintMasks();
+    const st = powerState.perception;
+    if (st.active) {
+      st.active = false;
+      syncSlot("perception");
+    }
+  }
+
+  function noteCollected(id) {
+    clearHintMask(qs(`.cl[data-id="${id}"]`));
+    if (perceptionTargets.delete(id) && !perceptionTargets.size) {
+      perceptionGen++;
+      endPerceptionHints();
+    }
+    syncAll();
+  }
+
+  function runPerception(level) {
+    const facing = facingFaceKey?.();
+    const opp = { N: "S", S: "N", E: "W", W: "E" }[facing];
+    const all = huntPool();
+    const pool = opp
+      ? all.filter((t) => !(t.room === player.room && t.face === opp))
+      : all;
+    const picks = shuffle((pool.length ? pool : all).slice()).slice(0, huntCount(level));
+    const p = P();
+    const wash =
+      level <= 1
+        ? p.washL1Pct
+        : Math.max(p.washMinPct, 100 - (level - 1) * p.washShrinkPct);
+    const rTarget = (R_MAX * Math.min(140, wash)) / 100;
+    const stagger = p.perceptionStaggerMs;
+    const holdMs = perceptionMs(level);
+
+    perceptionGen++;
+    const gen = perceptionGen;
+    perceptionTargets = new Set(picks.map((t) => t.id));
+
+    picks.forEach((t, i) => {
+      setTimeout(() => {
+        if (gen !== perceptionGen) return;
+        const layer = qs(`.cl[data-id="${t.id}"]`);
+        if (!layer) return;
+        clearHintMask(layer);
+        addWashRect(layer, colorHsl(t.color));
+        playHintMask(layer, rTarget);
+      }, i * stagger);
+    });
+
+    setTimeout(() => {
+      if (gen === perceptionGen) endPerceptionHints();
+    }, (picks.length - 1) * stagger + holdMs);
+  }
+
+  function runExtraction(level) {
+    if (puzzles?.isOpen?.()) return;
+    const pool = huntPool();
+    if (!pool.length) return;
+    const colorName = shuffle([...new Set(pool.map((t) => t.color.name))])[0];
+    const picks = shuffle(pool.filter((t) => t.color.name === colorName)).slice(
+      0,
+      huntCount(level)
+    );
+    const puzzle = puzzles?.map?.[colorName];
+    const tab = qs(`.ct[data-color="${colorName}"]`);
+    if (!puzzle || !tab) return;
+
+    picks.forEach((t, i) => {
+      const claim = claimTriangle(t.id);
+      if (!claim) return;
+      const { layer } = claim;
+      if (!layer) return void puzzle.addPieceToTray(t.id);
+      flyThen(
+        layer,
+        tab,
+        { fill: colorHsl(t.color), delay: i * 90, fromOffscreen: true },
+        () => puzzle.addPieceToTray(t.id)
+      );
+    });
+  }
+
+  function runAssembly(level) {
+    const n = Math.max(1, level);
+    const list = puzzleList();
+    const openP = list.find((p) => p.isOpen?.());
+    if (openP) return void openP.assemble?.(n);
+    if (bodyHas("po")) return;
+    const unsolved = list.filter((p) => !p.isSolved?.());
+    (unsolved.find((p) => (p.looseCount?.() || 0) > 0) || unsolved[0])?.assemble?.(n);
+  }
+
+  function runRadiance(n) {
+    if (!dodeRack?.openFaceCount?.()) return;
+    triggerReward?.();
+    Promise.resolve(dodeRack.addFaces?.(n)).then(() => {
+      if (dodeRack.allComplete?.()) endGameWon?.();
+      else if (levelCleared?.()) transitionToLevel?.(levelIndex + 1);
+    });
+  }
+
+  function activatePower(id) {
+    const st = powerState[id];
+    if (!unlocked(id) || st.active || st.cooling) return;
+    if (puzzleHold() && id !== "assembly") return;
+    if (id === "assembly" && !assemblyHasWork()) return;
+    if (id === "extraction" && !huntPool().length) return;
+
+    if (id === "perception") {
+      const n = huntCount(st.level);
+      const stagger = P().perceptionStaggerMs;
+      runPerception(st.level);
+      beginBusy(id, (n - 1) * stagger + perceptionMs(st.level), huntCdMs(st.level));
+    } else if (id === "extraction") {
+      runExtraction(st.level);
+      beginBusy(id, 900, huntCdMs(st.level));
+    } else if (id === "assembly") {
+      runAssembly(st.level);
+      beginBusy(id, 700);
+    } else {
+      const n = Math.max(1, st.level);
+      runRadiance(n);
+      beginBusy(id, OPTS.fly.trophyMs * n + 400, P().radianceCdMs);
+    }
+  }
+
+  syncAll();
+  return { offerUpgrade, activatePower, syncAll, powerState, noteCollected };
+}
+
+;
+const player = {
+  room: 0,
+  inspecting: false,
+  right: [1, 0, 0],
+  up: [0, 1, 0],
+  forward: [0, 0, -1],
+};
+
+const FACES = [
+  ["N", "face-n"],
+  ["E", "face-e"],
+  ["S", "face-s"],
+  ["W", "face-w"],
+  ["U", "face-u"],
+  ["D", "face-d"],
+];
+
+let levelIndex = 0;
+let rooms = [];
+let triangles = [];
+let levelColors = [];
+let collected = new Set();
+let solvedColors = new Set();
+let puzzles = null;
+
+const hiddensOn = (roomId, faceKey) =>
+  triangles.filter(
+    (h) => h.room === roomId && h.face === faceKey && !collected.has(h.id)
+  );
+
+// Camera basis (±90° on integer axes)
+
+const snap = (n) => Math.round(n);
+
+const rot90 = (v, axis, sign) => {
+  const [x, y, z] = v;
+  const [ax, ay, az] = axis;
+  const dot = ax * x + ay * y + az * z;
+  const cx = ay * z - az * y;
+  const cy = az * x - ax * z;
+  const cz = ax * y - ay * x;
+  return [snap(ax * dot + sign * cx), snap(ay * dot + sign * cy), snap(az * dot + sign * cz)];
+};
+
+const basisToCSS = (right, up, forward) => {
+  const [rx, ry, rz] = right;
+  const [ux, uy, uz] = up;
+  const [fx, fy, fz] = forward;
+  return `matrix3d(${rx},${ux},${-fx},0, ${ry},${uy},${-fy},0, ${rz},${uz},${-fz},0, 0,0,0,1)`;
+};
+
+const vDot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const vCross = (a, b) => [
+  a[1] * b[2] - a[2] * b[1],
+  a[2] * b[0] - a[0] * b[2],
+  a[0] * b[1] - a[1] * b[0],
+];
+const same3 = (a, b) => a[0] === b[0] && a[1] === b[1] && a[2] === b[2];
+
+const rotAround = (v, axis, ang) => {
+  const c = Math.cos(ang);
+  const s = Math.sin(ang);
+  const d = vDot(v, axis);
+  const [cx, cy, cz] = vCross(axis, v);
+  const k = 1 - c;
+  return [
+    v[0] * c + cx * s + axis[0] * d * k,
+    v[1] * c + cy * s + axis[1] * d * k,
+    v[2] * c + cz * s + axis[2] * d * k,
+  ];
+};
+
+const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
+
+const TURN_MS = OPTS.time.turnMs;
+const INSPECT_OUT_MS = OPTS.time.inspectOutMs;
+let turnRaf = null;
+let turnBusy = false;
+
+const animateTurn = (fromRight, fromUp, fromForward) => {
+  if (turnRaf != null) cancelAnimationFrame(turnRaf);
+  turnBusy = true;
+
+  const axis = same3(fromUp, player.up)
+    ? fromUp
+    : same3(fromRight, player.right)
+      ? fromRight
+      : fromForward;
+  const sign = Math.sign(vDot(vCross(fromForward, player.forward), axis)) || 1;
+  const start = performance.now();
+
+  const tick = (now) => {
+    const t = Math.min(1, (now - start) / TURN_MS);
+    if (t < 1) {
+      const ang = sign * (Math.PI / 2) * easeInOut(t);
+      pivot.style.transform = basisToCSS(
+        rotAround(fromRight, axis, ang),
+        rotAround(fromUp, axis, ang),
+        rotAround(fromForward, axis, ang)
+      );
+      turnRaf = requestAnimationFrame(tick);
+    } else {
+      turnRaf = null;
+      turnBusy = false;
+      pivot.style.transform = basisToCSS(
+        player.right,
+        player.up,
+        player.forward
+      );
+      updateView(false);
+    }
+  };
+
+  turnRaf = requestAnimationFrame(tick);
+};
+
+function facingFaceKey() {
+  const [fx, fy, fz] = player.forward;
+  const ax = Math.abs(fx);
+  const ay = Math.abs(fy);
+  const az = Math.abs(fz);
+  if (ay >= ax && ay >= az) return fy > 0 ? "U" : "D";
+  if (ax >= az) return fx > 0 ? "E" : "W";
+  return fz < 0 ? "N" : "S";
+}
+
+function buildRoom(spec) {
+  const walls = FACES.filter(([key]) => !(key in spec.doors)).map(([key, cls]) => {
+    const face = div({ className: "face" });
+    face.dataset.face = key;
+    const hides = hiddensOn(spec.id, key);
+    paintWallMesh(
+      face,
+      undefined,
+      hides.length
+        ? {
+            collectibles: hides.map((h) => ({ id: h.id, color: h.color })),
+          }
+        : {}
+    );
+    return div({ className: `wall ${cls}` }, face);
+  });
+
+  return div(
+    {
+      id: `room-${spec.id}`,
+      className: "room",
+      style: {
+        transform: `translate3d(calc(${spec.x} * var(--span)), 0px, calc(${spec.z} * var(--span)))`,
+      },
+    },
+    ...walls
+  );
+}
+
+const world = div({ id: "world" });
+const pivot = div({ id: "pivot" }, world);
+const camera = div({ id: "camera" }, pivot);
+const viewport = div({ id: "viewport" }, camera);
+const inspectStage = div({ id: "istage", hidden: true });
+
+const leftBtn = button("◀");
+const upBtn = button("▲");
+const rightBtn = button("▶");
+const downBtn = button("▼");
+const actionBtn = button({}, "Go");
+
+leftBtn.dataset.act = "left";
+upBtn.dataset.act = "up";
+rightBtn.dataset.act = "right";
+downBtn.dataset.act = "down";
+actionBtn.dataset.act = "action";
+
+const controls = div(
+  { id: "controls" },
+  leftBtn,
+  upBtn,
+  rightBtn,
+  downBtn,
+  actionBtn
+);
+
+document.body.append(viewport, inspectStage, controls);
+
+viewport.addEventListener("click", () => {
+  if (
+    player.inspecting ||
+    turnBusy ||
+    puzzles?.isOpen() ||
+    bodyHas("rewarding") ||
+    bodyHas("won")
+  )
+    return;
+  primaryAction();
+});
+
+const dodeRack = createDodeRack();
+const powers = createPowerSystem();
+
+function levelCleared() {
+  return (
+    triangles.every((t) => collected.has(t.id)) &&
+    levelColors.every((c) => solvedColors.has(c.name))
+  );
+}
+
+function retireColorFromLevel(colorOrName) {
+  const name =
+    typeof colorOrName === "string" ? colorOrName : colorOrName?.name;
+  if (!name) return;
+  solvedColors.add(name);
+  let stripped = false;
+  for (const t of triangles) {
+    if (t.color.name !== name || collected.has(t.id)) continue;
+    collected.add(t.id);
+    layerById(t.id)?.remove();
+    stripped = true;
+  }
+  puzzles?.map?.[name]?.remove?.();
+  if (puzzles?.map) delete puzzles.map[name];
+  levelColors = levelColors.filter((c) => c.name !== name);
+  if (stripped && player.inspecting) {
+    const layers = faceLayers(inspectFace());
+    if (layers.length) trackInspectHits(layers);
+    else stopHitTracking();
+  }
+  powers?.syncAll?.();
+}
+
+async function onColorComplete(color, puzzle) {
+  bodyOn("rewarding");
+  powers?.syncAll?.();
+  try {
+    triggerReward();
+    solvedColors.add(color.name);
+    const left = triangles.filter(
+      (t) => t.color.name === color.name && !collected.has(t.id)
+    ).length;
+
+    await wait(OPTS.time.solveHoldMs);
+
+    const gem = await puzzle.collapseToGem();
+    await dodeRack.deliver(color, gem);
+
+    if (dodeRack.isColorComplete?.(color)) {
+      retireColorFromLevel(color);
+    } else if (left >= PER_COLOR) {
+      puzzle.reset();
+    } else {
+      puzzle.remove();
+    }
+
+    if (dodeRack.allComplete?.()) {
+      endGameWon();
+      return;
+    }
+    await powers.offerUpgrade();
+    if (levelCleared()) await transitionToLevel(levelIndex + 1);
+  } finally {
+    bodyOff("rewarding");
+    powers?.syncAll?.();
+  }
+}
+
+function endGameWon() {
+  if (bodyHas("won")) return;
+  bodyOn("won");
+  qs(".pmod")?.remove();
+  if (!document.getElementById("win")) {
+    document.body.append(div({ id: "win" }, "You win"));
+  }
+}
+
+async function transitionToLevel(index) {
+  bodyOff("po", "pf");
+  player.inspecting = false;
+  clearInspectTarget();
+  stopHitTracking();
+
+  on(viewport, "lx");
+  await wait(OPTS.time.levelExitMs);
+
+  startLevel(index);
+
+  off(viewport, "lx");
+  on(viewport, "le");
+  void world.offsetWidth;
+  await wait(OPTS.time.levelEnterPadMs);
+  on(viewport, "li");
+  await wait(OPTS.time.levelEnterMs);
+  off(viewport, "le", "li");
+}
+
+function startLevel(index) {
+  const exclude = dodeRack.completedNames?.() || [];
+  const L = buildLevel(index, exclude);
+  if (!L.colors.length) {
+    endGameWon();
+    return;
+  }
+  levelIndex = L.index;
+  rooms = L.rooms;
+  triangles = L.triangles;
+  levelColors = L.colors;
+  collected = new Set();
+  solvedColors = new Set();
+  player.room = 0;
+  player.inspecting = false;
+  player.right = [1, 0, 0];
+  player.up = [0, 1, 0];
+  player.forward = [0, 0, -1];
+
+  puzzles?.destroy();
+  puzzles = createPuzzleSet(L.colors, L.perColor, onColorComplete);
+
+  clearAllHintMasks?.();
+  world.replaceChildren(...rooms.map(buildRoom));
+  updateView(false);
+  powers?.syncAll?.();
+}
+
+function passageTarget() {
+  const dir = facingFaceKey();
+  if (dir === "U" || dir === "D") return null;
+  const to = rooms[player.room].doors[dir];
+  return to === undefined ? null : to;
+}
+
+function getFacingFaceEl() {
+  const key = facingFaceKey();
+  return qs(
+    `#room-${player.room} .face[data-face="${key}"]`
+  );
+}
+
+function updateView(animate = true) {
+  tog(world, "na", !animate);
+  tog(camera, "na", !animate);
+
+  if (!turnBusy) {
+    pivot.style.transform = basisToCSS(player.right, player.up, player.forward);
+  }
+  const r = rooms[player.room];
+  if (!r) return;
+  world.style.transform = `translate3d(calc(${-r.x} * var(--span)), 0px, calc(${-r.z} * var(--span)))`;
+  tog(viewport, "inspecting", player.inspecting);
+
+  const passage = passageTarget();
+
+  if (player.inspecting) {
+    setNavDisabled(turnBusy);
+    actionBtn.disabled = false;
+    actionBtn.textContent = "Back";
+  } else {
+    setNavDisabled(turnBusy);
+    actionBtn.disabled = turnBusy;
+    actionBtn.textContent = passage !== null ? "Go" : "Inspect";
+  }
+}
+
+function setNavDisabled(busy) {
+  leftBtn.disabled = busy;
+  rightBtn.disabled = busy;
+  upBtn.disabled = busy;
+  downBtn.disabled = busy;
+}
+
+function navigateFromView(applyBasis) {
+  if (turnBusy) return;
+
+  const startTurn = () => {
+    const fr = [...player.right],
+      fu = [...player.up],
+      ff = [...player.forward];
+    applyBasis();
+    animateTurn(fr, fu, ff);
+    updateView(false);
+  };
+
+  if (!player.inspecting) {
+    startTurn();
+    return;
+  }
+
+  turnBusy = true;
+  const face = inspectFace();
+  const layers = faceLayers(face);
+  stopHitTracking();
+  resetRevealMask();
+  layers.forEach(resetLayerMask);
+  player.inspecting = false;
+  clearInspectTarget();
+
+  off(camera, "na");
+  off(world, "na");
+  off(viewport, "inspecting");
+  setNavDisabled(true);
+  actionBtn.disabled = true;
+
+  onceEndOrTimeout(
+    camera,
+    INSPECT_OUT_MS + 80,
+    () => {
+      turnBusy = false;
+      startTurn();
+    },
+    (e) => e.target === camera && e.propertyName === "transform"
+  );
+}
+
+function turnLeft() {
+  navigateFromView(() => {
+    player.forward = rot90(player.forward, player.up, 1);
+    player.right = rot90(player.right, player.up, 1);
+  });
+}
+
+function turnRight() {
+  navigateFromView(() => {
+    player.forward = rot90(player.forward, player.up, -1);
+    player.right = rot90(player.right, player.up, -1);
+  });
+}
+
+function lookUp() {
+  navigateFromView(() => {
+    player.forward = rot90(player.forward, player.right, -1);
+    player.up = rot90(player.up, player.right, -1);
+  });
+}
+
+function lookDown() {
+  navigateFromView(() => {
+    player.forward = rot90(player.forward, player.right, 1);
+    player.up = rot90(player.up, player.right, 1);
+  });
+}
+
+function clearInspectTarget() {
+  document
+    .querySelectorAll(".face.it")
+    .forEach((f) => off(f, "it"));
+  document
+    .querySelectorAll(".cl.hot, .ctri.hot")
+    .forEach((el) => off(el, "hot"));
+}
+
+let hitRaf = null;
+let inspectHits = [];
+
+function stopHitTracking() {
+  if (hitRaf != null) {
+    cancelAnimationFrame(hitRaf);
+    hitRaf = null;
+  }
+  inspectHits = [];
+  inspectStage.hidden = true;
+  inspectStage.replaceChildren();
+}
+
+function trackInspectHits(layers) {
+  stopHitTracking();
+  if (!layers.length) return;
+
+  inspectHits = layers.map((layer) => {
+    const hit = button({
+      className: "ihit",
+    });
+    hit.addEventListener("pointerenter", () => on(layer, "hot"));
+    hit.addEventListener("pointerleave", () => off(layer, "hot"));
+    hit.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!layer.dataset.id) return;
+      collectTriangle(layer.dataset.id, layer);
+    });
+    return { hit, layer };
+  });
+
+  inspectStage.hidden = false;
+  inspectStage.replaceChildren(...inspectHits.map((h) => h.hit));
+
+  const sync = () => {
+    if (!player.inspecting || !inspectHits.length) return;
+    const stage = inspectStage.getBoundingClientRect();
+    const pad = 6;
+    for (const { hit, layer } of inspectHits) {
+      const poly = layer.querySelector(".ctri");
+      const face = layer.closest(".face");
+      const target = poly || face || layer;
+      const r = target.getBoundingClientRect();
+      box(hit, {
+        x: r.left - stage.left - pad,
+        y: r.top - stage.top - pad,
+        w: Math.max(12, r.width + pad * 2),
+        h: Math.max(12, r.height + pad * 2),
+      });
+    }
+    hitRaf = requestAnimationFrame(sync);
+  };
+
+  hitRaf = requestAnimationFrame(sync);
+}
+
+function enterInspect() {
+  if (passageTarget() !== null) return;
+  player.inspecting = true;
+  clearInspectTarget();
+
+  const face = getFacingFaceEl();
+  if (face) {
+    on(face, "it");
+    clearFaceHints(face);
+    const layers = faceLayers(face);
+    if (layers.length) {
+      playRevealMask(layers);
+      trackInspectHits(layers);
+    } else {
+      stopHitTracking();
+    }
+  }
+
+  updateView();
+}
+
+function exitInspect() {
+  const face = inspectFace();
+  const layers = faceLayers(face);
+
+  player.inspecting = false;
+  stopHitTracking();
+  updateView();
+
+  if (layers.length) {
+    playHideMask(layers, () => {
+      off(face, "it");
+    });
+  } else {
+    clearInspectTarget();
+    resetRevealMask();
+  }
+}
+
+function primaryAction() {
+  if (turnBusy || puzzles?.isOpen()) return;
+  if (player.inspecting) {
+        exitInspect();
+    return;
+  }
+  const to = passageTarget();
+  if (to !== null) {
+        player.room = to;
+    updateView();
+    return;
+  }
+  enterInspect();
+}
+
+function claimTriangle(id, el) {
+  if (collected.has(id)) return null;
+  const tri = triangles.find((t) => t.id === id);
+  if (!tri) return null;
+  collected.add(id);
+  const layer =
+    el?.closest?.(".cl") ||
+    el ||
+    layerById(id);
+  const face = layer?.closest?.(".face");
+  powers?.noteCollected?.(id);
+  if (layer) layer.style.visibility = "hidden";
+  return { tri, layer, face };
+}
+
+function collectTriangle(id, el) {
+  const claim = claimTriangle(id, el);
+  if (!claim) return;
+    const { tri, layer, face } = claim;
+  clearFaceHints(face);
+  const others = face
+    ? faceLayers(face).filter((l) => l !== layer)
+    : [];
+
+  if (player.inspecting && others.length) {
+    for (const l of others) {
+      const c = l.querySelector(".rc");
+      setCircleR(c, R_MAX);
+      on(l, "revealed");
+      off(l, "revealing", "hiding");
+      l.style.filter = "none";
+    }
+    revealLayers = others;
+    trackInspectHits(others);
+  } else {
+    stopHitTracking();
+    resetRevealMask();
+    player.inspecting = false;
+    clearInspectTarget();
+    updateView();
+  }
+
+  puzzles?.flyIn(id, layer, tri.color);
+}
+
+controls.addEventListener("click", (e) => {
+  const btn = e.target.closest("button");
+  if (!btn) return;
+  ({
+    left: turnLeft,
+    right: turnRight,
+    up: lookUp,
+    down: lookDown,
+    action: primaryAction,
+  })[btn.dataset.act]?.();
+});
+
+window.addEventListener("keydown", (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const powerId = POWER_KEY[e.key.toLowerCase()];
+  if (powerId) {
+    e.preventDefault();
+    if (
+      bodyHas("rewarding") ||
+      qs(".pmod")
+    )
+      return;
+    // Only Assembly while a puzzle is open (E/W/R must wait)
+    if (puzzles?.isOpen() && powerId !== "assembly") return;
+    powers.activatePower(powerId);
+    return;
+  }
+  if (puzzles?.isOpen()) {
+    if (e.key === " " || e.key === "Enter") e.preventDefault();
+    return;
+  }
+  if (e.key === " " || e.key === "Enter") {
+    e.preventDefault();
+    primaryAction();
+    return;
+  }
+  const map = {
+    ArrowLeft: turnLeft,
+    ArrowRight: turnRight,
+    ArrowUp: lookUp,
+    ArrowDown: lookDown,
+  };
+  if (map[e.key]) {
+    e.preventDefault();
+    map[e.key]();
+  }
+});
+
+ensureRevealDefs();
+startLevel(0);
+powerState.perception.level = 1;
+powers.syncAll();
+
+</script>
+</body>
+</html>
