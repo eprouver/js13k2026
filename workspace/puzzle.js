@@ -73,25 +73,14 @@ function createPuzzleUI(opts) {
     if (tabsBar && !tabsBar.childElementCount) root?.remove();
   }
 
-  /** Fill up to n missing pieces, then complete if full. */
-  function assemble(n) {
-    if (solved || completing) return 0;
-    let done = 0;
-    while (done < n && ids.length < total) {
-      ids.push(`a-${color.name}-${ids.length}`);
-      done++;
-    }
-    refreshPips();
-    syncPow();
-    if (ids.length >= total) tryComplete();
-    return done;
-  }
-
   function collapseToGem() {
     return new Promise((resolve) => {
       const r = tab.getBoundingClientRect();
       const { gem, endSize } = makeGem(color, qs(".ds"));
-      const startSize = Math.max(endSize * 1.35, Math.min(r.width, r.height) * 1.2 || endSize * 2);
+      const startSize = Math.max(
+        endSize * 1.35,
+        Math.min(r.width, r.height) * 1.2 || endSize * 2
+      );
       const cx = r.left + r.width / 2;
       const cy = r.top + r.height / 2;
       const place = (size) => {
@@ -117,7 +106,6 @@ function createPuzzleUI(opts) {
     looseCount: () => (solved ? 0 : Math.max(0, total - ids.length)),
     reset,
     remove: removeTab,
-    assemble,
     collapseToGem,
     close: () => {},
   };

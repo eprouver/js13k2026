@@ -1,11 +1,10 @@
 const POWERS = [
   ["perception", "W", 210],
   ["extraction", "E", 32],
-  ["assembly", "A", 145],
   ["radiance", "R", 48],
 ];
 const POWER_IDS = POWERS.map((p) => p[0]);
-const POWER_KEY = { w: "perception", e: "extraction", a: "assembly", r: "radiance" };
+const POWER_KEY = { w: "perception", e: "extraction", r: "radiance" };
 const powStyle = (hue) =>
   toneStyle("pow", { h: hue, s: 70, l: 55 }, { h: hue, s: 50, l: 28 });
 
@@ -22,13 +21,8 @@ const perceptionMs = (level) => P().perceptionBaseMs + level * P().perceptionPer
 const huntCdMs = (level) =>
   Math.max(P().huntCdMinMs, P().huntCdL1Ms - (((lv1(level) - 1) / 2) | 0) * P().huntCdPerStepMs);
 
-const powerCdMs = (level) => Math.max(8e3, 8e3 + (lv1(level) - 1) * 6e3);
 const cdFor = (id, level) =>
-  id === "radiance"
-    ? P().radianceCdMs
-    : id === "assembly"
-      ? powerCdMs(level)
-      : huntCdMs(level);
+  id === "radiance" ? P().radianceCdMs : huntCdMs(level);
 
 function createPowerSystem() {
   const slots = POWERS.map(([id, glyph, hue]) => {
@@ -48,19 +42,11 @@ function createPowerSystem() {
   document.body.append(div({ id: "prk" }, ...slots));
 
   const gate = (id) =>
-    id === "assembly"
-      ? levelIndex >= P().assemblyFromLevel
-      : id === "radiance"
-        ? levelIndex >= P().radianceFromLevel
-        : true;
+    id === "radiance" ? levelIndex >= P().radianceFromLevel : true;
   const unlocked = (id) => powerState[id].level > 0 && gate(id);
 
-  const puzzleHold = () =>
-    bodyHas("rewarding") || !!puzzles?.isOpen?.();
+  const puzzleHold = () => bodyHas("rewarding");
 
-  const puzzleList = () => Object.values(puzzles?.map || {});
-  const assemblyHasWork = () =>
-    puzzleList().some((p) => !p.isSolved?.() && (p.looseCount?.() || 0) > 0);
   const huntPool = () => {
     const names = new Set(levelColors.map((c) => c.name));
     return triangles.filter((t) => !collected.has(t.id) && names.has(t.color.name));
@@ -71,10 +57,8 @@ function createPowerSystem() {
     const slot = slots[POWER_IDS.indexOf(id)];
     slot.querySelector(".pl").textContent = String(st.level);
     const lock = !unlocked(id);
-    const empty =
-      (!lock && id === "assembly" && !assemblyHasWork()) ||
-      (!lock && id === "extraction" && !huntPool().length);
-    const held = puzzleHold() && id !== "assembly";
+    const empty = !lock && id === "extraction" && !huntPool().length;
+    const held = puzzleHold();
     tog(slot, "locked", lock || empty);
     tog(slot, "active", st.active);
     tog(slot, "cooling", st.cooling);
@@ -86,7 +70,7 @@ function createPowerSystem() {
     const st = powerState[id];
     st.active = st.cooling = true;
     syncSlot(id);
-    const cd = cdMs ?? powerCdMs(st.level);
+    const cd = cdMs ?? huntCdMs(st.level);
     setTimeout(() => {
       st.active = false;
       syncSlot(id);
@@ -111,7 +95,7 @@ function createPowerSystem() {
       const commit = (id) => {
         if (picked || !canPick(id)) return;
         picked = true;
-                off(modal, "show");
+        off(modal, "show");
         setTimeout(() => modal.remove(), 750);
         for (const pid of POWER_IDS) if (upgradeSkip[pid] > 0) upgradeSkip[pid]--;
         const skip = skips[id] ?? 0;
@@ -234,16 +218,6 @@ function createPowerSystem() {
     });
   }
 
-  function runAssembly(level) {
-    const n = Math.max(1, level);
-    const list = puzzleList();
-    const openP = list.find((p) => p.isOpen?.());
-    if (openP) return void openP.assemble?.(n);
-    if (bodyHas("po")) return;
-    const unsolved = list.filter((p) => !p.isSolved?.());
-    (unsolved.find((p) => (p.looseCount?.() || 0) > 0) || unsolved[0])?.assemble?.(n);
-  }
-
   function runRadiance(n) {
     if (!dodeRack?.openFaceCount?.()) return;
     triggerReward?.();
@@ -255,9 +229,7 @@ function createPowerSystem() {
 
   function activatePower(id) {
     const st = powerState[id];
-    if (!unlocked(id) || st.active || st.cooling) return;
-    if (puzzleHold() && id !== "assembly") return;
-    if (id === "assembly" && !assemblyHasWork()) return;
+    if (!unlocked(id) || st.active || st.cooling || puzzleHold()) return;
     if (id === "extraction" && !huntPool().length) return;
 
     if (id === "perception") {
@@ -268,9 +240,6 @@ function createPowerSystem() {
     } else if (id === "extraction") {
       runExtraction(st.level);
       beginBusy(id, 900, huntCdMs(st.level));
-    } else if (id === "assembly") {
-      runAssembly(st.level);
-      beginBusy(id, 700);
     } else {
       const n = Math.max(1, st.level);
       runRadiance(n);

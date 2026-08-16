@@ -502,7 +502,7 @@ body.rewarding #controls {
 }
 
 .ps.locked,
-body.rewarding .ps:not([data-power="assembly"]) {
+body.rewarding .ps {
   filter: var(--dim);
   opacity: 0.5;
   cursor: default;

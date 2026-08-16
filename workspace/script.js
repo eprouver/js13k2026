@@ -623,8 +623,7 @@ window.addEventListener("keydown", (e) => {
       qs(".pmod")
     )
       return;
-    // Only Assembly while a puzzle is open (E/W/R must wait)
-    if (puzzles?.isOpen() && powerId !== "assembly") return;
+    if (puzzles?.isOpen()) return;
     powers.activatePower(powerId);
     return;
   }

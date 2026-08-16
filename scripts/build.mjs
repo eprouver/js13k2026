@@ -17,6 +17,8 @@ import { pipeline } from "node:stream/promises";
 import { createGzip, gzipSync } from "node:zlib";
 import { Readable } from "node:stream";
 import { Packer } from "roadroller";
+import { minify } from "terser";
+import CleanCSS from "clean-css";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
@@ -125,8 +127,25 @@ writeFileSync(join(dist, "source.html"), oneFile);
 writeFileSync(join(root, "index.html"), oneFile);
 console.log("wrote index.html (empty body, one <script> with CSS+game)");
 
+const cssMin = new CleanCSS({ level: 2 }).minify(cssRaw).styles;
+const minParts = [
+  addCSSRulesToHeadSource(cssMin),
+  ...SCRIPTS.map((f) => readFileSync(join(workspace, f), "utf8")),
+];
+const minified = await minify(minParts.join("\n;\n"), {
+  ecma: 2020,
+  module: false,
+  toplevel: true,
+  compress: { passes: 3, toplevel: true, unsafe: true, unsafe_arrows: true, booleans_as_integers: true },
+  mangle: { toplevel: true },
+  format: { comments: false },
+});
+if (minified.error) throw minified.error;
+const bundleMin = minified.code;
+writeFileSync(join(dist, "min.html"), wrapOneFile(bundleMin));
+
 console.log(`Roadroller optimize level ${optLevel}…`);
-const packer = new Packer([{ data: bundle, type: "js", action: "eval" }], {});
+const packer = new Packer([{ data: bundleMin, type: "js", action: "eval" }], {});
 await packer.optimize(optLevel);
 const { firstLine, secondLine } = packer.makeDecoder();
 const rolled = firstLine + secondLine;
@@ -146,7 +165,7 @@ if (existsSync(zipPath)) {
 }
 const zipBytes = await zipStore([packedPath], zipPath);
 
-const bundleBuf = Buffer.from(bundle);
+const bundleBuf = Buffer.from(bundleMin);
 const oneBuf = Buffer.from(oneFile);
 const packedBuf = Buffer.from(packed);
 const [bundleGz, packedGz] = await Promise.all([
@@ -157,7 +176,8 @@ const [bundleGz, packedGz] = await Promise.all([
 console.log(`
 ── js13k size report ─────────────────────────
   one-file source (index.html): ${kb(oneBuf.length)}  (${oneBuf.length} B)
-  JS payload gzip:              ${kb(bundleGz)}  (${bundleGz} B)
+  minified JS:                  ${kb(bundleMin.length)}  (${bundleMin.length} B)
+  minified JS gzip:             ${kb(bundleGz)}  (${bundleGz} B)
   Roadroller one-file:          ${kb(packedBuf.length)}  (${packedBuf.length} B)
   packed gzip (approx):         ${kb(packedGz)}  (${packedGz} B)
   submission zip:               ${kb(zipBytes)}  (${zipBytes} B)  ← 13 KB = 13312 B
