@@ -56,12 +56,11 @@ function createPowerSystem() {
   const unlocked = (id) => powerState[id].level > 0 && gate(id);
 
   const puzzleHold = () =>
-    bodyHas("po") || bodyHas("pf") || bodyHas("rewarding") ||
-    !!puzzles?.isOpen?.();
+    bodyHas("rewarding") || !!puzzles?.isOpen?.();
 
   const puzzleList = () => Object.values(puzzles?.map || {});
   const assemblyHasWork = () =>
-    puzzleList().some((p) => (p.looseCount?.() || 0) > 0 || p.isOpen?.());
+    puzzleList().some((p) => !p.isSolved?.() && (p.looseCount?.() || 0) > 0);
   const huntPool = () => {
     const names = new Set(levelColors.map((c) => c.name));
     return triangles.filter((t) => !collected.has(t.id) && names.has(t.color.name));

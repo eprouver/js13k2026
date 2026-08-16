@@ -180,9 +180,7 @@ body {
 
 .face .wm,
 .cl svg,
-.tpw svg,
-.tp svg,
-.pentagon .content .pwm {
+.tpw svg {
   display: block;
   width: 100%;
   height: 100%;
@@ -227,9 +225,7 @@ body {
   pointer-events: none;
 }
 
-#istage[hidden],
-#proot.hidden,
-.pm[hidden] {
+#istage[hidden] {
   display: none !important;
 }
 
@@ -271,7 +267,6 @@ body {
   background: var(--mute);
 }
 
-body.po #controls,
 body.rewarding #controls {
   opacity: 0;
   pointer-events: none;
@@ -332,40 +327,15 @@ body.rewarding #controls {
   padding: 0.55rem 0.85rem 0.65rem;
   border: none;
   font-size: 1rem;
-  cursor: pointer;
+  cursor: default;
   background: var(--tab-dark, #2a2a32);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tab, #888) 45%, transparent);
-  transform: translateY(0);
-  transition: transform 0.4s var(--ease), padding 0.4s ease, box-shadow 0.25s ease;
 }
 
-.ct.ready:not(.raised) {
+.ct.ready {
   box-shadow:
     inset 0 0 0 1px color-mix(in srgb, var(--tab, #888) 45%, transparent),
     0 0 0 2px var(--tab, #f90);
-}
-
-.ct.raised {
-  transform: translateY(-7.5rem);
-  padding: 0.7rem 0.9rem;
-  z-index: 62;
-  cursor: default;
-}
-
-.ct.shake {
-  animation: tab-shake 0.45s ease;
-}
-
-.ct.raised.shake {
-  --shake-y: -7.5rem;
-}
-
-@keyframes tab-shake {
-  0%,
-  100% { transform: translateY(var(--shake-y, 0)); }
-  25% { transform: translateY(var(--shake-y, 0)) translateX(-6px); }
-  50% { transform: translateY(var(--shake-y, 0)) translateX(6px); }
-  75% { transform: translateY(var(--shake-y, 0)) translateX(-3px); }
 }
 
 .tps {
@@ -374,169 +344,14 @@ body.rewarding #controls {
   gap: 0.35rem;
 }
 
-.ct.raised .tps {
-  display: none;
-}
-
 .tpw {
   width: 1.15rem;
   height: 1.15rem;
   flex: 0 0 auto;
 }
 
-.tb {
-  display: none;
-  align-items: center;
-  gap: 0.45rem;
-}
-
-.ct.raised .tb {
-  display: flex;
-}
-
-.tp {
-  width: 3.2rem;
-  height: 3.2rem;
-  flex: 0 0 auto;
-  cursor: grab;
-  touch-action: none;
-  pointer-events: auto;
-}
-
-.tp:active,
-.tp.dragging {
-  cursor: grabbing;
-}
-
-.dg {
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 80;
-  pointer-events: none;
-  opacity: 0.95;
-}
-
-.pm {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  pointer-events: none;
-}
-
-
-
-.pm:not([hidden]) {
-  pointer-events: auto;
-}
-
-.pb {
-  position: absolute;
-  inset: 0;
-  background: color-mix(in srgb, var(--tab-dark, #2a2a32) 42%, transparent);
-}
-
-.pp {
-  position: absolute;
-  left: 50%;
-  top: 38%;
-  transform: translate(-50%, -50%);
-  width: min(72vmin, 420px);
-  aspect-ratio: 1;
-}
-
-body.pf .pp {
-  top: 50%;
-  width: min(82vmin, 480px);
-  transition: top 0.35s ease, width 0.35s ease;
-}
-
-.pentagon {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.pentagon .slot {
-  position: absolute;
-  inset: 0;
-  transform: rotate(var(--base));
-  pointer-events: none;
-}
-
-.pentagon .wedge {
-  pointer-events: auto;
-  position: absolute;
-  inset: 0;
-  clip-path: polygon(50% 50%, 16% 4%, 84% 4%);
-  cursor: default;
-  background: color-mix(in srgb, var(--tab, #f90) 22%, transparent);
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--tab, #f90) 70%, #fff);
-}
-
-.pentagon .wedge.empty {
-  background:
-    repeating-linear-gradient(
-      -45deg,
-      color-mix(in srgb, var(--tab, #f90) 28%, transparent) 0 6px,
-      color-mix(in srgb, var(--tab, #f90) 10%, transparent) 6px 12px
-    );
-}
-
-.pentagon .wedge.dh {
-  background: color-mix(in srgb, var(--tab, #f90) 55%, transparent);
-  box-shadow: inset 0 0 0 2px #fff;
-}
-
-.pentagon .wedge.filled {
-  cursor: pointer;
-  background: transparent;
-  box-shadow: none;
-  filter: grayscale(1);
-  transition: filter 0.3s ease;
-}
-
-.pentagon .wedge.filled.aligned,
-.pentagon.solved .wedge.filled {
-  cursor: default;
-  filter: grayscale(0);
-}
-
-.pentagon .wedge.empty .content {
-  visibility: hidden;
-  opacity: 0;
-}
-
-.pentagon .wedge.filled .content {
-  visibility: visible;
-  opacity: 1;
-}
-
-.pentagon .content {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 180%;
-  height: 180%;
-  margin: -90% 0 0 -90%;
-  transform-origin: 50% 50%;
-  transform: rotate(var(--spin, 0deg));
-  transition: transform 0.3s linear;
-  pointer-events: none;
-}
-
-.pentagon .content .pwm {
-  position: absolute;
-  inset: 0;
-}
-
-.wm polygon,
-.pwm polygon {
+.wm polygon {
   stroke: none;
-}
-
-.pwm polygon {
-  filter: brightness(0.85);
 }
 
 .fly {
@@ -560,42 +375,10 @@ body.pf .pp {
   clip-path: none;
 }
 
-.pb.to-gem {
-  opacity: 0;
-  transition: opacity 0.45s ease;
-}
-
-.pp.to-gem {
-  transition: transform 0.65s var(--ease);
-  transform: translate(-50%, -50%) scale(0.1);
-}
-
-.pentagon.to-gem .slot {
-  opacity: 0;
-  transition: opacity 0.28s ease;
-  pointer-events: none;
-}
-
-.pentagon.to-gem::after,
 .gem,
 .dface {
   clip-path: polygon(50% 4%, 96% 38%, 79% 96%, 21% 96%, 4% 38%);
 }
-
-.pentagon.to-gem::after {
-  content: "";
-  position: absolute;
-  inset: 6%;
-  z-index: 6;
-  background: var(--gem, var(--tab, gold));
-  animation: gem-form 0.55s ease forwards;
-}
-
-@keyframes gem-form {
-  from { opacity: 0; transform: scale(1.15); }
-  to { opacity: 1; transform: scale(1); }
-}
-
 .gem {
   position: relative;
   flex-shrink: 0;
@@ -714,15 +497,10 @@ body.pf .pp {
 }
 
 .ps.locked,
-body.po .ps:not([data-power="assembly"]),
 body.rewarding .ps:not([data-power="assembly"]) {
   filter: var(--dim);
   opacity: 0.5;
   cursor: default;
-}
-
-body.po .ps:not([data-power="assembly"]),
-body.rewarding .ps:not([data-power="assembly"]) {
   pointer-events: none;
 }
 

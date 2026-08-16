@@ -272,7 +272,7 @@ function endGameWon() {
 }
 
 async function transitionToLevel(index) {
-  bodyOff("po", "pf");
+  bodyOff("rewarding");
   player.inspecting = false;
   clearInspectTarget();
   stopHitTracking();
