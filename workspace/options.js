@@ -31,7 +31,7 @@ const OPTS = {
   },
   reveal: { revealMs: 4e3, hideMs: 4e3, rMax: 80 },
   level: {
-    perColor: 5,
+    perColor: 4,
     maxMazeSize: 4,
     defs: [
       { mazeSize: 0, colorCount: 1 },
@@ -40,7 +40,7 @@ const OPTS = {
       { mazeSize: 4, colorCount: 4 },
     ],
   },
-  dode: { sideEm: 2, facePush: 0.76, minLightness: 58 },
+  cube: { sideEm: 2, minLightness: 58 },
 };
 
 (() => {

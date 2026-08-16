@@ -380,10 +380,6 @@ body.rewarding #controls {
   clip-path: none;
 }
 
-.gem,
-.dface {
-  clip-path: polygon(50% 4%, 96% 38%, 79% 96%, 21% 96%, 4% 38%);
-}
 .gem {
   position: relative;
   flex-shrink: 0;
@@ -434,46 +430,42 @@ body.rewarding #controls {
   --orb-ring: color-mix(in srgb, var(--slot, #888) 50%, transparent);
 }
 
-.ds:not(:has(.dode)) {
+.ds:not(:has(.cube)) {
   opacity: 0.45;
 }
 
-.ds .dode {
+.ds .cube {
   font-size: 1.2vmin;
 }
 
-.dode {
+.cube {
   position: relative;
   width: 1px;
   height: 1px;
   perspective: 8000px;
   transform-style: preserve-3d;
-  animation: dode-spin 12.3s linear infinite;
+  animation: cube-spin 12.3s linear infinite;
 }
 
-.dhold,
-.dface {
-  transform-style: preserve-3d;
-}
-
-.dface {
+.cf {
   position: absolute;
   top: 50%;
   left: 50%;
+  transform-style: preserve-3d;
   backface-visibility: visible;
   opacity: 0.7;
   transition: background 0.45s ease, opacity 0.45s ease;
 }
 
-.dface.pending { opacity: 0.85; }
-.dface.lit { opacity: 1; }
-.dface.lit.ignite { animation: dode-ignite 0.6s ease; }
+.cf.pending { opacity: 0.85; }
+.cf.lit { opacity: 1; }
+.cf.lit.ignite { animation: cube-ignite 0.6s ease; }
 
-@keyframes dode-ignite {
+@keyframes cube-ignite {
   35% { filter: brightness(1.65); }
 }
 
-@keyframes dode-spin {
+@keyframes cube-spin {
   to { transform: rotateX(360deg) rotateY(720deg); }
 }
 

@@ -1,8 +1,20 @@
-const dodeFill = (c) =>
-  colorHsl({ ...c, l: Math.max(c.l, OPTS.dode.minLightness) });
+const CUBE_FACES = 6;
+
+/** [rotateY, rotateX] per cube face. */
+const CUBE_TURNS = [
+  [0, 0],
+  [90, 0],
+  [180, 0],
+  [270, 0],
+  [0, 90],
+  [0, -90],
+];
+
+const cubeFill = (c) =>
+  colorHsl({ ...c, l: Math.max(c.l, OPTS.cube.minLightness) });
 
 const makeGem = (color, slot) => {
-  const fill = dodeFill(color);
+  const fill = cubeFill(color);
   const endSize = Math.max(
     28,
     (slot?.getBoundingClientRect?.().width || 52) * 0.72
@@ -14,56 +26,37 @@ const makeGem = (color, slot) => {
   return { gem, fill, endSize };
 };
 
-function createDodecahedron(opts) {
-  const {
-    color,
-    sideLength = 4.5,
-    unlockedFace = 0,
-    unlockedFaces,
-    pendingFaces = [],
-  } = opts;
-  const lit = new Set(
-    unlockedFaces ?? (unlockedFace != null ? [unlockedFace] : [0])
-  );
+function createCube(opts) {
+  const { color, sideLength = 2, unlockedFaces = [], pendingFaces = [] } = opts;
+  const lit = new Set(unlockedFaces);
   const pending = new Set(pendingFaces);
-  const fill = dodeFill(color);
-  const tilt = 26.565;
-  const z = sideLength * OPTS.dode.facePush;
-  const faces = [];
+  const fill = cubeFill(color);
+  const z = sideLength / 2;
 
-  for (let i = 0; i < 12; i++) {
-    const top = i < 6;
-    const pole = i === 0 || i === 11;
-    const rx = pole ? (top ? 90 : -90) : top ? tilt : -tilt;
-    const ry = pole ? (top ? 0 : 9) : top ? (i - 1) * 72 : (i - 6) * 72 + 36;
-    const rz = pole ? (top ? 0 : -9) : top ? 180 : 0;
+  const faces = CUBE_TURNS.map(([ry, rx], i) => {
     const isPending = pending.has(i);
     const on = lit.has(i) && !isPending;
     const face = div({
-      className: on
-        ? "dface lit"
-        : isPending
-          ? "dface pending"
-          : "dface",
+      className: on ? "cf lit" : isPending ? "cf pending" : "cf",
       style: {
         width: `${sideLength}em`,
         height: `${sideLength}em`,
         marginLeft: `${-sideLength / 2}em`,
         marginTop: `${-sideLength / 2}em`,
         background: on ? fill : "#3a3a42",
-        transform: `rotateY(${ry}deg) rotateX(${rx}deg) translateZ(${z}em) rotateZ(${rz}deg)`,
+        transform: `rotateY(${ry}deg) rotateX(${rx}deg) translateZ(${z}em)`,
       },
     });
     face.dataset.i = String(i);
-    faces.push(div({ className: "dhold" }, face));
-  }
+    return face;
+  });
 
-  const el = div({ className: "dode", style: { "--dode": fill } }, ...faces);
+  const el = div({ className: "cube", style: { "--cube": fill } }, ...faces);
   el.dataset.color = color.name;
   return el;
 }
 
-function createDodeRack() {
+function createCubeRack() {
   const litByColor = Object.fromEntries(
     RAINBOW.map((c) => [c.name, new Set()])
   );
@@ -93,11 +86,11 @@ function createDodeRack() {
     }
     const pending = new Set(pendingFaces);
     slot.replaceChildren(
-      createDodecahedron({
+      createCube({
         color: rainbow,
-        unlockedFaces: [...new Set([...lit, ...pending])].sort((a, b) => a - b),
+        unlockedFaces: [...new Set([...lit, ...pending])],
         pendingFaces: [...pending],
-        sideLength: OPTS.dode.sideEm,
+        sideLength: OPTS.cube.sideEm,
       })
     );
     return slot;
@@ -105,17 +98,17 @@ function createDodeRack() {
 
   const nextFace = (colorName) => {
     const lit = litByColor[colorName];
-    for (let i = 0; i < 12; i++) if (!lit.has(i)) return i;
+    for (let i = 0; i < CUBE_FACES; i++) if (!lit.has(i)) return i;
     return -1;
   };
 
   function igniteFace(slot, faceIndex) {
-    const face = slot?.querySelector?.(`.dface[data-i="${faceIndex}"]`);
+    const face = slot?.querySelector?.(`.cf[data-i="${faceIndex}"]`);
     if (!face) return;
     off(face, "pending");
     void face.offsetWidth;
     on(face, "lit", "ignite");
-    const fill = slot.querySelector(".dode")?.style.getPropertyValue("--dode");
+    const fill = slot.querySelector(".cube")?.style.getPropertyValue("--cube");
     if (fill) face.style.background = fill;
   }
 
@@ -130,7 +123,6 @@ function createDodeRack() {
     const rainbow = toRainbow(color);
     const slot = slotFor(rainbow);
     if (!slot) return null;
-    if (litByColor[rainbow.name].size >= 12) return retireFull(rainbow, slot, gemEl);
     const face = nextFace(rainbow.name);
     if (face < 0) return retireFull(rainbow, slot, gemEl);
     await flyThen(gemEl, slot, { node: gemEl, ms: OPTS.fly.trophyMs });
@@ -142,13 +134,13 @@ function createDodeRack() {
     const slot = paint(rainbow, [faceIndex]);
     await nextFrame();
     igniteFace(slot, faceIndex);
-    if (litByColor[rainbow.name].size >= 12) retireColorFromLevel?.(rainbow.name);
+    if (isFull(rainbow.name)) retireColorFromLevel?.(rainbow.name);
     if (allComplete()) endGameWon?.();
     return slot;
   }
 
   async function flyInFace(rainbow, faceIndex, delay = 0) {
-    if (litByColor[rainbow.name].size >= 12) return false;
+    if (isFull(rainbow.name)) return false;
     const slot = slotFor(rainbow);
     if (!slot || faceIndex < 0) return false;
     const { gem } = makeGem(rainbow, slot);
@@ -166,7 +158,7 @@ function createDodeRack() {
     let done = 0;
     for (let i = 0; i < Math.max(0, n); i++) {
       const targets = RAINBOW.filter(
-        (c) => litByColor[c.name].size > 0 && litByColor[c.name].size < 12
+        (c) => litByColor[c.name].size > 0 && !isFull(c.name)
       );
       if (!targets.length) break;
       const c = shuffle(targets.slice())[0];
@@ -182,17 +174,16 @@ function createDodeRack() {
     let n = 0;
     for (const c of RAINBOW) {
       const s = litByColor[c.name].size;
-      if (s > 0 && s < 12) n += 12 - s;
+      if (s > 0 && s < CUBE_FACES) n += CUBE_FACES - s;
     }
     return n;
   }
 
-  const isColorComplete = (color) =>
-    litByColor[toRainbow(color).name].size >= 12;
+  const isFull = (name) => litByColor[name].size >= CUBE_FACES;
+  const isColorComplete = (color) => isFull(toRainbow(color).name);
   const completedNames = () =>
-    RAINBOW.filter((c) => litByColor[c.name].size >= 12).map((c) => c.name);
-  const allComplete = () =>
-    RAINBOW.every((c) => litByColor[c.name].size >= 12);
+    RAINBOW.filter((c) => isFull(c.name)).map((c) => c.name);
+  const allComplete = () => RAINBOW.every((c) => isFull(c.name));
 
   return {
     rack,

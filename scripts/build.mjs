@@ -45,7 +45,7 @@ const SCRIPTS = [
   "reveal.js",
   "maze.js",
   "level.js",
-  "dode.js",
+  "cube.js",
   "puzzle.js",
   "powers.js",
   "script.js",

@@ -194,7 +194,7 @@ viewport.addEventListener("click", () => {
   primaryAction();
 });
 
-const dodeRack = createDodeRack();
+const cubeRack = createCubeRack();
 const powers = createPowerSystem();
 
 function levelCleared() {
@@ -240,9 +240,9 @@ async function onColorComplete(color, puzzle) {
     await wait(OPTS.time.solveHoldMs);
 
     const gem = await puzzle.collapseToGem();
-    await dodeRack.deliver(color, gem);
+    await cubeRack.deliver(color, gem);
 
-    if (dodeRack.isColorComplete?.(color)) {
+    if (cubeRack.isColorComplete?.(color)) {
       retireColorFromLevel(color);
     } else if (left >= PER_COLOR) {
       puzzle.reset();
@@ -250,7 +250,7 @@ async function onColorComplete(color, puzzle) {
       puzzle.remove();
     }
 
-    if (dodeRack.allComplete?.()) {
+    if (cubeRack.allComplete?.()) {
       endGameWon();
       return;
     }
@@ -292,7 +292,7 @@ async function transitionToLevel(index) {
 }
 
 function startLevel(index) {
-  const exclude = dodeRack.completedNames?.() || [];
+  const exclude = cubeRack.completedNames?.() || [];
   const L = buildLevel(index, exclude);
   if (!L.colors.length) {
     endGameWon();

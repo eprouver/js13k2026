@@ -219,10 +219,10 @@ function createPowerSystem() {
   }
 
   function runRadiance(n) {
-    if (!dodeRack?.openFaceCount?.()) return;
+    if (!cubeRack?.openFaceCount?.()) return;
     triggerReward?.();
-    Promise.resolve(dodeRack.addFaces?.(n)).then(() => {
-      if (dodeRack.allComplete?.()) endGameWon?.();
+    Promise.resolve(cubeRack.addFaces?.(n)).then(() => {
+      if (cubeRack.allComplete?.()) endGameWon?.();
       else if (levelCleared?.()) transitionToLevel?.(levelIndex + 1);
     });
   }
