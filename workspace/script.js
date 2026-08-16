@@ -615,6 +615,11 @@ controls.addEventListener("click", (e) => {
 
 window.addEventListener("keydown", (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key.toLowerCase() === "m") {
+    e.preventDefault();
+    toggleMute();
+    return;
+  }
   const powerId = POWER_KEY[e.key.toLowerCase()];
   if (powerId) {
     e.preventDefault();
