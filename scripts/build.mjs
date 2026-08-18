@@ -66,7 +66,7 @@ function wrapOneFile(js) {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${TITLE}</title>
 </head>
 <body>
@@ -81,6 +81,10 @@ ${js}
 function wrapPacked(js) {
   // <body> must exist before the script runs (document.body.append).
   return `<body><script>${js}</script>`;
+}
+
+function wrapPages(js) {
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>${TITLE}</title></head>${wrapPacked(js)}</html>`;
 }
 
 function kb(n) {
@@ -312,6 +316,8 @@ const rolled = firstLine + secondLine;
 const packed = wrapPacked(rolled);
 const packedPath = join(dist, "index.html");
 writeFileSync(packedPath, packed);
+mkdirSync(join(dist, "pages"), { recursive: true });
+writeFileSync(join(dist, "pages", "index.html"), wrapPages(rolled));
 
 const zipPath = join(dist, "game.zip");
 const { zipBytes, infozip, pyzip, zopfli, advzip } = await zipStore(packedPath, zipPath);
