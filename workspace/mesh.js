@@ -66,7 +66,7 @@ const createMeshData = (seed) => {
     preserveAspectRatio: "none",
     class: "wm",
   });
-  const g = svgEl("g", { filter: "url(#sf)" });
+  const g = svgEl("g", matchMedia("(hover:none)").matches ? {} : { filter: "url(#sf)" });
   g.append(svgEl("rect", { width: 100, height: 100, fill: "var(--wall-lo)" }));
   for (const [a, b, c] of tris) {
     g.append(

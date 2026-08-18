@@ -22,7 +22,7 @@
   --fg: #f8e8ff;
   --bow: repeating-linear-gradient(90deg,var(--c0),var(--c1),var(--c2),var(--c3),var(--c4),var(--c5),var(--c0) 50%);
   --ease: cubic-bezier(0.4, 0.05, 0.2, 1);
-  --side-orb: 7.25vmin;
+  --side-orb: max(7.25vmin, 3rem);
   --orb-font: calc(var(--side-orb) * 0.3);
   --dim: grayscale(1) brightness(0.55);
   --line: 0.2rem;
@@ -89,7 +89,13 @@ body.rewarding::after,
   overflow: hidden;
   background: linear-gradient(var(--wall-lo), var(--wall-hi));
   opacity: 1;
-  backface-visibility: visible;
+  backface-visibility: hidden;
+}
+
+@media (hover: fine) {
+  .face {
+    backface-visibility: visible;
+  }
 }
 
 .room,
@@ -202,6 +208,18 @@ body.rewarding::after,
 }
 .face.it .wm {
   filter: grayscale(1);
+}
+
+@media (hover: none) {
+  .face .wm {
+    transition: none;
+  }
+  .face.it .wm {
+    filter: none;
+  }
+  .wall:has(.it)::before {
+    animation: none;
+  }
 }
 
 .cl {
@@ -484,7 +502,7 @@ body.won .ds::before {
 }
 
 .ds .cube {
-  font-size: 1.2vmin;
+  font-size: calc(var(--side-orb) * 0.17);
   z-index: 1;
 }
 
