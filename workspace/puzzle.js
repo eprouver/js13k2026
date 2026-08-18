@@ -1,6 +1,10 @@
-const tinyPipSvg = () => isoTriSvg("#000", { svgClass: "tab-pip" });
+const tinyPipSvg = () =>
+  svgEl(
+    "svg",
+    SVG100,
+    svgEl("polygon", { points: "0,100 50,50 100,100", fill: "#333" })
+  );
 
-/** Color bank: collect N triangles → gem. No wedge puzzle. */
 function createPuzzleUI(opts) {
   const { color, total, onComplete, tabsBar } = opts;
   const fill = colorHsl(color);
@@ -14,11 +18,22 @@ function createPuzzleUI(opts) {
     return wrap;
   });
   const tab = button({ className: "ct", style: toneStyle("tab", color) });
-  tab.dataset.color = color.name;
   tab.append(div({ className: "tps" }, ...pips));
-  tabsBar.append(tab);
+  const hold = div({ className: "cth" }, tab);
+  tabsBar.append(hold);
 
-  const syncPow = () => powers?.syncAll?.();
+  const syncPow = () => powers.syncAll();
+  const clrTab = () => {
+    tab.style.position =
+      tab.style.left =
+      tab.style.top =
+      tab.style.width =
+      tab.style.height =
+      tab.style.margin =
+      tab.style.zIndex =
+        "";
+    hold.style.cssText = "";
+  };
 
   function refreshPips() {
     const n = ids.length;
@@ -27,7 +42,7 @@ function createPuzzleUI(opts) {
       if (i < total)
         pip.querySelector("polygon")?.setAttribute(
           "fill",
-          i < n ? fill : "#000"
+          i < n ? fill : "#333"
         );
     });
     tog(tab, "ready", n >= total && !solved);
@@ -37,14 +52,17 @@ function createPuzzleUI(opts) {
     if (solved || completing || ids.length < total) return;
     completing = true;
     solved = true;
+    ids.forEach(clearHintMask);
+    pruneWashes();
     on(tab, "ready");
     syncPow();
-    onComplete?.();
+    onComplete();
   }
 
   function addPieceToTray(id) {
     if (solved || completing || ids.includes(id)) return null;
     ids.push(id);
+    clearHintMask(id);
     refreshPips();
     syncPow();
     if (ids.length >= total) tryComplete();
@@ -61,53 +79,65 @@ function createPuzzleUI(opts) {
     solved = false;
     completing = false;
     ids.length = 0;
-    off(tab, "ready");
+    off(tab, "ready", "sealing", "sealed");
+    clrTab();
+    if (tab.parentNode !== hold) hold.append(tab);
     tab.hidden = false;
     refreshPips();
     syncPow();
   }
 
   function removeTab() {
-    tab.remove();
+    hold.remove();
     const root = tabsBar.closest("#proot");
     if (tabsBar && !tabsBar.childElementCount) root?.remove();
   }
 
-  function collapseToGem() {
-    return new Promise((resolve) => {
-      const r = tab.getBoundingClientRect();
-      const { gem, endSize } = makeGem(color, qs(".ds"));
-      const startSize = Math.max(
-        endSize * 1.35,
-        Math.min(r.width, r.height) * 1.2 || endSize * 2
-      );
-      const cx = r.left + r.width / 2;
-      const cy = r.top + r.height / 2;
-      const place = (size) => {
-        gem.style.width = gem.style.height = `${size}px`;
-        gem.style.left = `${cx - size / 2}px`;
-        gem.style.top = `${cy - size / 2}px`;
-      };
-      gem.style.position = "fixed";
-      gem.style.zIndex = "121";
-      place(startSize);
-      document.body.append(gem);
-      nextFrame().then(() => place(endSize));
-      setTimeout(() => resolve(gem), 280);
-    });
+  async function collapseToGem() {
+    const slot = cubeRack.slots[color.i];
+    const { gem, endSize } = makeGem(color, slot);
+    const r0 = tab.getBoundingClientRect();
+    hold.style.width = hold.style.minWidth = `${r0.width}px`;
+    hold.style.height = `${r0.height}px`;
+    tab.style.transition = "none";
+    document.body.append(tab);
+    tab.style.position = "fixed";
+    tab.style.zIndex = "121";
+    tab.style.left = `${r0.left}px`;
+    tab.style.top = `${r0.top}px`;
+    tab.style.width = `${r0.width}px`;
+    tab.style.height = `${r0.height}px`;
+    tab.style.margin = "0";
+    const r1 = tab.getBoundingClientRect();
+    tab.style.transition = "";
+    on(tab, "sealing");
+    tab.style.width = tab.style.height = `${endSize}px`;
+    tab.style.left = `${r1.left + r1.width / 2 - endSize / 2}px`;
+    tab.style.top = `${r1.top + r1.height / 2 - endSize / 2}px`;
+    await wait(OPTS.time.sealMs);
+    const r = tab.getBoundingClientRect();
+    gem.style.position = "fixed";
+    gem.style.zIndex = "121";
+    gem.style.width = gem.style.height = `${endSize}px`;
+    gem.style.left = `${r.left + r.width / 2 - endSize / 2}px`;
+    gem.style.top = `${r.top + r.height / 2 - endSize / 2}px`;
+    document.body.append(gem);
+    clrTab();
+    off(tab, "sealing", "ready");
+    on(tab, "sealed");
+    hold.append(tab);
+    await nextFrame();
+    return gem;
   }
 
   refreshPips();
   return {
     flyIn,
     addPieceToTray,
-    isOpen: () => false,
-    isSolved: () => solved,
-    looseCount: () => (solved ? 0 : Math.max(0, total - ids.length)),
     reset,
     remove: removeTab,
     collapseToGem,
-    close: () => {},
+    tab,
   };
 }
 
@@ -118,18 +148,17 @@ function createPuzzleSet(colors, perColor, onColorComplete) {
   document.body.append(root);
   const map = {};
   for (const c of colors) {
-    map[c.name] = createPuzzleUI({
+    map[c.i] = createPuzzleUI({
       color: c,
       total: perColor,
       tabsBar,
-      onComplete: () => onColorComplete(c, map[c.name]),
+      onComplete: () => onColorComplete(c, map[c.i]),
     });
   }
   return {
     map,
     root,
-    flyIn: (id, layer, color) => map[color.name]?.flyIn(id, layer),
-    isOpen: () => false,
+    flyIn: (id, layer, color) => map[color.i]?.flyIn(id, layer),
     destroy() {
       Object.values(map).forEach((p) => p.remove());
       root.remove();

@@ -2,34 +2,25 @@ const OPTS = {
   time: {
     turnMs: 450,
     camMs: 550,
-    inspectOutMs: 550,
-    walkMs: 700,
     levelExitMs: 580,
-    levelEnterPadMs: 40,
     levelEnterMs: 700,
-    solveHoldMs: 1100,
+    solveHoldMs: 400,
+    sealMs: 800,
   },
   fly: {
     ms: 1100,
     trophyMs: 1400,
+    crazy: 0.55,
+    trophyCrazy: 0.9,
   },
   powers: {
-    perceptionBaseMs: 5e3,
-    perceptionPerLevelMs: 2500,
-    perceptionStaggerMs: 550,
-    huntCdL1Ms: 24e3,
-    huntCdPerStepMs: 4e3,
-    huntCdMinMs: 8e3,
-    washL1Pct: 120,
-    washShrinkPct: 28,
-    washMinPct: 32,
-    radianceFromLevel: 3,
-    radianceEveryN: 3,
-    upgradeSkipAfter: { perception: 0, extraction: 1, radiance: 2 },
-    radianceCdMs: 12e4,
-    solveCheckMs: 480,
+    rallyFromLevel: 3,
+    washFadeMs: 3e4,
+    cd: [24e3, 4e3, 5e3],
+    evokeCd: [48e3, 4e3, 16e3],
+    rallyCd: [12e4, 16e3, 28e3],
   },
-  reveal: { revealMs: 4e3, hideMs: 4e3, rMax: 80 },
+  reveal: { ms: 4e3, rMax: 80 },
   level: {
     perColor: 4,
     maxMazeSize: 4,
@@ -40,12 +31,5 @@ const OPTS = {
       { mazeSize: 4, colorCount: 4 },
     ],
   },
-  cube: { sideEm: 2, minLightness: 58 },
+  cube: { minLightness: 58 },
 };
-
-(() => {
-  const r = document.documentElement.style;
-  const t = OPTS.time;
-  r.setProperty("--cam-ms", t.camMs + "ms");
-  r.setProperty("--walk-ms", t.walkMs + "ms");
-})();

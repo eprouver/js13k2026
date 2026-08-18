@@ -28,35 +28,13 @@ const hiddensOn = (roomId, faceKey) =>
     (h) => h.room === roomId && h.face === faceKey && !collected.has(h.id)
   );
 
-// Camera basis (±90° on integer axes)
-
 const snap = (n) => Math.round(n);
-
-const rot90 = (v, axis, sign) => {
-  const [x, y, z] = v;
-  const [ax, ay, az] = axis;
-  const dot = ax * x + ay * y + az * z;
-  const cx = ay * z - az * y;
-  const cy = az * x - ax * z;
-  const cz = ax * y - ay * x;
-  return [snap(ax * dot + sign * cx), snap(ay * dot + sign * cy), snap(az * dot + sign * cz)];
-};
-
-const basisToCSS = (right, up, forward) => {
-  const [rx, ry, rz] = right;
-  const [ux, uy, uz] = up;
-  const [fx, fy, fz] = forward;
-  return `matrix3d(${rx},${ux},${-fx},0, ${ry},${uy},${-fy},0, ${rz},${uz},${-fz},0, 0,0,0,1)`;
-};
-
 const vDot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 const vCross = (a, b) => [
   a[1] * b[2] - a[2] * b[1],
   a[2] * b[0] - a[0] * b[2],
   a[0] * b[1] - a[1] * b[0],
 ];
-const same3 = (a, b) => a[0] === b[0] && a[1] === b[1] && a[2] === b[2];
-
 const rotAround = (v, axis, ang) => {
   const c = Math.cos(ang);
   const s = Math.sin(ang);
@@ -69,49 +47,47 @@ const rotAround = (v, axis, ang) => {
     v[2] * c + cz * s + axis[2] * d * k,
   ];
 };
+const rot90 = (v, axis, sign) => rotAround(v, axis, (sign * Math.PI) / 2).map(snap);
+const poseCSS = (r, u, f) =>
+  `matrix3d(${r[0]},${u[0]},${-f[0]},0,${r[1]},${u[1]},${-f[1]},0,${r[2]},${u[2]},${-f[2]},0,0,0,0,1)`;
+const look = () => {
+  pivot.style.transform = poseCSS(player.right, player.up, player.forward);
+};
 
-const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
+let turnRaf,
+  turnBusy,
+  walkBusy,
+  walkGen = 0,
+  turnQ = [];
 
-const TURN_MS = OPTS.time.turnMs;
-const INSPECT_OUT_MS = OPTS.time.inspectOutMs;
-let turnRaf = null;
-let turnBusy = false;
+const haltTurns = () => {
+  cancelAnimationFrame(turnRaf);
+  turnRaf = turnBusy = walkBusy = 0;
+  walkGen++;
+  turnQ.length = 0;
+};
 
-const animateTurn = (fromRight, fromUp, fromForward) => {
-  if (turnRaf != null) cancelAnimationFrame(turnRaf);
-  turnBusy = true;
+const pumpQ = () => turnQ.length && doTurn(turnQ.shift());
 
-  const axis = same3(fromUp, player.up)
-    ? fromUp
-    : same3(fromRight, player.right)
-      ? fromRight
-      : fromForward;
-  const sign = Math.sign(vDot(vCross(fromForward, player.forward), axis)) || 1;
-  const start = performance.now();
-
-  const tick = (now) => {
-    const t = Math.min(1, (now - start) / TURN_MS);
-    if (t < 1) {
-      const ang = sign * (Math.PI / 2) * easeInOut(t);
-      pivot.style.transform = basisToCSS(
-        rotAround(fromRight, axis, ang),
-        rotAround(fromUp, axis, ang),
-        rotAround(fromForward, axis, ang)
+const animateTurn = (fr, fu, ff, axis, s) => {
+  turnBusy = 1;
+  runTween(OPTS.time.turnMs, {
+    ease: easeInOut,
+    setRaf: (id) => (turnRaf = id),
+    onTick: (eased) => {
+      const ang = s * (Math.PI / 2) * eased;
+      pivot.style.transform = poseCSS(
+        rotAround(fr, axis, ang),
+        rotAround(fu, axis, ang),
+        rotAround(ff, axis, ang)
       );
-      turnRaf = requestAnimationFrame(tick);
-    } else {
-      turnRaf = null;
-      turnBusy = false;
-      pivot.style.transform = basisToCSS(
-        player.right,
-        player.up,
-        player.forward
-      );
-      updateView(false);
-    }
-  };
-
-  turnRaf = requestAnimationFrame(tick);
+    },
+    onDone: () => {
+      turnBusy = 0;
+      look();
+      pumpQ();
+    },
+  });
 };
 
 function facingFaceKey() {
@@ -129,14 +105,9 @@ function buildRoom(spec) {
     const face = div({ className: "face" });
     face.dataset.face = key;
     const hides = hiddensOn(spec.id, key);
-    paintWallMesh(
+    paintWall(
       face,
-      undefined,
-      hides.length
-        ? {
-            collectibles: hides.map((h) => ({ id: h.id, color: h.color })),
-          }
-        : {}
+      hides.map((h) => ({ id: h.id, color: h.color }))
     );
     return div({ className: `wall ${cls}` }, face);
   });
@@ -159,39 +130,28 @@ const camera = div({ id: "camera" }, pivot);
 const viewport = div({ id: "viewport" }, camera);
 const inspectStage = div({ id: "istage", hidden: true });
 
-const leftBtn = button("◀");
-const upBtn = button("▲");
-const rightBtn = button("▶");
-const downBtn = button("▼");
-const actionBtn = button({}, "Go");
+document.body.append(viewport, inspectStage);
 
-leftBtn.dataset.act = "left";
-upBtn.dataset.act = "up";
-rightBtn.dataset.act = "right";
-downBtn.dataset.act = "down";
-actionBtn.dataset.act = "action";
-
-const controls = div(
-  { id: "controls" },
-  leftBtn,
-  upBtn,
-  rightBtn,
-  downBtn,
-  actionBtn
-);
-
-document.body.append(viewport, inspectStage, controls);
-
+let sx, sy, swiped;
 viewport.addEventListener("click", () => {
-  if (
-    player.inspecting ||
-    turnBusy ||
-    puzzles?.isOpen() ||
-    bodyHas("rewarding") ||
-    bodyHas("won")
-  )
-    return;
+  if (swiped) return void (swiped = 0);
+  if (turnBusy || bodyHas("rewarding") || bodyHas("won")) return;
   primaryAction();
+});
+viewport.addEventListener("touchstart", (e) => {
+  const t = e.changedTouches[0];
+  sx = t.clientX;
+  sy = t.clientY;
+  swiped = 0;
+}, { passive: true });
+viewport.addEventListener("touchend", (e) => {
+  if (bodyHas("rewarding") || bodyHas("won")) return;
+  const t = e.changedTouches[0];
+  const dx = t.clientX - sx;
+  const dy = t.clientY - sy;
+  if (dx * dx + dy * dy < 576) return;
+  swiped = 1;
+  doTurn(Math.abs(dx) > Math.abs(dy) ? +(dx > 0) : 2 + (dy > 0));
 });
 
 const cubeRack = createCubeRack();
@@ -200,65 +160,78 @@ const powers = createPowerSystem();
 function levelCleared() {
   return (
     triangles.every((t) => collected.has(t.id)) &&
-    levelColors.every((c) => solvedColors.has(c.name))
+    levelColors.every((c) => solvedColors.has(c.i))
   );
 }
 
-function retireColorFromLevel(colorOrName) {
-  const name =
-    typeof colorOrName === "string" ? colorOrName : colorOrName?.name;
-  if (!name) return;
-  solvedColors.add(name);
+function retireColorFromLevel(i) {
+  if (i == null) return;
+  solvedColors.add(i);
   let stripped = false;
   for (const t of triangles) {
-    if (t.color.name !== name || collected.has(t.id)) continue;
+    if (t.color.i !== i) continue;
+    clearHintMask(t.id);
+    if (collected.has(t.id)) continue;
     collected.add(t.id);
     layerById(t.id)?.remove();
     stripped = true;
   }
-  puzzles?.map?.[name]?.remove?.();
-  if (puzzles?.map) delete puzzles.map[name];
-  levelColors = levelColors.filter((c) => c.name !== name);
+  puzzles?.map?.[i]?.remove();
+  if (puzzles?.map) delete puzzles.map[i];
+  levelColors = levelColors.filter((c) => c.i !== i);
   if (stripped && player.inspecting) {
     const layers = faceLayers(inspectFace());
     if (layers.length) trackInspectHits(layers);
     else stopHitTracking();
   }
-  powers?.syncAll?.();
+  powers.syncAll();
 }
 
+let rewardInflight = 0;
+
 async function onColorComplete(color, puzzle) {
-  bodyOn("rewarding");
-  powers?.syncAll?.();
+  if (bodyHas("won")) return;
+  rewardInflight++;
+  solvedColors.add(color.i);
+  sfxReward(3 / 4, 0.2);
   try {
-    triggerReward();
-    solvedColors.add(color.name);
     const left = triangles.filter(
-      (t) => t.color.name === color.name && !collected.has(t.id)
+      (t) => t.color.i === color.i && !collected.has(t.id)
     ).length;
 
     await wait(OPTS.time.solveHoldMs);
+    if (bodyHas("won")) return;
 
     const gem = await puzzle.collapseToGem();
+    if (bodyHas("won")) return;
     await cubeRack.deliver(color, gem);
+    if (bodyHas("won") || cubeRack.allComplete()) {
+      endGameWon();
+      return;
+    }
 
-    if (cubeRack.isColorComplete?.(color)) {
-      retireColorFromLevel(color);
+    if (cubeRack.isColorComplete(color)) {
+      retireColorFromLevel(color.i);
     } else if (left >= PER_COLOR) {
       puzzle.reset();
     } else {
       puzzle.remove();
     }
 
-    if (cubeRack.allComplete?.()) {
+    await wait(300);
+    if (bodyHas("won")) return;
+    await powers.offerUpgrade();
+    if (bodyHas("won") || rewardInflight > 1) return;
+
+    if (cubeRack.allComplete()) {
       endGameWon();
       return;
     }
-    await powers.offerUpgrade();
     if (levelCleared()) await transitionToLevel(levelIndex + 1);
   } finally {
-    bodyOff("rewarding");
-    powers?.syncAll?.();
+    rewardInflight--;
+    if (!bodyHas("won") && !qs(".pmod")) bodyOff("rewarding");
+    powers.syncAll();
   }
 }
 
@@ -266,9 +239,38 @@ function endGameWon() {
   if (bodyHas("won")) return;
   bodyOn("won");
   qs(".pmod")?.remove();
-  if (!document.getElementById("win")) {
-    document.body.append(div({ id: "win" }, "You win"));
-  }
+  bodyOff("rewarding");
+  document.body.append(div({ id: "win" }, "You Won!"));
+  musicWin();
+  cubeRack.slots.forEach((_, i) =>
+    setTimeout(() => sfxReward(4 / 3), i * 200)
+  );
+  powers.syncAll();
+}
+
+function showHelp() {
+  const modal = showModal([
+    v.h2(
+      { className: "ph" },
+      "Find the Triangles: Save the Rainbow"
+    ),
+    div(
+      { className: "ph" },
+      "Swipe or arrows to turn\nTap or space to move\nPowerups will help"
+    ),
+  ]);
+  const go = () => {
+    removeEventListener("keydown", go);
+    modal.onclick = null;
+    on(modal, "out");
+    setTimeout(() => {
+      modal.remove();
+      bodyOff("rewarding");
+      powers.syncAll();
+    }, 520);
+  };
+  addEventListener("keydown", go);
+  modal.onclick = go;
 }
 
 async function transitionToLevel(index) {
@@ -276,7 +278,10 @@ async function transitionToLevel(index) {
   player.inspecting = false;
   clearInspectTarget();
   stopHitTracking();
+  off(viewport, "inspecting");
 
+  haltTurns();
+  doTurn((Math.random() * 4) | 0);
   on(viewport, "lx");
   await wait(OPTS.time.levelExitMs);
 
@@ -285,25 +290,26 @@ async function transitionToLevel(index) {
   off(viewport, "lx");
   on(viewport, "le");
   void world.offsetWidth;
-  await wait(OPTS.time.levelEnterPadMs);
   on(viewport, "li");
   await wait(OPTS.time.levelEnterMs);
   off(viewport, "le", "li");
 }
 
 function startLevel(index) {
-  const exclude = cubeRack.completedNames?.() || [];
+  const exclude = cubeRack.completed();
   const L = buildLevel(index, exclude);
   if (!L.colors.length) {
     endGameWon();
     return;
   }
+  applyLevelMood(index);
   levelIndex = L.index;
   rooms = L.rooms;
   triangles = L.triangles;
   levelColors = L.colors;
   collected = new Set();
   solvedColors = new Set();
+  haltTurns();
   player.room = 0;
   player.inspecting = false;
   player.right = [1, 0, 0];
@@ -313,10 +319,11 @@ function startLevel(index) {
   puzzles?.destroy();
   puzzles = createPuzzleSet(L.colors, L.perColor, onColorComplete);
 
-  clearAllHintMasks?.();
+  clearAllHintMasks();
   world.replaceChildren(...rooms.map(buildRoom));
   updateView(false);
-  powers?.syncAll?.();
+  if (index === 0 && powerState.wash.level < 1) powerState.wash.level = 1;
+  powers.syncAll();
 }
 
 function passageTarget() {
@@ -337,52 +344,28 @@ function updateView(animate = true) {
   tog(world, "na", !animate);
   tog(camera, "na", !animate);
 
-  if (!turnBusy) {
-    pivot.style.transform = basisToCSS(player.right, player.up, player.forward);
-  }
+  if (!turnBusy) look();
   const r = rooms[player.room];
   if (!r) return;
   world.style.transform = `translate3d(calc(${-r.x} * var(--span)), 0px, calc(${-r.z} * var(--span)))`;
   tog(viewport, "inspecting", player.inspecting);
-
-  const passage = passageTarget();
-
-  if (player.inspecting) {
-    setNavDisabled(turnBusy);
-    actionBtn.disabled = false;
-    actionBtn.textContent = "Back";
-  } else {
-    setNavDisabled(turnBusy);
-    actionBtn.disabled = turnBusy;
-    actionBtn.textContent = passage !== null ? "Go" : "Inspect";
-  }
 }
 
-function setNavDisabled(busy) {
-  leftBtn.disabled = busy;
-  rightBtn.disabled = busy;
-  upBtn.disabled = busy;
-  downBtn.disabled = busy;
-}
-
-function navigateFromView(applyBasis) {
-  if (turnBusy) return;
-
-  const startTurn = () => {
+function navigateFromView(applyBasis, axis, s) {
+  const kick = () => {
     const fr = [...player.right],
       fu = [...player.up],
       ff = [...player.forward];
     applyBasis();
-    animateTurn(fr, fu, ff);
-    updateView(false);
+    animateTurn(fr, fu, ff, axis, s);
   };
 
   if (!player.inspecting) {
-    startTurn();
+    kick();
     return;
   }
 
-  turnBusy = true;
+  turnBusy = 1;
   const face = inspectFace();
   const layers = faceLayers(face);
   stopHitTracking();
@@ -394,55 +377,36 @@ function navigateFromView(applyBasis) {
   off(camera, "na");
   off(world, "na");
   off(viewport, "inspecting");
-  setNavDisabled(true);
-  actionBtn.disabled = true;
 
   onceEndOrTimeout(
     camera,
-    INSPECT_OUT_MS + 80,
+    OPTS.time.camMs + 80,
     () => {
-      turnBusy = false;
-      startTurn();
+      turnBusy = 0;
+      kick();
     },
     (e) => e.target === camera && e.propertyName === "transform"
   );
 }
 
-function turnLeft() {
+const TURNS = [
+  ["up", "right", 1],
+  ["up", "right", -1],
+  ["right", "up", -1],
+  ["right", "up", 1],
+];
+const doTurn = (i) => {
+  if (turnBusy || walkBusy) return turnQ.length < 8 && turnQ.push(i);
+  const [ax, other, s] = TURNS[i];
+  const axis = player[ax];
   navigateFromView(() => {
-    player.forward = rot90(player.forward, player.up, 1);
-    player.right = rot90(player.right, player.up, 1);
-  });
-}
-
-function turnRight() {
-  navigateFromView(() => {
-    player.forward = rot90(player.forward, player.up, -1);
-    player.right = rot90(player.right, player.up, -1);
-  });
-}
-
-function lookUp() {
-  navigateFromView(() => {
-    player.forward = rot90(player.forward, player.right, -1);
-    player.up = rot90(player.up, player.right, -1);
-  });
-}
-
-function lookDown() {
-  navigateFromView(() => {
-    player.forward = rot90(player.forward, player.right, 1);
-    player.up = rot90(player.up, player.right, 1);
-  });
-}
+    player.forward = rot90(player.forward, axis, s);
+    player[other] = rot90(player[other], axis, s);
+  }, axis, s);
+};
 
 function clearInspectTarget() {
-  document
-    .querySelectorAll(".face.it")
-    .forEach((f) => off(f, "it"));
-  document
-    .querySelectorAll(".cl.hot, .ctri.hot")
-    .forEach((el) => off(el, "hot"));
+  qsa(".face.it").forEach((f) => off(f, "it"));
 }
 
 let hitRaf = null;
@@ -466,8 +430,6 @@ function trackInspectHits(layers) {
     const hit = button({
       className: "ihit",
     });
-    hit.addEventListener("pointerenter", () => on(layer, "hot"));
-    hit.addEventListener("pointerleave", () => off(layer, "hot"));
     hit.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -504,13 +466,13 @@ function trackInspectHits(layers) {
 
 function enterInspect() {
   if (passageTarget() !== null) return;
+  pruneWashes();
   player.inspecting = true;
   clearInspectTarget();
 
   const face = getFacingFaceEl();
   if (face) {
     on(face, "it");
-    clearFaceHints(face);
     const layers = faceLayers(face);
     if (layers.length) {
       playRevealMask(layers);
@@ -542,15 +504,22 @@ function exitInspect() {
 }
 
 function primaryAction() {
-  if (turnBusy || puzzles?.isOpen()) return;
+  if (turnBusy) return;
   if (player.inspecting) {
-        exitInspect();
+    exitInspect();
     return;
   }
   const to = passageTarget();
   if (to !== null) {
-        player.room = to;
+    player.room = to;
+    walkBusy = 1;
+    const gen = ++walkGen;
     updateView();
+    setTimeout(() => {
+      if (gen !== walkGen) return;
+      walkBusy = 0;
+      pumpQ();
+    }, 780);
     return;
   }
   enterInspect();
@@ -566,7 +535,7 @@ function claimTriangle(id, el) {
     el ||
     layerById(id);
   const face = layer?.closest?.(".face");
-  powers?.noteCollected?.(id);
+  powers.noteCollected(id);
   if (layer) layer.style.visibility = "hidden";
   return { tri, layer, face };
 }
@@ -574,8 +543,7 @@ function claimTriangle(id, el) {
 function collectTriangle(id, el) {
   const claim = claimTriangle(id, el);
   if (!claim) return;
-    const { tri, layer, face } = claim;
-  clearFaceHints(face);
+  const { tri, layer, face } = claim;
   const others = face
     ? faceLayers(face).filter((l) => l !== layer)
     : [];
@@ -601,39 +569,13 @@ function collectTriangle(id, el) {
   puzzles?.flyIn(id, layer, tri.color);
 }
 
-controls.addEventListener("click", (e) => {
-  const btn = e.target.closest("button");
-  if (!btn) return;
-  ({
-    left: turnLeft,
-    right: turnRight,
-    up: lookUp,
-    down: lookDown,
-    action: primaryAction,
-  })[btn.dataset.act]?.();
-});
-
 window.addEventListener("keydown", (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
-  if (e.key.toLowerCase() === "m") {
-    e.preventDefault();
-    toggleMute();
-    return;
-  }
+  if (bodyHas("rewarding") || bodyHas("won")) return;
   const powerId = POWER_KEY[e.key.toLowerCase()];
   if (powerId) {
     e.preventDefault();
-    if (
-      bodyHas("rewarding") ||
-      qs(".pmod")
-    )
-      return;
-    if (puzzles?.isOpen()) return;
     powers.activatePower(powerId);
-    return;
-  }
-  if (puzzles?.isOpen()) {
-    if (e.key === " " || e.key === "Enter") e.preventDefault();
     return;
   }
   if (e.key === " " || e.key === "Enter") {
@@ -642,18 +584,17 @@ window.addEventListener("keydown", (e) => {
     return;
   }
   const map = {
-    ArrowLeft: turnLeft,
-    ArrowRight: turnRight,
-    ArrowUp: lookUp,
-    ArrowDown: lookDown,
+    ArrowLeft: 0,
+    ArrowRight: 1,
+    ArrowUp: 2,
+    ArrowDown: 3,
   };
-  if (map[e.key]) {
+  if (map[e.key] != null) {
     e.preventDefault();
-    map[e.key]();
+    if (!e.repeat) doTurn(map[e.key]);
   }
 });
 
 ensureRevealDefs();
 startLevel(0);
-powerState.perception.level = 1;
-powers.syncAll();
+showHelp();

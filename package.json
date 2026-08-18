@@ -3,11 +3,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node scripts/build.mjs",
-    "build:max": "node scripts/build.mjs --opt 2",
-    "size": "node scripts/build.mjs"
+    "build": "node scripts/build.mjs --opt 2 --passes 3",
+    "build:fast": "node scripts/build.mjs --opt 1",
+    "size": "node scripts/build.mjs --opt 2 --passes 3"
   },
   "devDependencies": {
+    "@gfx/zopfli": "^1.0.15",
     "clean-css": "^5.3.3",
     "roadroller": "^2.1.0",
     "terser": "^5.50.0"

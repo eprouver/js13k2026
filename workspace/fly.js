@@ -1,9 +1,9 @@
 
-const generatePathData = (x1, y1, x2, y2) => {
+const generatePathData = (x1, y1, x2, y2, crazy) => {
   const dx = x2 - x1;
   const dy = y2 - y1;
   const len = Math.hypot(dx, dy) || 80;
-  const j = len * 0.28;
+  const j = len * (crazy ?? OPTS.fly.crazy);
   const nx = -dy / len;
   const ny = dx / len;
   const side = Math.random() < 0.5 ? 1 : -1;
@@ -51,12 +51,20 @@ const flyOnPath = (fromEl, toEl, opts = {}) =>
     const x2 = b.left + b.width / 2;
     const y2 = b.top + b.height / 2;
     const ms = opts.ms ?? (node ? OPTS.fly.trophyMs : OPTS.fly.ms);
+    const crazy = opts.crazy ?? (node ? OPTS.fly.trophyCrazy : OPTS.fly.crazy);
     const delay = opts.delay ?? 0;
 
     const mover = div({
       className: node ? "fly flyn" : "fly",
     });
-    mover.style.offsetPath = `path("${generatePathData(x1, y1, x2, y2)}")`;
+    if (node) {
+      const nr = node.getBoundingClientRect();
+      const size = Math.max(nr.width, nr.height, 8);
+      mover.style.width = `${size}px`;
+      mover.style.height = `${size}px`;
+    }
+    mover.style.offsetPath = `path("${generatePathData(x1, y1, x2, y2, crazy)}")`;
+    mover.style.offsetPosition = "0 0";
     mover.style.offsetDistance = "0%";
     mover.style.animationDuration = `${ms}ms`;
     mover.style.animationDelay = `${delay}ms`;
@@ -74,7 +82,10 @@ const flyOnPath = (fromEl, toEl, opts = {}) =>
       mover.style.setProperty("--fly", opts.fill || "gold");
       mover.style.width = `${size}px`;
       mover.style.height = `${size}px`;
-      if (fromEl) fromEl.style.visibility = "hidden";
+      if (fromEl) {
+        fromEl.style.visibility = "hidden";
+        clearHintMask(fromEl);
+      }
     }
 
     let done = false;
@@ -82,12 +93,16 @@ const flyOnPath = (fromEl, toEl, opts = {}) =>
       if (done) return;
       done = true;
       mover.remove();
-      if (!node) fromEl?.remove?.();
-      sfxLand();
+      if (!node) {
+        clearHintMask(fromEl);
+        fromEl?.remove?.();
+      }
+      (opts.sfx || sfxLand)();
       resolve();
     };
     mover.addEventListener("animationend", finish, { once: true });
     setTimeout(finish, delay + ms + 120);
+    if (!node) sfxLand();
     document.body.append(mover);
   });
 
@@ -111,3 +126,5 @@ const onceEndOrTimeout = (el, ms, onDone, filter) => {
 
 const flyThen = (fromEl, toEl, opts, onLand) =>
   flyOnPath(fromEl, toEl, opts).then(() => onLand?.());
+const flyIn = (from, to, opts, onLand) =>
+  flyThen(from, to, { fromOffscreen: true, ...opts }, onLand);

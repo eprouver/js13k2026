@@ -1,13 +1,5 @@
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-const mulberry32 = (a) => () => {
-  a |= 0;
-  a = (a + 0x6d2b79f5) | 0;
-  let t = Math.imul(a ^ (a >>> 15), 1 | a);
-  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-};
-
 const svgEl = (name, attrs = {}, ...kids) => {
   const e = document.createElementNS(SVG_NS, name);
   for (const k in attrs) e.setAttribute(k, attrs[k]);
@@ -15,18 +7,12 @@ const svgEl = (name, attrs = {}, ...kids) => {
   return e;
 };
 
-const ISO_PTS = "50,8 1.802,74.339 98.198,74.339";
-
-const isoTriSvg = (fill, opts = {}) => {
-  const { polyClass = "iso-tri", svgClass } = opts;
-  return svgEl(
-    "svg",
-    {
-      ...SVG100,
-      ...(svgClass ? { class: svgClass } : {}),
-    },
-    svgEl("polygon", { class: polyClass, points: ISO_PTS, fill })
-  );
+const mulberry32 = (a) => () => {
+  a |= 0;
+  a = (a + 0x6d2b79f5) | 0;
+  let t = Math.imul(a ^ (a >>> 15), 1 | a);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 };
 
 const buildMesh = (rand, n = 3) => {
@@ -72,40 +58,25 @@ const buildMesh = (rand, n = 3) => {
   return tris;
 };
 
-const createMeshData = (seed, opts = {}) => {
-  const tint = opts.color;
+const createMeshData = (seed) => {
   const rand = mulberry32(seed >>> 0);
-  const tris = buildMesh(rand, opts.cols || 3);
+  const tris = buildMesh(rand, 3);
   const svg = svgEl("svg", {
     ...SVG100,
     preserveAspectRatio: "none",
-    class: tint ? "wm pwm" : "wm",
+    class: "wm",
   });
-  svg.append(
-    svgEl("rect", {
-      width: 100,
-      height: 100,
-      fill: tint
-        ? colorHsl({ h: tint.h, s: tint.s, l: Math.max(8, tint.l * 0.35) })
-        : "#444",
-    })
-  );
+  const g = svgEl("g", { filter: "url(#sf)" });
+  g.append(svgEl("rect", { width: 100, height: 100, fill: "var(--wall-lo)" }));
   for (const [a, b, c] of tris) {
-    const g = 0x33 + ((rand() * 0x34) | 0);
-    const pts = [a, b, c].map(([x, y]) => `${x * 100},${y * 100}`).join(" ");
-    svg.append(
+    g.append(
       svgEl("polygon", {
-        points: pts,
-        fill: tint
-          ? colorHsl({
-              h: tint.h,
-              s: tint.s,
-              l: Math.max(18, Math.min(78, tint.l - 18 + ((g - 0x33) / 0x33) * 40)),
-            })
-          : `rgb(${g},${g},${g})`,
+        points: [a, b, c].map(([x, y]) => `${x * 100},${y * 100}`).join(" "),
+        fill: `color-mix(in srgb,var(--wall-lo) ${(rand() * 100) | 0}%,var(--wall-hi))`,
       })
     );
   }
+  svg.append(g);
   return { svg, tris };
 };
 
@@ -173,14 +144,10 @@ const createCollectLayer = (id, tri, color) => {
   return layer;
 };
 
-const paintWallMesh = (
-  face,
-  seed = (Math.random() * 0xffffffff) >>> 0,
-  opts = {}
-) => {
+const paintWall = (face, items = []) => {
+  const seed = (Math.random() * 0xffffffff) >>> 0;
   const { svg, tris } = createMeshData(seed);
   face.replaceChildren(svg);
-  const items = opts.collectibles || [];
   if (!items.length) return;
   const shapes = pickCollectTris(tris, seed, items.length);
   items.forEach((it, i) => face.append(createCollectLayer(it.id, shapes[i], it.color)));

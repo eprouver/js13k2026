@@ -7,40 +7,41 @@
 </head>
 <body>
 <script>
-function addCSSRulesToHead(cssRules) {
-  const styleElement = document.createElement('style');
-  styleElement.appendChild(document.createTextNode(cssRules));
-  document.head.appendChild(styleElement);
-}
-const css = `* {
+document.head.appendChild(document.createElement("style")).append(`*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  corner-shape: squircle;
 }
 
 :root {
-  --dist: 50vmin;
-  --gap: 10vmin;
-  --face: calc(2 * var(--dist) - var(--gap));
-  --radius: 32%;
+  --dist: 40vmin;
+  --face: calc(2 * var(--dist) - 10vmin);
+  --radius: 100%;
   --pill-radius: 2rem;
   --persp: 40vmin;
   --span: calc(2 * var(--dist));
-  --inset: 1px;
-  --inspect-zoom: 16vmin;
-  --bg: #0a0614;
+  --bg: #121621;
+  --wall-lo: #2c313d;
+  --wall-hi: #4f576d;
   --fg: #f8e8ff;
-  --ink: #1a0a2e;
-  --mute: #888;
-  --cam-ms: 550ms;
-  --walk-ms: 700ms;
+  --bow: repeating-linear-gradient(90deg,var(--c0),var(--c1),var(--c2),var(--c3),var(--c4),var(--c5),var(--c0) 50%);
   --ease: cubic-bezier(0.4, 0.05, 0.2, 1);
-  --ease2: var(--ease2);
   --side-orb: 7.25vmin;
   --orb-font: calc(var(--side-orb) * 0.3);
-  --orb-r: calc(var(--side-orb) * 3);
   --dim: grayscale(1) brightness(0.55);
+  --line: 0.2rem;
+  --bow-line: 0.6rem;
+}
+
+@supports not (corner-shape: squircle) {
+  :root {
+    --radius: 32%;
+  }
 }
 
 html,
@@ -53,63 +54,80 @@ body {
   color: var(--fg);
 }
 
-/* Repeated layout atoms — identical declarations pack well. */
-.z3 {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 0;
-  height: 0;
-  transform-style: preserve-3d;
+.pmc {
+  border-radius: var(--pill-radius);
+  corner-shape: round;
+  position: relative;
+  z-index: 1;
+  padding: 1.35rem 1.55rem;
+  background: #222;
+  animation: pmc-in 0.7s cubic-bezier(0.2, 1.4, 0.3, 1) both;
 }
 
-.ov {
+.ct,
+.ds,
+.ps,
+.ppk,
+.pl,
+.gem,
+.face {
+  border-radius: var(--radius);
+}
+
+#viewport,
+#camera,
+#istage,
+.cl,
+.wl {
+  position: absolute;
+  inset: 0;
+}
+
+body.rewarding::after,
+.pmod {
   position: fixed;
   inset: 0;
 }
 
-.abs {
+.face {
+  width: var(--face);
+  height: var(--face);
+  left: calc(var(--face) / -2);
+  top: calc(var(--face) / -2);
   position: absolute;
-  inset: 0;
+  overflow: hidden;
+  background: linear-gradient(var(--wall-lo), var(--wall-hi));
+  opacity: 1;
+  backface-visibility: visible;
 }
 
-@supports (corner-shape: squircle) {
-  *,
-  *::before,
-  *::after {
-    corner-shape: squircle;
-  }
-}
-
-/* Pills opt out of squircle (tabs, action, upgrade card). */
-#controls [data-act="action"],
-.ct,
-.pmc {
-  border-radius: var(--pill-radius);
-  corner-shape: round;
+.room,
+.wall,
+.face .wm,
+.face .cl,
+.face .wl,
+.face svg {
+  backface-visibility: hidden;
 }
 
 #viewport {
-  position: absolute;
-  inset: 0;
   perspective: var(--persp);
   overflow: hidden;
-  background: var(--bg, #0a0614);
+  background: var(--bg);
   pointer-events: auto;
   cursor: pointer;
+  touch-action: none;
+  outline: none;
 }
 
 #viewport.inspecting {
-  pointer-events: none;
   cursor: default;
 }
 
 #camera {
-  position: absolute;
-  inset: 0;
   transform-style: preserve-3d;
   transform: translateZ(0);
-  transition: transform var(--cam-ms) var(--ease);
+  transition: transform 550ms var(--ease);
 }
 
 #camera.na,
@@ -118,7 +136,7 @@ body {
 }
 
 #viewport.inspecting #camera {
-  transform: translateZ(var(--inspect-zoom));
+  transform: translateZ(16vmin);
 }
 
 #pivot,
@@ -140,17 +158,12 @@ body {
 }
 
 #world {
-  transition: transform var(--walk-ms) var(--ease);
-}
-
-.room,
-.wall {
-  backface-visibility: hidden;
+  transition: transform 700ms var(--ease);
 }
 
 .wall {
   transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))
-    translateZ(calc(-1 * var(--dist) + var(--inset)));
+    translateZ(calc(-1 * var(--dist) + 1px));
 }
 .wall.face-n { --ry: 0deg; }
 .wall.face-s { --ry: 180deg; }
@@ -159,42 +172,34 @@ body {
 .wall.face-u { --rx: 90deg; }
 .wall.face-d { --rx: -90deg; }
 
-.face {
-  position: absolute;
-  width: var(--face);
-  height: var(--face);
-  left: calc(var(--face) / -2);
-  top: calc(var(--face) / -2);
-  backface-visibility: hidden;
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: #1a1a1a;
-  transform-origin: 50% 50%;
-  transition: scale 0.55s var(--ease);
+body.rewarding::after,
+.ds::before,
+.pmc::before,
+.pmc::after,
+.wall:has(.it)::before {
+  content: "";
 }
 
-.face .wm,
-.face .cl,
-.face svg {
-  backface-visibility: hidden;
-}
-
-#viewport.lx .face,
-#viewport.le .face {
-  scale: 0 0;
+#viewport.lx .face {
+  opacity: 0;
+  transition: opacity 0.55s var(--ease);
 }
 
 #viewport.le .face {
+  opacity: 0;
   transition: none;
 }
 
 #viewport.le.li .face {
-  transition: scale 0.65s var(--ease2);
+  opacity: 1;
+  transition: opacity 0.65s var(--ease);
 }
 
 .face .wm,
 .cl svg,
-.tpw svg {
+.wl svg,
+.tpw svg,
+#uni svg {
   display: block;
   width: 100%;
   height: 100%;
@@ -202,111 +207,63 @@ body {
 
 .face .wm {
   pointer-events: none;
+  transition: filter 0.45s var(--ease);
+}
+.face.it .wm {
+  filter: grayscale(1);
 }
 
 .cl {
-  position: absolute;
-  inset: 0;
   z-index: 2;
   opacity: 0;
   pointer-events: none;
 }
 
-.cl svg {
+.cl svg,
+.wl svg,
+#uni svg {
   overflow: visible;
-  pointer-events: none;
 }
 
 #viewport.inspecting .face.it .cl,
-.face.it .cl.hiding,
-.cl.prv {
+.face.it .cl.hiding {
   opacity: 1;
 }
 
-.cl.prv .ctri {
-  opacity: 0;
+.wl {
+  z-index: 1;
+  pointer-events: none;
 }
 
-.face.it .cl.hot .ctri,
-.face.it .ctri.hot {
-  filter: brightness(1.25);
+#viewport.inspecting .face.it .wl {
+  visibility: hidden;
+}
+
+.wr {
+  animation: wash-fade linear forwards;
+}
+
+@keyframes wash-fade {
+  to {
+    opacity: 0;
+  }
 }
 
 #istage {
-  position: absolute;
-  inset: 0;
   z-index: 5;
   pointer-events: none;
 }
 
-#istage[hidden] {
-  display: none !important;
-}
-
-
-
 #istage .ihit {
   position: absolute;
-  margin: 0;
-  padding: 0;
   border: none;
   background: transparent;
   cursor: pointer;
   pointer-events: auto;
-  touch-action: manipulation;
 }
 
-#controls {
-  position: absolute;
-  bottom: 4.25rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  display: grid;
-  grid-template-columns: repeat(3, 3.2rem);
-  grid-template-rows: 3.2rem 3.2rem 2.35rem;
-  gap: 0.45rem;
-  transition: opacity 0.25s ease;
-  pointer-events: none;
-}
-
-#controls button {
-  pointer-events: auto;
-  font: inherit;
-  border: none;
-  border-radius: var(--orb-r);
-  cursor: pointer;
-  color: var(--ink);
-  font-size: 1.25rem;
-  background: var(--mute);
-}
-
-body.rewarding #controls {
-  opacity: 0;
-  pointer-events: none;
-}
-
-#controls button:hover:not(:disabled):not([data-act="action"]) {
-  background: #ff6ec7;
-  color: #fff;
-}
-
-#controls button:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-
-#controls [data-act="left"] { grid-area: 2 / 1; }
-#controls [data-act="up"] { grid-area: 1 / 2; }
-#controls [data-act="down"] { grid-area: 2 / 2; }
-#controls [data-act="right"] { grid-area: 2 / 3; }
-#controls [data-act="action"] {
-  grid-area: 3 / 1 / 4 / 4;
-  font-size: 0.95rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  background: var(--mute);
-  color: var(--ink);
+body.rewarding::after {
+  z-index: 80;
 }
 
 #proot {
@@ -320,8 +277,6 @@ body.rewarding #controls {
   pointer-events: none;
 }
 
-
-
 #ctabs {
   position: relative;
   display: flex;
@@ -331,41 +286,84 @@ body.rewarding #controls {
   pointer-events: none;
 }
 
+.cth {
+  flex: 0 0 auto;
+}
+
 .ct {
   pointer-events: auto;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0;
-  padding: 0.55rem 0.85rem 0.65rem;
+  padding: calc(var(--line) * 2 + 0.4rem);
   border: none;
   font-size: 1rem;
   cursor: default;
-  background: var(--tab-dark, #2a2a32);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tab, #888) 45%, transparent);
+  overflow: hidden;
+  --sh: inset 0 0 0 var(--line) color-mix(in srgb, var(--tab) 45%, transparent);
+  background: var(--tab-dark);
+  box-shadow: var(--sh);
+  transition: 0.8s var(--ease);
 }
 
 .ct.ready {
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--tab, #888) 45%, transparent),
-    0 0 0 2px var(--tab, #f90);
+  box-shadow: var(--sh), 0 0 0 var(--line) var(--tab);
+}
+
+.ct.sealing {
+  z-index: 121;
+  min-width: 0;
+  padding: 0;
+  border-radius: 0.35rem;
+  background: var(--tab);
+  box-shadow: 0 0 1.2rem var(--tab);
+  animation: tab-seal 0.8s var(--ease) both;
+}
+
+.ct.sealing .tps {
+  opacity: 0;
+  transform: scale(0.15);
+}
+
+.ct.sealed {
+  width: 0;
+  min-width: 0;
+  height: 0;
+  padding: 0;
+  opacity: 0;
+  box-shadow: none;
+}
+
+@keyframes tab-seal {
+  0% { filter: brightness(1); }
+  28% { filter: brightness(1.7); }
+  100% { filter: brightness(1.15); }
 }
 
 .tps {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
+  position: relative;
+  width: 1.85rem;
+  height: 1.85rem;
+  transition: opacity 0.4s ease, transform 0.7s var(--ease);
 }
 
 .tpw {
-  width: 1.15rem;
-  height: 1.15rem;
-  flex: 0 0 auto;
+  position: absolute;
+  inset: 0;
 }
 
-.wm polygon {
-  stroke: none;
+.tpw:nth-child(1) {
+  transform: translateY(-2px) rotate(180deg);
+}
+.tpw:nth-child(2) {
+  transform: translateX(2px) rotate(-90deg);
+}
+.tpw:nth-child(3) {
+  transform: translateY(2px);
+}
+.tpw:nth-child(4) {
+  transform: translateX(-2px) rotate(90deg);
 }
 
 .fly {
@@ -377,14 +375,14 @@ body.rewarding #controls {
   offset-anchor: center;
   offset-rotate: 0deg;
   offset-distance: 0%;
-  background: var(--fly, gold);
+  --spin: 1turn;
+  background: var(--fly);
   clip-path: polygon(50% 8%, 0% 100%, 100% 100%);
   animation: path-fly linear forwards;
 }
 
 .flyn {
-  width: 1px;
-  height: 1px;
+  --spin: 0deg;
   background: none;
   clip-path: none;
 }
@@ -403,7 +401,7 @@ body.rewarding #controls {
 }
 
 @keyframes path-fly {
-  to { offset-distance: 100%; }
+  to { offset-distance: 100%; offset-rotate: var(--spin); }
 }
 
 #drk,
@@ -422,21 +420,72 @@ body.rewarding #controls {
 #drk { left: 0.35rem; }
 #prk { right: 0.35rem; }
 
+body.won #drk { z-index: 85; }
+body.won #prk { display: none; }
+
+#uni {
+  position: absolute;
+  right: -3vmin;
+  bottom: -5vmin;
+  width: 25vmin;
+  height: 25vmin;
+  z-index: 210;
+  pointer-events: none;
+  overflow: visible;
+  filter: brightness(0.65) drop-shadow(0 0 0 #fff);
+  transition: filter 0.35s ease;
+}
+#uni svg {
+  transform: scaleX(-1);
+  transform-origin: 50% 80%;
+}
+#uni.go,
+body.won #uni {
+  filter: brightness(1) drop-shadow(0 0 0 #fff);
+}
+#uni.go {
+  animation: uni-gallop 0.5s ease;
+}
+body.won #uni {
+  animation: uni-gallop 0.74s ease infinite;
+}
+@keyframes uni-gallop {
+  45% {
+    transform: rotate(-14deg) translate(-16%, -8%) scale(1.25);
+  }
+}
+
 .ds,
-.ps {
+.ps,
+.ppk {
   width: var(--side-orb);
   height: var(--side-orb);
   font-size: var(--orb-font);
   display: grid;
   place-items: center;
-  border-radius: var(--orb-r);
-  background: var(--orb-base, #333);
-  box-shadow: inset 0 0 0 0.11em var(--orb-ring, transparent);
+  background: var(--orb-base);
+  box-shadow: inset 0 0 0 var(--line) var(--orb-ring);
 }
-
 .ds {
-  --orb-base: var(--slot-dark, #2a2a32);
-  --orb-ring: color-mix(in srgb, var(--slot, #888) 50%, transparent);
+  position: relative;
+  overflow: visible;
+  --orb-base: var(--slot-dark);
+  --orb-ring: color-mix(in srgb, var(--slot) 50%, transparent);
+}
+.ds::before {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0;
+  background: var(--slot);
+  border-radius: 0;
+  transition: width 0.8s var(--ease) var(--d, 0s);
+  pointer-events: none;
+}
+body.won .ds::before {
+  left: -0.35rem;
+  width: 100vw;
 }
 
 .ds:not(:has(.cube)) {
@@ -445,6 +494,7 @@ body.rewarding #controls {
 
 .ds .cube {
   font-size: 1.2vmin;
+  z-index: 1;
 }
 
 .cube {
@@ -453,7 +503,7 @@ body.rewarding #controls {
   height: 1px;
   perspective: 8000px;
   transform-style: preserve-3d;
-  animation: cube-spin 12.3s linear infinite;
+  animation: cube-spin 7.7s linear infinite;
 }
 
 .cf {
@@ -462,6 +512,9 @@ body.rewarding #controls {
   left: 50%;
   transform-style: preserve-3d;
   backface-visibility: visible;
+  width: 2em;
+  height: 2em;
+  margin: -1em 0 0 -1em;
   opacity: 0.7;
   transition: background 0.45s ease, opacity 0.45s ease;
 }
@@ -480,33 +533,45 @@ body.rewarding #controls {
 
 #win {
   position: fixed;
-  inset: 0;
-  z-index: 9999;
-  display: grid;
-  place-items: center;
-  background: rgba(8, 4, 18, 0.78);
-  color: var(--fg);
-  font-size: clamp(2.5rem, 12vmin, 6rem);
-  letter-spacing: 0.06em;
+  left: 50%;
+  top: 50%;
+  z-index: 100;
+  width: min(92vw, 80vmin);
+  transform: translate(-50%, -50%) rotate(-16deg);
   pointer-events: none;
+  text-align: center;
+  font-weight: 700;
+  font-size: 16vmin;
+  color: #fff;
+  -webkit-text-stroke: .025em #000;
 }
 
-.ps {
+.ps,
+.ppk {
   pointer-events: auto;
   position: relative;
   border: none;
   cursor: pointer;
   color: #fff;
-  --orb-base: var(--pow-dark, #333);
-  --orb-ring: var(--pow, #888);
+  --orb-base: var(--pow-dark);
+  --orb-ring: var(--pow);
+}
+
+.ps {
   transition: transform 0.4s ease, filter 0.3s ease, opacity 0.3s ease;
 }
 
 .ps.locked,
-body.rewarding .ps {
+body.rewarding #prk .ps,
+.ppk.locked,
+.ppk:disabled {
   filter: var(--dim);
   opacity: 0.5;
   cursor: default;
+}
+
+.ps.locked,
+body.rewarding #prk .ps {
   pointer-events: none;
 }
 
@@ -538,36 +603,107 @@ body.rewarding .ps {
   bottom: -0.1em;
   min-width: 1.2em;
   padding: 0.1em 0.25em;
-  border-radius: var(--radius);
   font-size: 0.95em;
   background: #111;
-  box-shadow: 0 0 0 1px var(--pow, #888);
+  box-shadow: 0 0 0 var(--line) var(--pow);
 }
 
 .pmod {
-  position: fixed;
-  inset: 0;
-  z-index: 90;
+  z-index: 200;
   display: grid;
   place-items: center;
-  background: rgba(6, 4, 12, 0.55);
+  pointer-events: auto;
+  background: rgba(60, 60, 64, 0.82);
   opacity: 0;
-  transition: opacity 0.75s ease;
+  transition: opacity 0.45s ease;
 }
 
 .pmod.show {
   opacity: 1;
 }
 
-.pmc {
-  padding: 1.2rem 1.4rem;
-  background: var(--mute);
-  transform: translateY(0.6rem);
-  transition: transform 0.75s var(--ease2);
+.pmod.out {
+  opacity: 0;
 }
 
-.pmod.show .pmc {
-  transform: none;
+.pmc::before,
+.pmc::after {
+  border-radius: inherit;
+  corner-shape: round;
+}
+
+.pmc::after {
+  position: absolute;
+  inset: 0;
+  background: #222;
+  pointer-events: none;
+}
+
+.pmc::before,
+.wall:has(.it)::before {
+  position: absolute;
+  background: var(--bow) 0 / 200%;
+  animation: bow 8s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.pmc::before {
+  inset: calc(-1 * var(--bow-line));
+}
+
+.wall:has(.it)::before {
+  --bow-line: 1.5rem;
+  width: calc(var(--face) + 2 * var(--bow-line));
+  height: calc(var(--face) + 2 * var(--bow-line));
+  left: calc(var(--face) / -2 - var(--bow-line));
+  top: calc(var(--face) / -2 - var(--bow-line));
+  border-radius: var(--radius);
+}
+
+@keyframes bow {
+  to { background-position: 100%; }
+}
+
+.pmod.out .pmc {
+  animation: pmc-out 0.5s ease both;
+}
+
+@keyframes pmc-in {
+  0% {
+    transform: scale(0.45);
+    filter: brightness(2.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes pmc-out {
+  to {
+    transform: scale(1.35);
+    filter: brightness(2);
+    opacity: 0;
+  }
+}
+
+.pmc > * {
+  position: relative;
+  z-index: 1;
+}
+
+.pmc h2 {
+  margin: 0 0 0.45em;
+  font-size: 1.55rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.ph {
+  text-align: center;
+  font-size: 1.05rem;
+  line-height: 1.45;
+  white-space: pre-line;
 }
 
 .ppks {
@@ -577,79 +713,42 @@ body.rewarding .ps {
   gap: 0.7rem;
 }
 
-.ppk {
-  width: 4.6rem;
-  padding: 0.7rem 0.35rem 0.55rem;
-  border: none;
-  border-radius: var(--orb-r);
-  cursor: pointer;
-  color: #f5f0ff;
-  background: var(--pow-dark, #333);
-  box-shadow: inset 0 0 0 2px var(--pow, #888);
-  transition: transform 0.15s ease, filter 0.15s ease;
+.ppk.picked {
+  animation: ppk-pop 0.5s ease;
+  filter: brightness(1.7);
 }
 
-.ppk:hover:not(:disabled):not(.locked) {
-  transform: translateY(-3px);
-  filter: brightness(1.12);
+@keyframes ppk-pop {
+  35% {
+    transform: scale(1.4);
+    filter: brightness(2);
+  }
 }
-
-.ppk.locked,
-.ppk:disabled {
-  filter: var(--dim);
-  opacity: 0.5;
-  cursor: default;
-  transform: none;
-}
-
-.ppk-glyph {
-  font-size: 1.8rem;
-  font-weight: 700;
-  text-align: center;
-}
-
-.ppk-lvl {
-  margin-top: 0.2rem;
-  text-align: center;
-  font-size: 0.75rem;
-  opacity: 0.8;
-}
-`;
-addCSSRulesToHead(css);
-
+`);
 ;
 const OPTS = {
   time: {
     turnMs: 450,
     camMs: 550,
-    inspectOutMs: 550,
-    walkMs: 700,
     levelExitMs: 580,
-    levelEnterPadMs: 40,
     levelEnterMs: 700,
-    solveHoldMs: 1100,
+    solveHoldMs: 400,
+    sealMs: 800,
   },
   fly: {
     ms: 1100,
     trophyMs: 1400,
+    crazy: 0.55,
+    trophyCrazy: 0.9,
   },
   powers: {
-    perceptionBaseMs: 5e3,
-    perceptionPerLevelMs: 2500,
-    perceptionStaggerMs: 550,
-    huntCdL1Ms: 24e3,
-    huntCdPerStepMs: 4e3,
-    huntCdMinMs: 8e3,
-    washL1Pct: 120,
-    washShrinkPct: 28,
-    washMinPct: 32,
-    radianceFromLevel: 3,
-    radianceEveryN: 3,
-    upgradeSkipAfter: { perception: 0, extraction: 1, radiance: 2 },
-    radianceCdMs: 12e4,
-    solveCheckMs: 480,
+    rallyFromLevel: 3,
+    washFadeMs: 3e4,
+    cd: [24e3, 4e3, 5e3],
+    evokeCd: [48e3, 4e3, 16e3],
+    rallyCd: [12e4, 16e3, 28e3],
   },
-  reveal: { revealMs: 4e3, hideMs: 4e3, rMax: 80 },
+  reveal: { ms: 4e3, rMax: 80 },
   level: {
     perColor: 4,
     maxMazeSize: 4,
@@ -660,625 +759,116 @@ const OPTS = {
       { mazeSize: 4, colorCount: 4 },
     ],
   },
-  cube: { sideEm: 2, minLightness: 58 },
+  cube: { minLightness: 58 },
 };
-
-(() => {
-  const r = document.documentElement.style;
-  const t = OPTS.time;
-  r.setProperty("--cam-ms", t.camMs + "ms");
-  r.setProperty("--walk-ms", t.walkMs + "ms");
-})();
 
 ;
-// SFX engine only — ambient music lives in music.deferred.js (not in build)
-// ZzFXMicro - Zuper Zmall Zound Zynth - v1.3.2 by Frank Force
-let zzfxV = 0.3, // volume
-  zzfxX = new AudioContext(), // audio context
-  zzfx = // play sound
-  (
-    p = 1,
-    k = 0.05,
-    b = 220,
-    e = 0,
-    r = 0,
-    t = 0.1,
-    q = 0,
-    D = 1,
-    u = 0,
-    y = 0,
-    v = 0,
-    z = 0,
-    l = 0,
-    E = 0,
-    A = 0,
-    F = 0,
-    c = 0,
-    w = 1,
-    m = 0,
-    B = 0,
-    N = 0
-  ) => {
-    let M = Math,
-      d = 2 * M.PI,
-      R = 44100,
-      G = (u *= (500 * d) / R / R),
-      C = (b *= (1 - k + 2 * k * M.random((k = []))) * d) / R,
-      g = 0,
-      H = 0,
-      a = 0,
-      n = 1,
-      I = 0,
-      J = 0,
-      f = 0,
-      h = N < 0 ? -1 : 1,
-      x = (d * h * N * 2) / R,
-      L = M.cos(x),
-      Z = M.sin,
-      K = Z(x) / 4,
-      O = 1 + K,
-      X = (-2 * L) / O,
-      Y = (1 - K) / O,
-      P = (1 + h * L) / 2 / O,
-      Q = -(h + L) / O,
-      S = P,
-      T = 0,
-      U = 0,
-      V = 0,
-      W = 0;
-    e = R * e + 9;
-    m *= R;
-    r *= R;
-    t *= R;
-    c *= R;
-    y *= (500 * d) / R ** 3;
-    A *= d / R;
-    v *= d / R;
-    z *= R;
-    l = (R * l) | 0;
-    p *= zzfxV;
-    for (h = (e + m + r + t + c) | 0; a < h; k[a++] = f * p)
-      ++J % ((100 * F) | 0) ||
-        ((f = q
-          ? 1 < q
-            ? 2 < q
-              ? 3 < q
-                ? 4 < q
-                  ? ((g / d) % 1 < D / 2) * 2 - 1
-                  : Z(g ** 3)
-                : M.max(M.min(M.tan(g), 1), -1)
-              : 1 - (((2 * g) / d) % 2 + 2) % 2
-            : 1 - 4 * M.abs(M.round(g / d) - g / d)
-          : Z(g)),
-        (f =
-          (l ? 1 - B + B * Z((d * a) / l) : 1) *
-          (4 < q ? f : (f < 0 ? -1 : 1) * M.abs(f) ** D) *
-          (a < e
-            ? a / e
-            : a < e + m
-              ? 1 - ((a - e) / m) * (1 - w)
-              : a < e + m + r
-                ? w
-                : a < h - c
-                  ? ((h - a - c) / t) * w
-                  : 0)),
-        (f = c
-          ? f / 2 +
-            (c > a ? 0 : ((a < h - c ? 1 : (h - a) / c) * k[(a - c) | 0]) / 2 / p)
-          : f),
-        N
-          ? (f = W = S * T + Q * (T = U) + P * (U = f) - Y * V - X * (V = W))
-          : 0,
-        (x = (b += u += y) * M.cos(A * H++)),
-        (g += x + x * E * Z(a ** 5)),
-        n && ++n > z && ((b += v), (C += v), (n = 0)),
-        !l || ++I % l || ((b = C), (u = G), (n = n || 1)));
-    X = zzfxX;
-    p = X.createBuffer(1, h, R);
-    p.getChannelData(0).set(k);
-    b = X.createBufferSource();
-    b.buffer = p;
-    b.connect(X.destination);
-    b.start();
-  };
-
-
-// Only the scales we settled on
-const SCALES_RAW = {
-  lydian: { s: "-024679bcdfghjklmoqrtv", t: "-37cfjmqtx" },
-  whole: { s: "-024579bceghjlnqstvxz", t: "-047cgjosv" },
+const ac = new AudioContext();
+let beat = 600,
+  lift = 0;
+const musicWin = () => {
+  beat = 400;
+  lift = 7;
 };
 
-const SCALES = {};
-for (const k in SCALES_RAW) {
-  SCALES[k] = {
-    s: [...SCALES_RAW[k].s].map((c) => parseInt(c, 36) + 45),
-    t: [...SCALES_RAW[k].t].map((c) => parseInt(c, 36) + 45),
-  };
-}
-
-const NORMAL_SCALE = "lydian";
-const REWARD_SCALE = "whole";
-
-let audioCtx = null;
-let masterGain, masterReverb, crusher, bgBus, bellBus;
-
-let globalVolume = 1.5;
-let playing = false;
-let rewarding = false;
-let doubleTimeBells = true;
-
-let nextNoteTime = 0;
-let scheduledTime = 0;
-let step = 0;
-let beatInMeasure = 0;
-let tempo = 0.6;
-
-let scale = SCALES[NORMAL_SCALE].s;
-let triad = SCALES[NORMAL_SCALE].t;
-
-let centerIdx = 8;
-const startIdx = centerIdx;
-let currentMelodyMidi = 69;
-let phraseLength = 1;
-let maxPhrase = 8;
-let phraseStep = 0;
-let direction = -1;
-
-const initAudio = () => {
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-  masterGain = audioCtx.createGain();
-  masterGain.gain.value = globalVolume;
-  masterGain.connect(audioCtx.destination);
-
-  masterReverb = audioCtx.createConvolver();
-  const revLen = audioCtx.sampleRate * 1.25;
-  const revBuf = audioCtx.createBuffer(2, revLen, audioCtx.sampleRate);
-  for (let c = 0; c < 2; c++) {
-    const d = revBuf.getChannelData(c);
-    for (let i = 0; i < revLen; i++) {
-      d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / revLen, 3.5);
-    }
-  }
-  masterReverb.buffer = revBuf;
-
-  const reverbWet = audioCtx.createGain();
-  reverbWet.gain.value = 1.2;
-  reverbWet.connect(masterGain);
-  masterReverb.connect(reverbWet);
-
-  crusher = audioCtx.createScriptProcessor(4096, 1, 1);
-  crusher.onaudioprocess = (e) => {
-    const i = e.inputBuffer.getChannelData(0);
-    const o = e.outputBuffer.getChannelData(0);
-    for (let j = 0; j < i.length; j++) o[j] = Math.round(i[j] * 64) / 64;
-  };
-
-  bgBus = audioCtx.createGain();
-  bellBus = audioCtx.createGain();
-
-  bgBus.connect(crusher);
-  crusher.connect(masterGain);
-
-  bellBus.connect(masterReverb);
-  bellBus.connect(masterGain);
-};
-
-const setEnv = (g, t, peak, d) => {
-  g.gain.cancelScheduledValues(t);
-  g.gain.setValueAtTime(0, t);
-  g.gain.linearRampToValueAtTime(peak, t + 0.01);
-  g.gain.setValueAtTime(peak, t + 0.01);
-  g.gain.exponentialRampToValueAtTime(0.001, t + d - 0.02);
-  g.gain.linearRampToValueAtTime(0, t + d);
-};
-
-const playBigKick = (t) => {
-  const osc = audioCtx.createOscillator();
-  const env = audioCtx.createGain();
-
-  osc.frequency.setValueAtTime(210, t);
-  osc.frequency.exponentialRampToValueAtTime(45, t + 0.08);
-
-  env.gain.setValueAtTime(0, t);
-  env.gain.linearRampToValueAtTime(0.12, t + 0.01);
-  env.gain.linearRampToValueAtTime(0.001, t + 0.4);
-  env.gain.linearRampToValueAtTime(0, t + 0.45);
-
-  bgBus.gain.cancelScheduledValues(t);
-  bgBus.gain.setTargetAtTime(0.1, t, 0.005);
-  bgBus.gain.setTargetAtTime(1.0, t + 0.08, 0.06);
-
-  osc.connect(env).connect(masterGain);
-  osc.start(t);
-  osc.stop(t + 0.45);
-};
-
-const playSnare = (t) => {
-  const b = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.1, audioCtx.sampleRate);
-  const d = b.getChannelData(0);
-  for (let i = 0; i < d.length; i++) d[i] = Math.random();
-
-  const s = audioCtx.createBufferSource();
-  s.buffer = b;
-
-  const f = audioCtx.createBiquadFilter();
-  f.type = rewarding ? "bandpass" : "lowpass";
-  f.frequency.value = 650;
-
-  const e = audioCtx.createGain();
-  e.gain.setValueAtTime(0.4, t);
-  e.gain.setValueAtTime(0.7, t + 0.01);
-  e.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
-
-  s.connect(f).connect(e).connect(bellBus);
-  s.start(t);
-  s.stop(t + 0.21);
-};
-
-const playWoo = (t) => {
-  const osc = audioCtx.createOscillator();
-  const env = audioCtx.createGain();
-  osc.type = "triangle";
-  osc.frequency.setValueAtTime(150, t);
-  osc.frequency.exponentialRampToValueAtTime(400, t + 0.1);
-  setEnv(env, t, 0.8, 0.53);
-
-  [400, 800].forEach((f) => {
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = "bandpass";
-    filter.frequency.value = f;
-    filter.Q.value = 10;
-    osc.connect(filter).connect(env).connect(bellBus);
-  });
-  osc.start(t);
-  osc.stop(t + 0.2);
-};
-
-const playFMLead = (f, t, d) => {
-  const car = audioCtx.createOscillator();
-  const mod = audioCtx.createOscillator();
-  const mG = audioCtx.createGain();
-  const env = audioCtx.createGain();
-
-  car.type = "sawtooth";
-  mod.frequency.value = f * 1.5;
-  mG.gain.value = 1000;
-  setEnv(env, t, 0.09, d);
-
-  mod.connect(mG).connect(car.frequency);
-  car.connect(env).connect(bgBus);
-
-  [car, mod].forEach((o) => {
-    o.start(t);
-    o.stop(t + d + 0.05);
-  });
-};
-
-const playGlistenArp = (f, t, d) => {
-  if (!f) return;
-  const osc = audioCtx.createOscillator();
-  const env = audioCtx.createGain();
-  osc.type = "triangle";
-  osc.frequency.setValueAtTime(f, t);
-  setEnv(env, t, 0.15, d);
-  osc.connect(env).connect(bgBus);
-  osc.start(t);
-  osc.stop(t + d);
-};
-
-/** Rhodes voice (chosen instrument) */
-const playBell = (freq, t, duration, isMelody) => {
-  if (!freq) return;
-
-  freq *= rewarding ? 1.3 : 0.65;
-  const strikes = isMelody
-    ? [
-        {
-          fRatio: 0.84375,
-          tOffset: 0,
-          dur: duration * 1.5,
-          volMult: rewarding ? 0 : 0.375 * (130 / freq),
-        },
-      ]
-    : [{ fRatio: 1.5, tOffset: 0, dur: duration, volMult: 0.3 }];
-
-  strikes.forEach((strike) => {
-    const sTime = t + strike.tOffset;
-    const sFreq = freq * strike.fRatio;
-    const carrier = audioCtx.createOscillator();
-    const modulator = audioCtx.createOscillator();
-    const mainEnv = audioCtx.createGain();
-    const modIndex = audioCtx.createGain();
-
-    carrier.type = "sine";
-    carrier.frequency.setValueAtTime(sFreq, sTime);
-    modulator.type = "sawtooth";
-    modulator.frequency.setValueAtTime(sFreq * 14, sTime);
-
-    const peakBrightness = (isMelody ? 1800 : 800) * strike.volMult;
-    modIndex.gain.setValueAtTime(0, sTime);
-    modIndex.gain.linearRampToValueAtTime(peakBrightness, sTime + 0.005);
-    modIndex.gain.exponentialRampToValueAtTime(0.01, sTime + 0.15);
-
-    const peakVol = (isMelody ? 0.4 : 0.2) * strike.volMult;
-    mainEnv.gain.setValueAtTime(0, sTime);
-    mainEnv.gain.linearRampToValueAtTime(peakVol, sTime + 0.01);
-    mainEnv.gain.exponentialRampToValueAtTime(0.001, sTime + strike.dur);
-
-    modulator.connect(modIndex).connect(carrier.frequency);
-    carrier.connect(mainEnv).connect(bellBus);
-
-    [carrier, modulator].forEach((o) => {
-      o.start(sTime);
-      o.stop(sTime + strike.dur + 0.1);
-    });
-  });
-};
-
-const mToF = (midi) => 440 * Math.pow(2, (midi - 69) / 12);
-
-const getTVoice = (melodyMidi, position) => {
-  const superior = triad.filter((n) => n >= melodyMidi);
-  const inferior = triad.filter((n) => n <= melodyMidi).reverse();
-
-  if (position > 0) {
-    const target = superior[position - 1];
-    return target !== undefined ? target : triad[triad.length - 1];
-  }
-  if (position < 0) {
-    const target = inferior[Math.abs(position) - 1];
-    return target !== undefined ? target : triad[0];
-  }
-  return melodyMidi;
-};
-
-const playHook = (t) => {
-  let arp = [
-    [1, 0.55, 0.1],
-    [14, 0.7, 0.15],
-    [7, 0.7, 0.2],
-    [9, 0.88, 0.02],
-    [11, 0.94, 0.02],
-  ];
-
-  if (rewarding) {
-    arp = arp.concat([
-      [13, 1.0, 0.02],
-      [8, 1.15, 0.2],
-      [21, 1.3, 0.3],
-      [14, 1.3, 0.4],
-    ]);
-  }
-
-  arp.forEach(([offset, timeDelay, decay]) => {
-    playGlistenArp(mToF(scale[centerIdx] + offset), t + timeDelay, decay);
-  });
-};
-
-function scheduler() {
-  while (nextNoteTime < audioCtx.currentTime + 0.1) {
-    const sMod8 = step % 8;
-    const tNote = getTVoice(currentMelodyMidi, Math.random() > 0.5 ? 1 : -1);
-
-    if (Math.random() > 0.95 && !rewarding) {
-      doubleTimeBells = !doubleTimeBells;
-    }
-
-    if (scheduledTime > 3) {
-      if (sMod8 === 0 || sMod8 === 4) playBigKick(nextNoteTime);
-      if (sMod8 === 2 || sMod8 === 6) {
-        playSnare(nextNoteTime);
-      } else if (Math.random() > 0.75 || rewarding) {
-        for (let j = 0; j < 2; j++) {
-          playGlistenArp(mToF(tNote), nextNoteTime + j * (tempo / 4), 0.06);
-        }
-      }
-      if (step % 16 === 7) playWoo(nextNoteTime);
-
-      if (step % 4 === 0) {
-        playFMLead(rewarding ? mToF(65) : mToF(45), nextNoteTime, 0.4);
-        if (!rewarding) {
-          for (let i = 0; i < 2; i++) {
-            setTimeout(() => {
-              zzfx(
-                globalVolume * 0.4,
-                0,
-                90,
-                0,
-                0.09,
-                0.1,
-                1,
-                0.63,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0.02,
-                0.5,
-                0.04,
-                0,
-                -165
-              );
-            }, 30 + i * 380);
-          }
-        }
-      }
-
-      if (phraseStep > phraseLength) {
-        phraseStep = 0;
-
-        if (direction === -1) {
-          direction = 1;
-        } else {
-          direction = Math.random() > 0.5 ? 1 : -1;
-          phraseLength = (phraseLength % maxPhrase) + 1;
-          scale = SCALES[NORMAL_SCALE].s;
-          triad = SCALES[NORMAL_SCALE].t;
-          maxPhrase = 8;
-          tempo = 0.6;
-          centerIdx = startIdx;
-          doubleTimeBells = false;
-          playHook(nextNoteTime);
-          rewarding = false;
-        }
-      }
-    }
-
-    if (beatInMeasure === 0) {
-      scheduledTime++;
-      const offset = phraseLength - phraseStep;
-      let safeIndex;
-
-      phraseStep++;
-
-      if (phraseStep === 1 && direction === -1 && !rewarding) {
-        safeIndex = startIdx;
-      } else {
-        safeIndex = Math.min(
-          scale.length - 1,
-          Math.max(0, centerIdx + offset * direction)
-        );
-      }
-
-      currentMelodyMidi = scale[safeIndex];
-
-      playBell(mToF(getTVoice(currentMelodyMidi, -1)), nextNoteTime, 2.5, false);
-
-      if (doubleTimeBells) {
-        playBell(
-          mToF(getTVoice(currentMelodyMidi, 1)),
-          nextNoteTime + tempo / 2,
-          1.2,
-          false
-        );
-      }
-    } else if (beatInMeasure === 1) {
-      playBell(mToF(currentMelodyMidi), nextNoteTime, 1.0, true);
-
-      if (doubleTimeBells) {
-        playBell(
-          mToF(getTVoice(currentMelodyMidi, Math.random() > 0.5 ? -1 : 2)),
-          nextNoteTime + tempo / 2,
-          0.6,
-          false
-        );
-      }
-    } else if ((beatInMeasure === 2 && Math.random() > 0.5) || rewarding) {
-      playBell(mToF(getTVoice(currentMelodyMidi, 1)), nextNoteTime, 2.0, false);
-
-      if (doubleTimeBells) {
-        playBell(
-          mToF(currentMelodyMidi + 12),
-          nextNoteTime + tempo / 2,
-          0.8,
-          true
-        );
-      }
-    } else if ((beatInMeasure === 3 && Math.random() > 0.5) || rewarding) {
-      playBell(
-        mToF(getTVoice(currentMelodyMidi, Math.random() > 0.5 ? 0 : 2)),
-        nextNoteTime,
-        0.6,
-        false
-      );
-
-      if (doubleTimeBells) {
-        playBell(
-          mToF(getTVoice(currentMelodyMidi, -1)),
-          nextNoteTime + tempo / 2,
-          0.4,
-          false
-        );
-      }
-    }
-
-    beatInMeasure = (beatInMeasure + 1) % 4;
-    step++;
-    nextNoteTime += tempo;
-  }
-  if (playing) requestAnimationFrame(scheduler);
-}
-
-/** Start ambient music (must be from a user gesture). */
 function startMusic() {
-  if (musicMuted) return;
-  if (playing) {
-    if (audioCtx?.state === "suspended") audioCtx.resume();
-    if (zzfxX.state === "suspended") zzfxX.resume();
-    return;
+  const X = ac;
+  if (X.state === "suspended") return X.resume().then(startMusic);
+  if (startMusic._on) return;
+  startMusic._on = 1;
+  const R = X.sampleRate,
+    n = (R * 2.5) | 0,
+    buf = X.createBuffer(2, n, R);
+  for (let c = 0; c < 2; c++) {
+    const d = buf.getChannelData(c);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n) ** 2.5;
   }
-  playing = true;
-  if (!audioCtx) initAudio();
-  else if (audioCtx.state === "suspended") audioCtx.resume();
-  if (zzfxX.state === "suspended") zzfxX.resume();
-  nextNoteTime = audioCtx.currentTime;
-  scheduler();
-}
-
-function stopMusic() {
-  playing = false;
-}
-
-let musicMuted = false; // M toggles; playback waits for the first gesture
-
-function toggleMute() {
-  musicMuted = !musicMuted;
-  if (musicMuted) {
-    stopMusic();
-    if (audioCtx?.state === "running") audioCtx.suspend();
-  } else {
-    startMusic();
-  }
-  return musicMuted;
+  const conv = X.createConvolver();
+  conv.buffer = buf;
+  const wet = X.createGain();
+  wet.gain.value = 0.4;
+  conv.connect(wet).connect(X.destination);
+  const bassOsc = X.createOscillator(),
+    bassGain = X.createGain(),
+    melOsc = X.createOscillator(),
+    melGain = X.createGain();
+  bassOsc.type = "triangle";
+  melOsc.type = "sine";
+  bassGain.gain.value = melGain.gain.value = 0;
+  bassOsc.connect(bassGain).connect(X.destination);
+  bassGain.connect(conv);
+  melOsc.connect(melGain).connect(X.destination);
+  melGain.connect(conv);
+  bassOsc.start();
+  melOsc.start();
+  const roots = [40, 43, 47, 50];
+  const phrases = [
+    "7x7x7x7x7x7x7x7x",
+    "axaxaxax9x9xaxax",
+    "bxbxbxbxbxbxbxbx",
+    "cxcxcxcxcxcxcxcx",
+  ];
+  let step = 0;
+  const midi = (m) => 440 * 2 ** ((m - 69) / 12);
+  const tick = () => {
+    const t = X.currentTime;
+    const ci = ((step / 16) | 0) % 4,
+      s = step++ % 16;
+    let bn = roots[ci] + lift;
+    const p = s % 4;
+    if (p & 1) bn += 7;
+    if (p === 2) bn += 12;
+    bassGain.gain.cancelScheduledValues(t);
+    bassGain.gain.setValueAtTime(0.06, t);
+    bassGain.gain.exponentialRampToValueAtTime(1e-4, t + 1);
+    bassOsc.frequency.setValueAtTime(midi(bn - 12), t);
+    const ch = phrases[ci][s];
+    if (ch !== "x") {
+      melGain.gain.cancelScheduledValues(t);
+      melGain.gain.setValueAtTime(0.05, t);
+      melGain.gain.exponentialRampToValueAtTime(1e-4, t + 1.6);
+      melOsc.frequency.setValueAtTime(midi(52 + parseInt(ch, 16) + lift), t);
+    }
+    setTimeout(tick, beat);
+  };
+  tick();
 }
 
 const armMusicStart = () => {
   const go = () => {
     window.removeEventListener("pointerdown", go, true);
     window.removeEventListener("keydown", go, true);
-    if (zzfxX.state === "suspended") zzfxX.resume();
-    if (!musicMuted) startMusic();
+    startMusic();
   };
   window.addEventListener("pointerdown", go, true);
   window.addEventListener("keydown", go, true);
 };
 armMusicStart();
 
-function triggerReward() {
-  if (musicMuted) return;
-  if (!playing) startMusic();
-
-  doubleTimeBells = false;
-
-  if (!rewarding) {
-    scale = SCALES[REWARD_SCALE].s;
-    triad = SCALES[REWARD_SCALE].t;
-    beatInMeasure = 0;
-    centerIdx = 12;
-    tempo = 0.15;
-    direction = -1;
-  } else {
-    beatInMeasure = ~~(Math.random() * 3);
-    direction = -direction;
-    centerIdx = 8 + ~~(Math.random() * 8);
-  }
-
-  phraseStep = 0;
-  maxPhrase = 6 + beatInMeasure;
-  phraseLength = 6 + beatInMeasure;
-  rewarding = true;
-}
-
 ;
-/** Only path-landing sting — all other SFX removed. */
-const sfxLand = () =>
-  zzfx(1, 0, 492, 0.03, 0.06, 0.09, 0, 1.1, -2, 88, 152, 0.09, 0, 0, 0, 0, 0, 0.55, 0.03);
+const beep = (f, d, ty = "sine", v = 0.12, wait = 0, to) => {
+  ac.state === "suspended" && ac.resume();
+  const t = ac.currentTime + wait;
+  const o = ac.createOscillator();
+  const g = ac.createGain();
+  o.type = ty;
+  o.frequency.setValueAtTime(f, t);
+  to && o.frequency.exponentialRampToValueAtTime(to, t + d);
+  g.gain.setValueAtTime(v, t);
+  g.gain.exponentialRampToValueAtTime(1e-4, t + d);
+  o.connect(g).connect(ac.destination);
+  o.start(t);
+  o.stop(t + d);
+};
+const sfxLand = () => (
+  beep(1600, 0.02, "sine", 0.1),
+  beep(620, 0.055, "sine", 0.05, 0, 220)
+);
+const sfxPick = () => beep(880, 0.07, "square", 0.07);
+const sfxReward = (m = 1, v = 0.1) => (
+  beep(523 * m, 0.16, "triangle", v),
+  beep(784 * m, 0.28, "triangle", v, 0.12)
+);
 
 ;
 const v = new Proxy(
@@ -1315,16 +905,49 @@ const off = (el, ...c) => el && el.classList.remove(...c);
 const tog = (el, c, v) => el && el.classList.toggle(c, v);
 const bodyOn = (...c) => on(document.body, ...c);
 const bodyOff = (...c) => off(document.body, ...c);
-const has = (el, c) => !!el?.classList.contains(c);
-const bodyHas = (c) => has(document.body, c);
+const bodyHas = (c) => document.body.classList.contains(c);
+const showModal = (kids, ding) => {
+  if (bodyHas("won")) return qs(".pmod");
+  const card = div(
+    { className: "pmc" },
+    ...(typeof kids === "string" ? [div({ className: "ph" }, kids)] : [].concat(kids))
+  );
+  let modal = qs(".pmod");
+  if (modal) {
+    off(modal, "out");
+    modal.replaceChildren(card);
+  } else {
+    modal = div({ className: "pmod" }, card);
+    bodyOn("rewarding");
+    document.body.append(modal);
+    void modal.offsetWidth;
+    on(modal, "show");
+  }
+  ding && sfxReward(ding);
+  return modal;
+};
 const px = (n) => n + "px";
+const easeOut3 = (t) => 1 - (1 - t) ** 3;
+const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
+const runTween = (ms, { onTick, onDone, setRaf, ease = easeOut3 }) => {
+  const start = performance.now();
+  const tick = (now) => {
+    const t = Math.min(1, (now - start) / ms);
+    onTick(ease(t), t);
+    if (t < 1) setRaf(requestAnimationFrame(tick));
+    else {
+      setRaf(null);
+      onDone?.();
+    }
+  };
+  setRaf(requestAnimationFrame(tick));
+};
 const box = (el, o) => {
   if (!el) return;
   if (o.w != null) el.style.width = px(o.w);
   if (o.h != null) el.style.height = px(o.h);
   if (o.x != null) el.style.left = px(o.x);
   if (o.y != null) el.style.top = px(o.y);
-  if (o.z != null) el.style.zIndex = o.z;
 };
 const SVG100 = {
   viewBox: "0 0 100 100",
@@ -1333,20 +956,38 @@ const SVG100 = {
 };
 
 const inspectFace = () => qs(".face.it");
-const faceLayers = (face) => (face ? qsa(".cl", face) : []);
+const faceLayers = (face) =>
+  face
+    ? qsa(".cl", face).filter((l) => l.style.visibility !== "hidden")
+    : [];
 const layerById = (id) => qs(`.cl[data-id="${id}"]`);
 
 ;
 const RAINBOW = [
-  { name: "Red", h: 0, s: 80, l: 55 },
-  { name: "Orange", h: 28, s: 85, l: 52 },
-  { name: "Yellow", h: 52, s: 85, l: 55 },
-  { name: "Green", h: 112, s: 75, l: 48 },
-  { name: "Blue", h: 224, s: 80, l: 55 },
-  { name: "Purple", h: 280, s: 70, l: 55 },
+  { h: 3, s: 100, l: 61 },
+  { h: 28, s: 100, l: 55 },
+  { h: 52, s: 100, l: 50 },
+  { h: 127, s: 63, l: 49 },
+  { h: 208, s: 100, l: 43 },
+  { h: 292, s: 88, l: 42 },
 ];
 
 const colorHsl = ({ h, s, l }) => `hsl(${h} ${s}% ${l}%)`;
+RAINBOW.forEach((c, i) => {
+  c.i = i;
+  document.documentElement.style.setProperty("--c" + i, colorHsl(c));
+});
+
+const applyLevelMood = (i) => {
+  const n = RAINBOW.length;
+  const a = RAINBOW[i % n].h;
+  const b = RAINBOW[(i + 1) % n].h;
+  const h = (a + ((b - a + 360) % 360) * (0.35 + Math.random() * 0.3)) % 360;
+  const st = document.documentElement.style;
+  st.setProperty("--bg", colorHsl({ h, s: 14, l: 10 }));
+  st.setProperty("--wall-lo", colorHsl({ h, s: 8, l: 21 }));
+  st.setProperty("--wall-hi", colorHsl({ h, s: 8, l: 37 }));
+};
 
 const colorPair = (c) => ({ ...c, l: 33 });
 
@@ -1355,27 +996,29 @@ const toneStyle = (prefix, color, dark = colorPair(color)) => ({
   [`--${prefix}-dark`]: colorHsl(dark),
 });
 
-const toRainbow = (c) => {
-  let best = RAINBOW[0];
-  let bestD = 1e9;
-  for (const r of RAINBOW) {
-    let d = Math.abs(c.h - r.h) % 360;
-    if (d > 180) d = 360 - d;
-    if (d < bestD) {
-      bestD = d;
-      best = r;
-    }
-  }
-  return best;
+const uniPink = "#f9a0e5";
+const uniCyan = "#7fdbff";
+const uniGold = "#ffdc00";
+
+const uni = div({ id: "uni" });
+uni.innerHTML = `<svg viewBox="0 0 128 128"><ellipse cx="55" cy="49" fill="${uniPink}" rx="24" ry="16" transform="rotate(-19 55 49)"/><path fill="#fff" d="m32 112 19-66 32 2 7 37-18 4 6 24z"/><path fill="${uniCyan}" d="M31 78c-5-2-6-13-2-24q9-19 18-17c5 2 6 13 2 24q-8 19-18 17z"/><path fill="#fff" d="m50 56 4-21 12 18zm20-4 11-17 3 21z"/><circle cx="60" cy="64" r="5" fill="#222"/><circle cx="80" cy="64" r="5" fill="#222"/><ellipse cx="79" cy="84" fill="#fde8f6" rx="11" ry="10"/><path fill="${uniGold}" d="m63 49 7-35 2 36z"/><ellipse cx="59" cy="63" fill="#fff" rx="1.4" ry="1.3"/><ellipse cx="78" cy="63" fill="#fff" rx="1.4" ry="1.3"/><ellipse cx="78" cy="82" fill="${uniPink}" rx="2.4" ry="2.6"/><ellipse cx="86" cy="82" fill="${uniPink}" rx="2.4" ry="2.6"/><g fill="none" stroke-linecap="round" stroke-width="21"><path stroke="${uniPink}" d="m38 62-12 59"/><path stroke="${uniCyan}" d="m33 86-12 60"/></g></svg>`;
+document.body.append(uni);
+const uniDone = () => off(uni, "go");
+const uniGo = () => {
+  off(uni, "go");
+  uni.removeEventListener("animationend", uniDone);
+  void uni.offsetWidth;
+  on(uni, "go");
+  uni.addEventListener("animationend", uniDone, { once: true });
 };
 
 ;
 
-const generatePathData = (x1, y1, x2, y2) => {
+const generatePathData = (x1, y1, x2, y2, crazy) => {
   const dx = x2 - x1;
   const dy = y2 - y1;
   const len = Math.hypot(dx, dy) || 80;
-  const j = len * 0.28;
+  const j = len * (crazy ?? OPTS.fly.crazy);
   const nx = -dy / len;
   const ny = dx / len;
   const side = Math.random() < 0.5 ? 1 : -1;
@@ -1423,12 +1066,20 @@ const flyOnPath = (fromEl, toEl, opts = {}) =>
     const x2 = b.left + b.width / 2;
     const y2 = b.top + b.height / 2;
     const ms = opts.ms ?? (node ? OPTS.fly.trophyMs : OPTS.fly.ms);
+    const crazy = opts.crazy ?? (node ? OPTS.fly.trophyCrazy : OPTS.fly.crazy);
     const delay = opts.delay ?? 0;
 
     const mover = div({
       className: node ? "fly flyn" : "fly",
     });
-    mover.style.offsetPath = `path("${generatePathData(x1, y1, x2, y2)}")`;
+    if (node) {
+      const nr = node.getBoundingClientRect();
+      const size = Math.max(nr.width, nr.height, 8);
+      mover.style.width = `${size}px`;
+      mover.style.height = `${size}px`;
+    }
+    mover.style.offsetPath = `path("${generatePathData(x1, y1, x2, y2, crazy)}")`;
+    mover.style.offsetPosition = "0 0";
     mover.style.offsetDistance = "0%";
     mover.style.animationDuration = `${ms}ms`;
     mover.style.animationDelay = `${delay}ms`;
@@ -1446,7 +1097,10 @@ const flyOnPath = (fromEl, toEl, opts = {}) =>
       mover.style.setProperty("--fly", opts.fill || "gold");
       mover.style.width = `${size}px`;
       mover.style.height = `${size}px`;
-      if (fromEl) fromEl.style.visibility = "hidden";
+      if (fromEl) {
+        fromEl.style.visibility = "hidden";
+        clearHintMask(fromEl);
+      }
     }
 
     let done = false;
@@ -1454,12 +1108,16 @@ const flyOnPath = (fromEl, toEl, opts = {}) =>
       if (done) return;
       done = true;
       mover.remove();
-      if (!node) fromEl?.remove?.();
-      sfxLand();
+      if (!node) {
+        clearHintMask(fromEl);
+        fromEl?.remove?.();
+      }
+      (opts.sfx || sfxLand)();
       resolve();
     };
     mover.addEventListener("animationend", finish, { once: true });
     setTimeout(finish, delay + ms + 120);
+    if (!node) sfxLand();
     document.body.append(mover);
   });
 
@@ -1483,17 +1141,11 @@ const onceEndOrTimeout = (el, ms, onDone, filter) => {
 
 const flyThen = (fromEl, toEl, opts, onLand) =>
   flyOnPath(fromEl, toEl, opts).then(() => onLand?.());
+const flyIn = (from, to, opts, onLand) =>
+  flyThen(from, to, { fromOffscreen: true, ...opts }, onLand);
 
 ;
 const SVG_NS = "http://www.w3.org/2000/svg";
-
-const mulberry32 = (a) => () => {
-  a |= 0;
-  a = (a + 0x6d2b79f5) | 0;
-  let t = Math.imul(a ^ (a >>> 15), 1 | a);
-  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-};
 
 const svgEl = (name, attrs = {}, ...kids) => {
   const e = document.createElementNS(SVG_NS, name);
@@ -1502,18 +1154,12 @@ const svgEl = (name, attrs = {}, ...kids) => {
   return e;
 };
 
-const ISO_PTS = "50,8 1.802,74.339 98.198,74.339";
-
-const isoTriSvg = (fill, opts = {}) => {
-  const { polyClass = "iso-tri", svgClass } = opts;
-  return svgEl(
-    "svg",
-    {
-      ...SVG100,
-      ...(svgClass ? { class: svgClass } : {}),
-    },
-    svgEl("polygon", { class: polyClass, points: ISO_PTS, fill })
-  );
+const mulberry32 = (a) => () => {
+  a |= 0;
+  a = (a + 0x6d2b79f5) | 0;
+  let t = Math.imul(a ^ (a >>> 15), 1 | a);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 };
 
 const buildMesh = (rand, n = 3) => {
@@ -1559,40 +1205,25 @@ const buildMesh = (rand, n = 3) => {
   return tris;
 };
 
-const createMeshData = (seed, opts = {}) => {
-  const tint = opts.color;
+const createMeshData = (seed) => {
   const rand = mulberry32(seed >>> 0);
-  const tris = buildMesh(rand, opts.cols || 3);
+  const tris = buildMesh(rand, 3);
   const svg = svgEl("svg", {
     ...SVG100,
     preserveAspectRatio: "none",
-    class: tint ? "wm pwm" : "wm",
+    class: "wm",
   });
-  svg.append(
-    svgEl("rect", {
-      width: 100,
-      height: 100,
-      fill: tint
-        ? colorHsl({ h: tint.h, s: tint.s, l: Math.max(8, tint.l * 0.35) })
-        : "#444",
-    })
-  );
+  const g = svgEl("g", { filter: "url(#sf)" });
+  g.append(svgEl("rect", { width: 100, height: 100, fill: "var(--wall-lo)" }));
   for (const [a, b, c] of tris) {
-    const g = 0x33 + ((rand() * 0x34) | 0);
-    const pts = [a, b, c].map(([x, y]) => `${x * 100},${y * 100}`).join(" ");
-    svg.append(
+    g.append(
       svgEl("polygon", {
-        points: pts,
-        fill: tint
-          ? colorHsl({
-              h: tint.h,
-              s: tint.s,
-              l: Math.max(18, Math.min(78, tint.l - 18 + ((g - 0x33) / 0x33) * 40)),
-            })
-          : `rgb(${g},${g},${g})`,
+        points: [a, b, c].map(([x, y]) => `${x * 100},${y * 100}`).join(" "),
+        fill: `color-mix(in srgb,var(--wall-lo) ${(rand() * 100) | 0}%,var(--wall-hi))`,
       })
     );
   }
+  svg.append(g);
   return { svg, tris };
 };
 
@@ -1660,14 +1291,10 @@ const createCollectLayer = (id, tri, color) => {
   return layer;
 };
 
-const paintWallMesh = (
-  face,
-  seed = (Math.random() * 0xffffffff) >>> 0,
-  opts = {}
-) => {
+const paintWall = (face, items = []) => {
+  const seed = (Math.random() * 0xffffffff) >>> 0;
   const { svg, tris } = createMeshData(seed);
   face.replaceChildren(svg);
-  const items = opts.collectibles || [];
   if (!items.length) return;
   const shapes = pickCollectTris(tris, seed, items.length);
   items.forEach((it, i) => face.append(createCollectLayer(it.id, shapes[i], it.color)));
@@ -1677,24 +1304,10 @@ const paintWallMesh = (
 let revealRaf = null;
 let revealLayers = [];
 
-const REVEAL_MS = OPTS.reveal.revealMs;
-const HIDE_MS = OPTS.reveal.hideMs;
+const REVEAL_MS = OPTS.reveal.ms;
 const R_MAX = OPTS.reveal.rMax;
-const easeOut3 = (t) => 1 - (1 - t) ** 3;
-
-const runTween = (ms, { onTick, onDone, setRaf }) => {
-  const start = performance.now();
-  const tick = (now) => {
-    const t = Math.min(1, (now - start) / ms);
-    onTick(easeOut3(t), t);
-    if (t < 1) setRaf(requestAnimationFrame(tick));
-    else {
-      setRaf(null);
-      onDone?.();
-    }
-  };
-  setRaf(requestAnimationFrame(tick));
-};
+const filt = (id, seed, freq = ".03") =>
+  `<filter id="${id}" x="-50%" y="-50%" width="200%" height="200%"><feTurbulence type="fractalNoise" baseFrequency="${freq}" numOctaves="2" seed="${seed}" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="48" xChannelSelector="R" yChannelSelector="G"/></filter>`;
 
 const setCircleR = (circle, r) =>
   circle?.setAttribute?.("r", String(Math.max(0, r)));
@@ -1710,11 +1323,7 @@ function ensureRevealDefs() {
   wrap.setAttribute("aria-hidden", "true");
   wrap.style.cssText =
     "position:absolute;width:0;height:0;overflow:hidden;pointer-events:none";
-  wrap.innerHTML =
-    `<defs><filter id="df" x="-50%" y="-50%" width="200%" height="200%">` +
-    `<feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="2" result="n"/>` +
-    `<feDisplacementMap in="SourceGraphic" in2="n" scale="48" xChannelSelector="R" yChannelSelector="G"/>` +
-    `</filter></defs>`;
+  wrap.innerHTML = `<defs>${filt("df", 1, ".05")}${filt("wf", 9)}<filter id="sf" x="-50%" y="-50%" width="200%" height="200%"><feTurbulence type="fractalNoise" baseFrequency=".08" numOctaves="4"/><feDiffuseLighting diffuseConstant=".6" surfaceScale=".7"><feDistantLight elevation="50"/></feDiffuseLighting><feBlend in2="SourceGraphic" mode="multiply"/></filter></defs>`;
   document.body.prepend(wrap);
 }
 
@@ -1727,9 +1336,8 @@ function stopRevealRaf() {
 
 function resetLayerMask(layer) {
   if (!layer) return;
-  stopHintRaf(layer);
-  setCircleR(layer.querySelector(".rc"), 0);
   off(layer, "revealing", "hiding", "revealed");
+  setCircleR(layer.querySelector(".rc"), 0);
 }
 
 function resetRevealMask() {
@@ -1751,19 +1359,18 @@ function playRevealMask(layerOrLayers) {
   }
   revealLayers = layers;
   const circles = layers.map((layer) => {
-    stopHintRaf(layer);
     off(layer, "revealed", "hiding");
     on(layer, "revealing");
-    return layer.querySelector(".rc");
+    const c = layer.querySelector(".rc");
+    setCircleR(c, 0);
+    return c;
   });
   if (circles.some((c) => !c)) return;
-  const r0s = circles.map((c) => readCircleR(c, 0));
   runTween(REVEAL_MS, {
     setRaf: (id) => {
       revealRaf = id;
     },
-    onTick: (eased) =>
-      circles.forEach((c, i) => setCircleR(c, r0s[i] + (R_MAX - r0s[i]) * eased)),
+    onTick: (eased) => circles.forEach((c) => setCircleR(c, R_MAX * eased)),
     onDone: () =>
       layers.forEach((layer, i) => {
         setCircleR(circles[i], R_MAX);
@@ -1786,7 +1393,7 @@ function playHideMask(layerOrLayers, onDone) {
   });
   if (circles.some((c) => !c)) return void onDone?.();
   const r0s = circles.map((c) => readCircleR(c, R_MAX));
-  const dur = Math.max(400, HIDE_MS * (Math.max(...r0s, 1) / R_MAX));
+  const dur = Math.max(400, REVEAL_MS * (Math.max(...r0s, 1) / R_MAX));
   runTween(dur, {
     setRaf: (id) => {
       revealRaf = id;
@@ -1801,64 +1408,82 @@ function playHideMask(layerOrLayers, onDone) {
   });
 }
 
-function stopHintRaf(layer) {
-  if (layer?._hintRaf != null) {
-    cancelAnimationFrame(layer._hintRaf);
-    layer._hintRaf = null;
+function stopHintRaf(el) {
+  if (el?._hintRaf != null) {
+    cancelAnimationFrame(el._hintRaf);
+    el._hintRaf = null;
   }
 }
 
-function addWashRect(layer, fill) {
-  const svg = layer.querySelector("svg");
-  const poly = layer.querySelector(".ctri");
-  if (!svg || !poly) return;
-  layer.querySelectorAll(".wr").forEach((r) => r.remove());
-  svg.insertBefore(
-    svgEl("rect", {
-      class: "wr",
-      width: 100,
-      height: 100,
-      fill,
-      "fill-opacity": 0.55,
-      mask: poly.getAttribute("mask"),
-    }),
-    poly
-  );
-}
-
-function playHintMask(layer, rTarget, ms = REVEAL_MS) {
-  ensureRevealDefs();
-  const circle = layer?.querySelector?.(".rc");
-  if (!circle) return;
-  stopHintRaf(layer);
-  on(layer, "prv");
-  const r0 = readCircleR(circle, 0);
-  const target = Math.max(0, rTarget);
-  runTween(ms, {
-    setRaf: (id) => {
-      layer._hintRaf = id;
-    },
-    onTick: (eased) => setCircleR(circle, r0 + (target - r0) * eased),
-    onDone: () => setCircleR(circle, target),
+function clearHintMask(idOrEl) {
+  const id = idOrEl?.dataset?.id ?? idOrEl;
+  if (id == null) return;
+  qsa(`.wl[data-id="${id}"]`).forEach((wl) => {
+    stopHintRaf(wl);
+    clearTimeout(wl._wt);
+    wl.remove();
   });
 }
 
-function clearHintMask(layer) {
-  if (!layer) return;
-  stopHintRaf(layer);
-  off(layer, "prv");
-  layer.querySelectorAll(".wr").forEach((r) => r.remove());
-  setCircleR(layer.querySelector(".rc"), 0);
+function pruneWashes() {
+  qsa(".wl").forEach((wl) => {
+    const id = wl.dataset.id;
+    const cl = layerById(id);
+    if (collected.has(id) || !cl || cl.style.visibility === "hidden")
+      clearHintMask(id);
+  });
 }
 
 function clearAllHintMasks() {
-  document
-    .querySelectorAll(".cl.prv")
-    .forEach(clearHintMask);
+  qsa(".wl").forEach((wl) => clearHintMask(wl.dataset.id));
 }
 
-const clearFaceHints = (face) =>
-  face?.querySelectorAll?.(".cl.prv").forEach(clearHintMask);
+function playWash(cl, fill) {
+  const id = cl?.dataset?.id;
+  const face = cl?.closest?.(".face");
+  const rc = cl?.querySelector?.(".rc");
+  if (
+    !id ||
+    !face ||
+    !rc ||
+    collected.has(id) ||
+    cl.style.visibility === "hidden"
+  )
+    return;
+  ensureRevealDefs();
+  const cx = +rc.getAttribute("cx") || 50;
+  const cy = +rc.getAttribute("cy") || 50;
+  clearHintMask(id);
+  const mid = `wm-${id}`;
+  const target =
+    Math.max(
+      Math.hypot(cx, cy),
+      Math.hypot(100 - cx, cy),
+      Math.hypot(cx, 100 - cy),
+      Math.hypot(100 - cx, 100 - cy)
+    ) + 50;
+  const wl = div({ className: "wl" });
+  wl.dataset.id = id;
+  const svg = svgEl("svg", { ...SVG100, preserveAspectRatio: "none" });
+  svg.innerHTML =
+    `<defs>` +
+    `<mask id="${mid}" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">` +
+    `<circle class="wc" cx="${cx}" cy="${cy}" r="0" fill="#fff" filter="url(#wf)"/>` +
+    `</mask></defs>` +
+    `<rect class="wr" width="100" height="100" fill="${fill}" fill-opacity="0.55" mask="url(#${mid})" ` +
+    `style="animation-duration:${OPTS.powers.washFadeMs}ms"/>`;
+  wl.append(svg);
+  face.insertBefore(wl, cl);
+  const circle = wl.querySelector(".wc");
+  wl._wt = setTimeout(() => clearHintMask(id), OPTS.powers.washFadeMs);
+  runTween(REVEAL_MS, {
+    setRaf: (raf) => {
+      wl._hintRaf = raf;
+    },
+    onTick: (eased) => setCircleR(circle, target * eased),
+    onDone: () => setCircleR(circle, target),
+  });
+}
 
 ;
 const indexToRC = (index, cols) => ({
@@ -1905,8 +1530,6 @@ const generateMaze = (size = 5) => {
 ;
 const PER_COLOR = OPTS.level.perColor;
 
-const LEVEL_DEFS = OPTS.level.defs;
-
 const shuffle = (a) => {
   for (let i = a.length - 1; i > 0; i--) {
     const j = (Math.random() * (i + 1)) | 0;
@@ -1933,16 +1556,15 @@ const mazeRooms = (size) => {
   });
 };
 
-const pickLevelColors = (count, excludeNames = []) => {
-  const ban = new Set(excludeNames);
-  const pool = RAINBOW.filter((c) => !ban.has(c.name));
-  return shuffle(pool.slice()).slice(0, Math.min(count, pool.length));
+const pickLevelColors = (count, exclude = []) => {
+  const ban = new Set(exclude);
+  return shuffle(RAINBOW.filter((c) => !ban.has(c.i))).slice(0, count);
 };
 
 const placeTriangles = (rooms, colors, perColor = PER_COLOR) => {
   const slots = [];
   for (const r of rooms) {
-    for (const face of ["N", "E", "S", "W"]) {
+    for (const face of ["N", "E", "S", "W", "U", "D"]) {
       if (face in r.doors) continue;
       slots.push({ room: r.id, face });
     }
@@ -1965,23 +1587,17 @@ const placeTriangles = (rooms, colors, perColor = PER_COLOR) => {
   return tris;
 };
 
-const buildLevel = (index, excludeNames = []) => {
+const buildLevel = (index, exclude = []) => {
   const maxSize = OPTS.level.maxMazeSize;
   const raw =
-    LEVEL_DEFS[index] || {
+    OPTS.level.defs[index] || {
       mazeSize: Math.min(maxSize, 2 + index),
-      colorCount: Math.min(6, 1 + index),
+      colorCount: 1 + index,
     };
   const mazeSize =
     raw.mazeSize <= 0 ? 0 : Math.min(maxSize, raw.mazeSize);
-  const ban = new Set(excludeNames);
-  const pool = RAINBOW.filter((c) => !ban.has(c.name));
-  const colorCount = Math.min(
-    pool.length,
-    Math.min(6, Math.max(1, raw.colorCount || 1))
-  );
-  const rooms = mazeSize <= 0 ? tutorialRooms() : mazeRooms(mazeSize);
-  const colors = pickLevelColors(colorCount, excludeNames);
+  const rooms = mazeSize ? mazeRooms(mazeSize) : tutorialRooms();
+  const colors = pickLevelColors(Math.min(6, raw.colorCount || 1), exclude);
   return {
     index,
     mazeSize,
@@ -1997,7 +1613,6 @@ const buildLevel = (index, excludeNames = []) => {
 ;
 const CUBE_FACES = 6;
 
-/** [rotateY, rotateX] per cube face. */
 const CUBE_TURNS = [
   [0, 0],
   [90, 0],
@@ -2012,9 +1627,11 @@ const cubeFill = (c) =>
 
 const makeGem = (color, slot) => {
   const fill = cubeFill(color);
+  const cubeFace = slot?.querySelector?.(".cf");
   const endSize = Math.max(
-    28,
-    (slot?.getBoundingClientRect?.().width || 52) * 0.72
+    16,
+    cubeFace?.getBoundingClientRect?.().width ||
+      (slot?.getBoundingClientRect?.().width || 52) * 0.34
   );
   const gem = div({ className: "gem" });
   gem.style.setProperty("--fly", fill);
@@ -2023,12 +1640,10 @@ const makeGem = (color, slot) => {
   return { gem, fill, endSize };
 };
 
-function createCube(opts) {
-  const { color, sideLength = 2, unlockedFaces = [], pendingFaces = [] } = opts;
+function createCube({ color, unlockedFaces = [], pendingFaces = [] }) {
   const lit = new Set(unlockedFaces);
   const pending = new Set(pendingFaces);
   const fill = cubeFill(color);
-  const z = sideLength / 2;
 
   const faces = CUBE_TURNS.map(([ry, rx], i) => {
     const isPending = pending.has(i);
@@ -2036,47 +1651,37 @@ function createCube(opts) {
     const face = div({
       className: on ? "cf lit" : isPending ? "cf pending" : "cf",
       style: {
-        width: `${sideLength}em`,
-        height: `${sideLength}em`,
-        marginLeft: `${-sideLength / 2}em`,
-        marginTop: `${-sideLength / 2}em`,
         background: on ? fill : "#3a3a42",
-        transform: `rotateY(${ry}deg) rotateX(${rx}deg) translateZ(${z}em)`,
+        transform: `rotateY(${ry}deg) rotateX(${rx}deg) translateZ(1em)`,
       },
     });
     face.dataset.i = String(i);
     return face;
   });
 
-  const el = div({ className: "cube", style: { "--cube": fill } }, ...faces);
-  el.dataset.color = color.name;
-  return el;
+  return div({ className: "cube", style: { "--cube": fill } }, ...faces);
 }
 
 function createCubeRack() {
-  const litByColor = Object.fromEntries(
-    RAINBOW.map((c) => [c.name, new Set()])
-  );
+  const litByColor = RAINBOW.map(() => new Set());
 
-  const slots = RAINBOW.map((c) => {
+  const slots = RAINBOW.map((c, i) => {
     const slot = div({
       className: "ds",
-      style: toneStyle("slot", c),
+      style: { ...toneStyle("slot", c), "--slot": cubeFill(c), "--d": i * 0.2 + "s" },
     });
-    slot.dataset.color = c.name;
     return slot;
   });
 
   const rack = div({ id: "drk" }, ...slots);
   document.body.append(rack);
 
-  const slotFor = (color) =>
-    slots[RAINBOW.indexOf(toRainbow(color))] || null;
+  const slotFor = (color) => slots[color.i];
 
   function paint(rainbow, pendingFaces = []) {
-    const slot = slots[RAINBOW.indexOf(rainbow)];
+    const slot = slots[rainbow.i];
     if (!slot) return null;
-    const lit = litByColor[rainbow.name];
+    const lit = litByColor[rainbow.i];
     if (!lit.size && !pendingFaces.length) {
       slot.replaceChildren();
       return slot;
@@ -2087,15 +1692,14 @@ function createCubeRack() {
         color: rainbow,
         unlockedFaces: [...new Set([...lit, ...pending])],
         pendingFaces: [...pending],
-        sideLength: OPTS.cube.sideEm,
       })
     );
     return slot;
   }
 
-  const nextFace = (colorName) => {
-    const lit = litByColor[colorName];
-    for (let i = 0; i < CUBE_FACES; i++) if (!lit.has(i)) return i;
+  const nextFace = (i) => {
+    const lit = litByColor[i];
+    for (let f = 0; f < CUBE_FACES; f++) if (!lit.has(f)) return f;
     return -1;
   };
 
@@ -2111,94 +1715,103 @@ function createCubeRack() {
 
   const retireFull = (rainbow, slot, gemEl) => {
     paint(rainbow);
-    gemEl?.remove?.();
-    retireColorFromLevel?.(rainbow.name);
+    gemEl?.remove();
+    retireColorFromLevel(rainbow.i);
     return slot;
   };
 
   async function deliver(color, gemEl) {
-    const rainbow = toRainbow(color);
-    const slot = slotFor(rainbow);
+    const slot = slotFor(color);
     if (!slot) return null;
-    const face = nextFace(rainbow.name);
-    if (face < 0) return retireFull(rainbow, slot, gemEl);
-    await flyThen(gemEl, slot, { node: gemEl, ms: OPTS.fly.trophyMs });
-    return settleFace(rainbow, face);
+    const face = nextFace(color.i);
+    if (face < 0) return retireFull(color, slot, gemEl);
+    await flyThen(gemEl, slot, { node: gemEl, ms: OPTS.fly.trophyMs, sfx: sfxReward });
+    if (bodyHas("won")) return null;
+    return settleFace(color, face);
   }
 
   async function settleFace(rainbow, faceIndex) {
-    litByColor[rainbow.name].add(faceIndex);
+    litByColor[rainbow.i].add(faceIndex);
     const slot = paint(rainbow, [faceIndex]);
     await nextFrame();
     igniteFace(slot, faceIndex);
-    if (isFull(rainbow.name)) retireColorFromLevel?.(rainbow.name);
-    if (allComplete()) endGameWon?.();
+    if (isFull(rainbow.i)) retireColorFromLevel(rainbow.i);
+    if (allComplete()) endGameWon();
+    else powers.syncAll();
     return slot;
   }
 
-  async function flyInFace(rainbow, faceIndex, delay = 0) {
-    if (isFull(rainbow.name)) return false;
-    const slot = slotFor(rainbow);
-    if (!slot || faceIndex < 0) return false;
-    const { gem } = makeGem(rainbow, slot);
-    await flyThen(null, slot, {
-      node: gem,
-      fromOffscreen: true,
-      delay,
-      ms: OPTS.fly.trophyMs,
-    });
-    await settleFace(rainbow, faceIndex);
-    return true;
+  const litCount = () => {
+    let n = 0;
+    for (const s of litByColor) n += s.size;
+    return n;
+  };
+
+  function rallyRoom(spare = 1) {
+    let open = 0;
+    for (const s of litByColor) {
+      if (s.size > 0 && s.size < CUBE_FACES) open += CUBE_FACES - s.size;
+    }
+    return Math.max(0, Math.min(open, RAINBOW.length * CUBE_FACES - spare - litCount()));
   }
 
-  async function addFaces(n) {
-    let done = 0;
+  async function addFaces(n, spare = 0) {
+    const picks = [];
+    const incoming = RAINBOW.map(() => []);
     for (let i = 0; i < Math.max(0, n); i++) {
+      if (rallyRoom(spare) <= 0) break;
       const targets = RAINBOW.filter(
-        (c) => litByColor[c.name].size > 0 && !isFull(c.name)
+        (c) => litByColor[c.i].size > 0 && !isFull(c.i)
       );
       if (!targets.length) break;
       const c = shuffle(targets.slice())[0];
-      const f = nextFace(c.name);
+      const f = nextFace(c.i);
       if (f < 0) continue;
-      await flyInFace(c, f, i === 0 ? 0 : 80);
-      done++;
+      litByColor[c.i].add(f);
+      incoming[c.i].push(f);
+      paint(c, incoming[c.i]);
+      picks.push([c, f]);
     }
-    return done;
+    await Promise.all(
+      picks.map(([c, f]) => {
+        const slot = slotFor(c);
+        const { gem } = makeGem(c, slot);
+        return flyIn(null, slot, { node: gem, sfx: sfxReward }, () => {
+          if (bodyHas("won")) return;
+          igniteFace(slot, f);
+          if (isFull(c.i)) retireColorFromLevel(c.i);
+        });
+      })
+    );
+    if (allComplete()) endGameWon();
+    else powers.syncAll();
+    return picks.length;
   }
 
-  function openFaceCount() {
-    let n = 0;
-    for (const c of RAINBOW) {
-      const s = litByColor[c.name].size;
-      if (s > 0 && s < CUBE_FACES) n += CUBE_FACES - s;
-    }
-    return n;
-  }
-
-  const isFull = (name) => litByColor[name].size >= CUBE_FACES;
-  const isColorComplete = (color) => isFull(toRainbow(color).name);
-  const completedNames = () =>
-    RAINBOW.filter((c) => isFull(c.name)).map((c) => c.name);
-  const allComplete = () => RAINBOW.every((c) => isFull(c.name));
+  const isFull = (i) => litByColor[i].size >= CUBE_FACES;
+  const isColorComplete = (color) => isFull(color.i);
+  const completed = () => RAINBOW.filter((c) => isFull(c.i)).map((c) => c.i);
+  const allComplete = () => RAINBOW.every((c) => isFull(c.i));
 
   return {
-    rack,
     slots,
     deliver,
     addFaces,
-    openFaceCount,
-    slotFor,
+    rallyRoom,
     isColorComplete,
-    completedNames,
+    completed,
     allComplete,
   };
 }
 
 ;
-const tinyPipSvg = () => isoTriSvg("#000", { svgClass: "tab-pip" });
+const tinyPipSvg = () =>
+  svgEl(
+    "svg",
+    SVG100,
+    svgEl("polygon", { points: "0,100 50,50 100,100", fill: "#333" })
+  );
 
-/** Color bank: collect N triangles → gem. No wedge puzzle. */
 function createPuzzleUI(opts) {
   const { color, total, onComplete, tabsBar } = opts;
   const fill = colorHsl(color);
@@ -2212,11 +1825,22 @@ function createPuzzleUI(opts) {
     return wrap;
   });
   const tab = button({ className: "ct", style: toneStyle("tab", color) });
-  tab.dataset.color = color.name;
   tab.append(div({ className: "tps" }, ...pips));
-  tabsBar.append(tab);
+  const hold = div({ className: "cth" }, tab);
+  tabsBar.append(hold);
 
-  const syncPow = () => powers?.syncAll?.();
+  const syncPow = () => powers.syncAll();
+  const clrTab = () => {
+    tab.style.position =
+      tab.style.left =
+      tab.style.top =
+      tab.style.width =
+      tab.style.height =
+      tab.style.margin =
+      tab.style.zIndex =
+        "";
+    hold.style.cssText = "";
+  };
 
   function refreshPips() {
     const n = ids.length;
@@ -2225,7 +1849,7 @@ function createPuzzleUI(opts) {
       if (i < total)
         pip.querySelector("polygon")?.setAttribute(
           "fill",
-          i < n ? fill : "#000"
+          i < n ? fill : "#333"
         );
     });
     tog(tab, "ready", n >= total && !solved);
@@ -2235,14 +1859,17 @@ function createPuzzleUI(opts) {
     if (solved || completing || ids.length < total) return;
     completing = true;
     solved = true;
+    ids.forEach(clearHintMask);
+    pruneWashes();
     on(tab, "ready");
     syncPow();
-    onComplete?.();
+    onComplete();
   }
 
   function addPieceToTray(id) {
     if (solved || completing || ids.includes(id)) return null;
     ids.push(id);
+    clearHintMask(id);
     refreshPips();
     syncPow();
     if (ids.length >= total) tryComplete();
@@ -2259,53 +1886,65 @@ function createPuzzleUI(opts) {
     solved = false;
     completing = false;
     ids.length = 0;
-    off(tab, "ready");
+    off(tab, "ready", "sealing", "sealed");
+    clrTab();
+    if (tab.parentNode !== hold) hold.append(tab);
     tab.hidden = false;
     refreshPips();
     syncPow();
   }
 
   function removeTab() {
-    tab.remove();
+    hold.remove();
     const root = tabsBar.closest("#proot");
     if (tabsBar && !tabsBar.childElementCount) root?.remove();
   }
 
-  function collapseToGem() {
-    return new Promise((resolve) => {
-      const r = tab.getBoundingClientRect();
-      const { gem, endSize } = makeGem(color, qs(".ds"));
-      const startSize = Math.max(
-        endSize * 1.35,
-        Math.min(r.width, r.height) * 1.2 || endSize * 2
-      );
-      const cx = r.left + r.width / 2;
-      const cy = r.top + r.height / 2;
-      const place = (size) => {
-        gem.style.width = gem.style.height = `${size}px`;
-        gem.style.left = `${cx - size / 2}px`;
-        gem.style.top = `${cy - size / 2}px`;
-      };
-      gem.style.position = "fixed";
-      gem.style.zIndex = "121";
-      place(startSize);
-      document.body.append(gem);
-      nextFrame().then(() => place(endSize));
-      setTimeout(() => resolve(gem), 280);
-    });
+  async function collapseToGem() {
+    const slot = cubeRack.slots[color.i];
+    const { gem, endSize } = makeGem(color, slot);
+    const r0 = tab.getBoundingClientRect();
+    hold.style.width = hold.style.minWidth = `${r0.width}px`;
+    hold.style.height = `${r0.height}px`;
+    tab.style.transition = "none";
+    document.body.append(tab);
+    tab.style.position = "fixed";
+    tab.style.zIndex = "121";
+    tab.style.left = `${r0.left}px`;
+    tab.style.top = `${r0.top}px`;
+    tab.style.width = `${r0.width}px`;
+    tab.style.height = `${r0.height}px`;
+    tab.style.margin = "0";
+    const r1 = tab.getBoundingClientRect();
+    tab.style.transition = "";
+    on(tab, "sealing");
+    tab.style.width = tab.style.height = `${endSize}px`;
+    tab.style.left = `${r1.left + r1.width / 2 - endSize / 2}px`;
+    tab.style.top = `${r1.top + r1.height / 2 - endSize / 2}px`;
+    await wait(OPTS.time.sealMs);
+    const r = tab.getBoundingClientRect();
+    gem.style.position = "fixed";
+    gem.style.zIndex = "121";
+    gem.style.width = gem.style.height = `${endSize}px`;
+    gem.style.left = `${r.left + r.width / 2 - endSize / 2}px`;
+    gem.style.top = `${r.top + r.height / 2 - endSize / 2}px`;
+    document.body.append(gem);
+    clrTab();
+    off(tab, "sealing", "ready");
+    on(tab, "sealed");
+    hold.append(tab);
+    await nextFrame();
+    return gem;
   }
 
   refreshPips();
   return {
     flyIn,
     addPieceToTray,
-    isOpen: () => false,
-    isSolved: () => solved,
-    looseCount: () => (solved ? 0 : Math.max(0, total - ids.length)),
     reset,
     remove: removeTab,
     collapseToGem,
-    close: () => {},
+    tab,
   };
 }
 
@@ -2316,18 +1955,17 @@ function createPuzzleSet(colors, perColor, onColorComplete) {
   document.body.append(root);
   const map = {};
   for (const c of colors) {
-    map[c.name] = createPuzzleUI({
+    map[c.i] = createPuzzleUI({
       color: c,
       total: perColor,
       tabsBar,
-      onComplete: () => onColorComplete(c, map[c.name]),
+      onComplete: () => onColorComplete(c, map[c.i]),
     });
   }
   return {
     map,
     root,
-    flyIn: (id, layer, color) => map[color.name]?.flyIn(id, layer),
-    isOpen: () => false,
+    flyIn: (id, layer, color) => map[color.i]?.flyIn(id, layer),
     destroy() {
       Object.values(map).forEach((p) => p.remove());
       root.remove();
@@ -2337,57 +1975,64 @@ function createPuzzleSet(colors, perColor, onColorComplete) {
 
 ;
 const POWERS = [
-  ["perception", "W", 210],
-  ["extraction", "E", 32],
-  ["radiance", "R", 48],
+  ["wash", "W", uniCyan],
+  ["evoke", "E", uniPink],
+  ["rally", "R", uniGold],
 ];
 const POWER_IDS = POWERS.map((p) => p[0]);
-const POWER_KEY = { w: "perception", e: "extraction", r: "radiance" };
-const powStyle = (hue) =>
-  toneStyle("pow", { h: hue, s: 70, l: 55 }, { h: hue, s: 50, l: 28 });
+const POWER_KEY = { w: "wash", e: "evoke", r: "rally" };
+const powStyle = (fill) => ({
+  "--pow": `color-mix(in srgb, ${fill} 65%, #000)`,
+  "--pow-dark": `color-mix(in srgb, ${fill} 27%, #201018)`,
+});
 
 const powerState = Object.fromEntries(
   POWER_IDS.map((id) => [id, { level: 0, active: false, cooling: false }])
 );
-const upgradeSkip = Object.fromEntries(POWER_IDS.map((id) => [id, 0]));
-let pentagonClears = 0;
 
-const P = () => OPTS.powers;
 const lv1 = (n) => Math.max(1, n | 0);
-const huntCount = (level) => 1 + ((lv1(level) / 2) | 0);
-const perceptionMs = (level) => P().perceptionBaseMs + level * P().perceptionPerLevelMs;
-const huntCdMs = (level) =>
-  Math.max(P().huntCdMinMs, P().huntCdL1Ms - (((lv1(level) - 1) / 2) | 0) * P().huntCdPerStepMs);
+const powerCd = (id, level) => {
+  const [base, step, min] = OPTS.powers[id + "Cd"] || OPTS.powers.cd;
+  return Math.max(min, base - (lv1(level) - 1) * step);
+};
 
-const cdFor = (id, level) =>
-  id === "radiance" ? P().radianceCdMs : huntCdMs(level);
+const powerBtn = ([id, glyph, fill], n, extra) => {
+  const btn = button({
+    className: extra ? `ps ${extra}` : "ps",
+    style: powStyle(fill),
+  });
+  btn.dataset.power = id;
+  btn.append(div({ className: "pg" }, glyph), div({ className: "pl" }, String(n)));
+  return btn;
+};
+
+let upgradeQueue = Promise.resolve();
+let upgradeWait = 0;
 
 function createPowerSystem() {
-  const slots = POWERS.map(([id, glyph, hue]) => {
-    const slot = button({
-      className: "ps locked",
-      style: powStyle(hue),
-    });
-    slot.dataset.power = id;
-    slot.append(
-      div({ className: "pg" }, glyph),
-      div({ className: "pl" }, "0")
-    );
+  const slots = POWERS.map((p) => {
+    const slot = powerBtn(p, 0, "locked");
     slot.disabled = true;
-    slot.onclick = () => activatePower(id);
+    slot.onclick = () => activatePower(p[0]);
     return slot;
   });
   document.body.append(div({ id: "prk" }, ...slots));
 
   const gate = (id) =>
-    id === "radiance" ? levelIndex >= P().radianceFromLevel : true;
+    id === "rally" ? levelIndex >= OPTS.powers.rallyFromLevel : true;
   const unlocked = (id) => powerState[id].level > 0 && gate(id);
 
-  const puzzleHold = () => bodyHas("rewarding");
-
-  const huntPool = () => {
-    const names = new Set(levelColors.map((c) => c.name));
-    return triangles.filter((t) => !collected.has(t.id) && names.has(t.color.name));
+  const openPool = () => {
+    const ids = new Set(levelColors.map((c) => c.i));
+    return triangles.filter((t) => {
+      const el = layerById(t.id);
+      return (
+        !collected.has(t.id) &&
+        ids.has(t.color.i) &&
+        el &&
+        el.style.visibility !== "hidden"
+      );
+    });
   };
 
   function syncSlot(id) {
@@ -2395,8 +2040,11 @@ function createPowerSystem() {
     const slot = slots[POWER_IDS.indexOf(id)];
     slot.querySelector(".pl").textContent = String(st.level);
     const lock = !unlocked(id);
-    const empty = !lock && id === "extraction" && !huntPool().length;
-    const held = puzzleHold();
+    const empty =
+      !lock &&
+      ((id === "evoke" && !openPool().length) ||
+        (id === "rally" && !(cubeRack.rallyRoom() > 0)));
+    const held = bodyHas("rewarding");
     tog(slot, "locked", lock || empty);
     tog(slot, "active", st.active);
     tog(slot, "cooling", st.cooling);
@@ -2404,11 +2052,11 @@ function createPowerSystem() {
   }
   const syncAll = () => POWER_IDS.forEach(syncSlot);
 
-  function beginBusy(id, activeMs, cdMs) {
+  function beginBusy(id, activeMs) {
     const st = powerState[id];
     st.active = st.cooling = true;
     syncSlot(id);
-    const cd = cdMs ?? huntCdMs(st.level);
+    const cd = powerCd(id, st.level);
     setTimeout(() => {
       st.active = false;
       syncSlot(id);
@@ -2419,50 +2067,66 @@ function createPowerSystem() {
     }, cd);
   }
 
-  function offerUpgrade() {
+  function showUpgrade() {
     return new Promise((resolve) => {
-      pentagonClears++;
-      const everyN = P().radianceEveryN;
-      const skips = P().upgradeSkipAfter;
-      const canPick = (id) =>
-        !(upgradeSkip[id] > 0) &&
-        gate(id) &&
-        (id !== "radiance" || pentagonClears % everyN === 0);
-
+      if (bodyHas("won")) {
+        upgradeWait--;
+        resolve();
+        return;
+      }
+      const canPick = (id) => gate(id);
       let picked = false;
-      const commit = (id) => {
-        if (picked || !canPick(id)) return;
-        picked = true;
-        off(modal, "show");
-        removeEventListener("keydown", onKey);
-        setTimeout(() => modal.remove(), 750);
-        for (const pid of POWER_IDS) if (upgradeSkip[pid] > 0) upgradeSkip[pid]--;
-        const skip = skips[id] ?? 0;
-        if (skip) upgradeSkip[id] = skip;
-        const st = powerState[id];
-        st.level++;
-        beginBusy(id, 0, cdFor(id, st.level));
-        syncSlot(id);
-        resolve(id);
-      };
+      let onKey;
 
-      const choices = POWERS.map(([id, glyph, hue]) => {
-        const st = powerState[id];
+      const choices = POWERS.map((p) => {
+        const [id] = p;
         const ok = canPick(id);
-        const btn = button({
-          className: ok ? "ppk" : "ppk locked",
-          style: powStyle(hue),
-        });
-        btn.disabled = !ok;
-        btn.append(
-          div({ className: "ppk-glyph" }, glyph),
-          div({ className: "ppk-lvl" }, `${st.level}→${st.level + 1}`)
+        const btn = powerBtn(
+          p,
+          "+",
+          ok ? "ppk" : "ppk locked"
         );
+        btn.disabled = !ok;
         if (ok) btn.onclick = () => commit(id);
         return btn;
       });
+      const modal = showModal(div({ className: "ppks" }, ...choices), 4 / 3);
+      syncAll();
 
-      const onKey = (e) => {
+      const finish = (id) => {
+        upgradeWait--;
+        if (bodyHas("won")) {
+          resolve(id);
+          return;
+        }
+        if (upgradeWait > 0) {
+          resolve(id);
+          return;
+        }
+        modal?.remove();
+        bodyOff("rewarding");
+        syncAll();
+        resolve(id);
+      };
+      const close = (id) => {
+        if (picked || bodyHas("won")) return;
+        picked = true;
+        removeEventListener("keydown", onKey);
+        const more = upgradeWait > 1;
+        if (!more) on(modal, "out");
+        setTimeout(() => finish(id), more ? 400 : 520);
+      };
+      const commit = (id) => {
+        if (picked || bodyHas("won") || !canPick(id)) return;
+        sfxPick();
+        on(choices[POWER_IDS.indexOf(id)], "picked");
+        close(id);
+        const st = powerState[id];
+        st.level++;
+        syncSlot(id);
+      };
+
+      onKey = (e) => {
         if (e.metaKey || e.ctrlKey || e.altKey) return;
         const id = POWER_KEY[e.key.toLowerCase()];
         if (!id) return;
@@ -2470,133 +2134,96 @@ function createPowerSystem() {
         commit(id);
       };
       addEventListener("keydown", onKey);
-
-      const modal = div(
-        { className: "pmod" },
-        div({ className: "pmc" }, div({ className: "ppks" }, ...choices))
-      );
-      document.body.append(modal);
-      nextFrame().then(() => on(modal, "show"));
     });
   }
 
-  let perceptionTargets = new Set();
-  let perceptionGen = 0;
-
-  function endPerceptionHints() {
-    perceptionTargets = new Set();
-    clearAllHintMasks();
-    const st = powerState.perception;
-    if (st.active) {
-      st.active = false;
-      syncSlot("perception");
-    }
-  }
+  const offerUpgrade = () => {
+    if (bodyHas("won")) return Promise.resolve();
+    upgradeWait++;
+    const p = upgradeQueue.then(showUpgrade, showUpgrade);
+    upgradeQueue = p.catch(() => {});
+    return p;
+  };
 
   function noteCollected(id) {
-    clearHintMask(qs(`.cl[data-id="${id}"]`));
-    if (perceptionTargets.delete(id) && !perceptionTargets.size) {
-      perceptionGen++;
-      endPerceptionHints();
-    }
+    clearHintMask(id);
     syncAll();
   }
 
-  function runPerception(level) {
-    const facing = facingFaceKey?.();
+  function runWash(level) {
+    const facing = facingFaceKey();
     const opp = { N: "S", S: "N", E: "W", W: "E" }[facing];
-    const all = huntPool();
+    const all = openPool();
     const pool = opp
       ? all.filter((t) => !(t.room === player.room && t.face === opp))
       : all;
-    const picks = shuffle((pool.length ? pool : all).slice()).slice(0, huntCount(level));
-    const p = P();
-    const wash =
-      level <= 1
-        ? p.washL1Pct
-        : Math.max(p.washMinPct, 100 - (level - 1) * p.washShrinkPct);
-    const rTarget = (R_MAX * Math.min(140, wash)) / 100;
-    const stagger = p.perceptionStaggerMs;
-    const holdMs = perceptionMs(level);
+    const picks = shuffle((pool.length ? pool : all).slice()).slice(0, lv1(level));
 
-    perceptionGen++;
-    const gen = perceptionGen;
-    perceptionTargets = new Set(picks.map((t) => t.id));
-
-    picks.forEach((t, i) => {
-      setTimeout(() => {
-        if (gen !== perceptionGen) return;
-        const layer = qs(`.cl[data-id="${t.id}"]`);
-        if (!layer) return;
-        clearHintMask(layer);
-        addWashRect(layer, colorHsl(t.color));
-        playHintMask(layer, rTarget);
-      }, i * stagger);
+    picks.forEach((t) => {
+      if (collected.has(t.id)) return;
+      const layer = layerById(t.id);
+      if (!layer || layer.style.visibility === "hidden") return;
+      playWash(layer, colorHsl(colorPair(t.color)));
     });
-
-    setTimeout(() => {
-      if (gen === perceptionGen) endPerceptionHints();
-    }, (picks.length - 1) * stagger + holdMs);
   }
 
-  function runExtraction(level) {
-    if (puzzles?.isOpen?.()) return;
-    const pool = huntPool();
+  function runEvoke(level) {
+    const pool = openPool();
     if (!pool.length) return;
-    const colorName = shuffle([...new Set(pool.map((t) => t.color.name))])[0];
-    const picks = shuffle(pool.filter((t) => t.color.name === colorName)).slice(
+    const i = shuffle([...new Set(pool.map((t) => t.color.i))])[0];
+    const picks = shuffle(pool.filter((t) => t.color.i === i)).slice(
       0,
-      huntCount(level)
+      lv1(level)
     );
-    const puzzle = puzzles?.map?.[colorName];
-    const tab = qs(`.ct[data-color="${colorName}"]`);
-    if (!puzzle || !tab) return;
+    const puzzle = puzzles.map[i];
+    if (!puzzle) return;
 
-    picks.forEach((t, i) => {
+    picks.forEach((t) => {
       const claim = claimTriangle(t.id);
       if (!claim) return;
       const { layer } = claim;
       if (!layer) return void puzzle.addPieceToTray(t.id);
-      flyThen(
-        layer,
-        tab,
-        { fill: colorHsl(t.color), delay: i * 90, fromOffscreen: true },
-        () => puzzle.addPieceToTray(t.id)
+      flyIn(layer, puzzle.tab, { fill: colorHsl(t.color) }, () =>
+        puzzle.addPieceToTray(t.id)
       );
     });
+    pruneWashes();
   }
 
-  function runRadiance(n) {
-    if (!cubeRack?.openFaceCount?.()) return;
-    triggerReward?.();
-    Promise.resolve(cubeRack.addFaces?.(n)).then(() => {
-      if (cubeRack.allComplete?.()) endGameWon?.();
-      else if (levelCleared?.()) transitionToLevel?.(levelIndex + 1);
+  function runRally(n) {
+    if (!(cubeRack.rallyRoom() > 0)) return;
+    Promise.resolve(cubeRack.addFaces(n, 1)).then(() => {
+      syncAll();
+      if (levelCleared()) transitionToLevel(levelIndex + 1);
     });
   }
 
   function activatePower(id) {
     const st = powerState[id];
-    if (!unlocked(id) || st.active || st.cooling || puzzleHold()) return;
-    if (id === "extraction" && !huntPool().length) return;
+    if (!unlocked(id) || st.active || st.cooling || bodyHas("rewarding") || bodyHas("won")) return;
+    if (id === "evoke" && !openPool().length) return;
+    if (id === "rally" && !(cubeRack.rallyRoom() > 0)) return;
 
-    if (id === "perception") {
-      const n = huntCount(st.level);
-      const stagger = P().perceptionStaggerMs;
-      runPerception(st.level);
-      beginBusy(id, (n - 1) * stagger + perceptionMs(st.level), huntCdMs(st.level));
-    } else if (id === "extraction") {
-      runExtraction(st.level);
-      beginBusy(id, 900, huntCdMs(st.level));
+    uniGo();
+    sfxReward(4 / 3);
+
+    if (id === "rally") {
+      runRally(lv1(st.level));
+      beginBusy(id, OPTS.fly.trophyMs + 400);
     } else {
-      const n = Math.max(1, st.level);
-      runRadiance(n);
-      beginBusy(id, OPTS.fly.trophyMs * n + 400, P().radianceCdMs);
+      if (id === "wash") runWash(st.level);
+      else runEvoke(st.level);
+      beginBusy(id, 900);
     }
   }
 
   syncAll();
-  return { offerUpgrade, activatePower, syncAll, powerState, noteCollected };
+  return {
+    offerUpgrade,
+    activatePower,
+    syncAll,
+    noteCollected,
+  };
 }
 
 ;
@@ -2630,35 +2257,13 @@ const hiddensOn = (roomId, faceKey) =>
     (h) => h.room === roomId && h.face === faceKey && !collected.has(h.id)
   );
 
-// Camera basis (±90° on integer axes)
-
 const snap = (n) => Math.round(n);
-
-const rot90 = (v, axis, sign) => {
-  const [x, y, z] = v;
-  const [ax, ay, az] = axis;
-  const dot = ax * x + ay * y + az * z;
-  const cx = ay * z - az * y;
-  const cy = az * x - ax * z;
-  const cz = ax * y - ay * x;
-  return [snap(ax * dot + sign * cx), snap(ay * dot + sign * cy), snap(az * dot + sign * cz)];
-};
-
-const basisToCSS = (right, up, forward) => {
-  const [rx, ry, rz] = right;
-  const [ux, uy, uz] = up;
-  const [fx, fy, fz] = forward;
-  return `matrix3d(${rx},${ux},${-fx},0, ${ry},${uy},${-fy},0, ${rz},${uz},${-fz},0, 0,0,0,1)`;
-};
-
 const vDot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 const vCross = (a, b) => [
   a[1] * b[2] - a[2] * b[1],
   a[2] * b[0] - a[0] * b[2],
   a[0] * b[1] - a[1] * b[0],
 ];
-const same3 = (a, b) => a[0] === b[0] && a[1] === b[1] && a[2] === b[2];
-
 const rotAround = (v, axis, ang) => {
   const c = Math.cos(ang);
   const s = Math.sin(ang);
@@ -2671,49 +2276,47 @@ const rotAround = (v, axis, ang) => {
     v[2] * c + cz * s + axis[2] * d * k,
   ];
 };
+const rot90 = (v, axis, sign) => rotAround(v, axis, (sign * Math.PI) / 2).map(snap);
+const poseCSS = (r, u, f) =>
+  `matrix3d(${r[0]},${u[0]},${-f[0]},0,${r[1]},${u[1]},${-f[1]},0,${r[2]},${u[2]},${-f[2]},0,0,0,0,1)`;
+const look = () => {
+  pivot.style.transform = poseCSS(player.right, player.up, player.forward);
+};
 
-const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
+let turnRaf,
+  turnBusy,
+  walkBusy,
+  walkGen = 0,
+  turnQ = [];
 
-const TURN_MS = OPTS.time.turnMs;
-const INSPECT_OUT_MS = OPTS.time.inspectOutMs;
-let turnRaf = null;
-let turnBusy = false;
+const haltTurns = () => {
+  cancelAnimationFrame(turnRaf);
+  turnRaf = turnBusy = walkBusy = 0;
+  walkGen++;
+  turnQ.length = 0;
+};
 
-const animateTurn = (fromRight, fromUp, fromForward) => {
-  if (turnRaf != null) cancelAnimationFrame(turnRaf);
-  turnBusy = true;
+const pumpQ = () => turnQ.length && doTurn(turnQ.shift());
 
-  const axis = same3(fromUp, player.up)
-    ? fromUp
-    : same3(fromRight, player.right)
-      ? fromRight
-      : fromForward;
-  const sign = Math.sign(vDot(vCross(fromForward, player.forward), axis)) || 1;
-  const start = performance.now();
-
-  const tick = (now) => {
-    const t = Math.min(1, (now - start) / TURN_MS);
-    if (t < 1) {
-      const ang = sign * (Math.PI / 2) * easeInOut(t);
-      pivot.style.transform = basisToCSS(
-        rotAround(fromRight, axis, ang),
-        rotAround(fromUp, axis, ang),
-        rotAround(fromForward, axis, ang)
+const animateTurn = (fr, fu, ff, axis, s) => {
+  turnBusy = 1;
+  runTween(OPTS.time.turnMs, {
+    ease: easeInOut,
+    setRaf: (id) => (turnRaf = id),
+    onTick: (eased) => {
+      const ang = s * (Math.PI / 2) * eased;
+      pivot.style.transform = poseCSS(
+        rotAround(fr, axis, ang),
+        rotAround(fu, axis, ang),
+        rotAround(ff, axis, ang)
       );
-      turnRaf = requestAnimationFrame(tick);
-    } else {
-      turnRaf = null;
-      turnBusy = false;
-      pivot.style.transform = basisToCSS(
-        player.right,
-        player.up,
-        player.forward
-      );
-      updateView(false);
-    }
-  };
-
-  turnRaf = requestAnimationFrame(tick);
+    },
+    onDone: () => {
+      turnBusy = 0;
+      look();
+      pumpQ();
+    },
+  });
 };
 
 function facingFaceKey() {
@@ -2731,14 +2334,9 @@ function buildRoom(spec) {
     const face = div({ className: "face" });
     face.dataset.face = key;
     const hides = hiddensOn(spec.id, key);
-    paintWallMesh(
+    paintWall(
       face,
-      undefined,
-      hides.length
-        ? {
-            collectibles: hides.map((h) => ({ id: h.id, color: h.color })),
-          }
-        : {}
+      hides.map((h) => ({ id: h.id, color: h.color }))
     );
     return div({ className: `wall ${cls}` }, face);
   });
@@ -2761,39 +2359,28 @@ const camera = div({ id: "camera" }, pivot);
 const viewport = div({ id: "viewport" }, camera);
 const inspectStage = div({ id: "istage", hidden: true });
 
-const leftBtn = button("◀");
-const upBtn = button("▲");
-const rightBtn = button("▶");
-const downBtn = button("▼");
-const actionBtn = button({}, "Go");
+document.body.append(viewport, inspectStage);
 
-leftBtn.dataset.act = "left";
-upBtn.dataset.act = "up";
-rightBtn.dataset.act = "right";
-downBtn.dataset.act = "down";
-actionBtn.dataset.act = "action";
-
-const controls = div(
-  { id: "controls" },
-  leftBtn,
-  upBtn,
-  rightBtn,
-  downBtn,
-  actionBtn
-);
-
-document.body.append(viewport, inspectStage, controls);
-
+let sx, sy, swiped;
 viewport.addEventListener("click", () => {
-  if (
-    player.inspecting ||
-    turnBusy ||
-    puzzles?.isOpen() ||
-    bodyHas("rewarding") ||
-    bodyHas("won")
-  )
-    return;
+  if (swiped) return void (swiped = 0);
+  if (turnBusy || bodyHas("rewarding") || bodyHas("won")) return;
   primaryAction();
+});
+viewport.addEventListener("touchstart", (e) => {
+  const t = e.changedTouches[0];
+  sx = t.clientX;
+  sy = t.clientY;
+  swiped = 0;
+}, { passive: true });
+viewport.addEventListener("touchend", (e) => {
+  if (bodyHas("rewarding") || bodyHas("won")) return;
+  const t = e.changedTouches[0];
+  const dx = t.clientX - sx;
+  const dy = t.clientY - sy;
+  if (dx * dx + dy * dy < 576) return;
+  swiped = 1;
+  doTurn(Math.abs(dx) > Math.abs(dy) ? +(dx > 0) : 2 + (dy > 0));
 });
 
 const cubeRack = createCubeRack();
@@ -2802,65 +2389,78 @@ const powers = createPowerSystem();
 function levelCleared() {
   return (
     triangles.every((t) => collected.has(t.id)) &&
-    levelColors.every((c) => solvedColors.has(c.name))
+    levelColors.every((c) => solvedColors.has(c.i))
   );
 }
 
-function retireColorFromLevel(colorOrName) {
-  const name =
-    typeof colorOrName === "string" ? colorOrName : colorOrName?.name;
-  if (!name) return;
-  solvedColors.add(name);
+function retireColorFromLevel(i) {
+  if (i == null) return;
+  solvedColors.add(i);
   let stripped = false;
   for (const t of triangles) {
-    if (t.color.name !== name || collected.has(t.id)) continue;
+    if (t.color.i !== i) continue;
+    clearHintMask(t.id);
+    if (collected.has(t.id)) continue;
     collected.add(t.id);
     layerById(t.id)?.remove();
     stripped = true;
   }
-  puzzles?.map?.[name]?.remove?.();
-  if (puzzles?.map) delete puzzles.map[name];
-  levelColors = levelColors.filter((c) => c.name !== name);
+  puzzles?.map?.[i]?.remove();
+  if (puzzles?.map) delete puzzles.map[i];
+  levelColors = levelColors.filter((c) => c.i !== i);
   if (stripped && player.inspecting) {
     const layers = faceLayers(inspectFace());
     if (layers.length) trackInspectHits(layers);
     else stopHitTracking();
   }
-  powers?.syncAll?.();
+  powers.syncAll();
 }
 
+let rewardInflight = 0;
+
 async function onColorComplete(color, puzzle) {
-  bodyOn("rewarding");
-  powers?.syncAll?.();
+  if (bodyHas("won")) return;
+  rewardInflight++;
+  solvedColors.add(color.i);
+  sfxReward(3 / 4, 0.2);
   try {
-    triggerReward();
-    solvedColors.add(color.name);
     const left = triangles.filter(
-      (t) => t.color.name === color.name && !collected.has(t.id)
+      (t) => t.color.i === color.i && !collected.has(t.id)
     ).length;
 
     await wait(OPTS.time.solveHoldMs);
+    if (bodyHas("won")) return;
 
     const gem = await puzzle.collapseToGem();
+    if (bodyHas("won")) return;
     await cubeRack.deliver(color, gem);
+    if (bodyHas("won") || cubeRack.allComplete()) {
+      endGameWon();
+      return;
+    }
 
-    if (cubeRack.isColorComplete?.(color)) {
-      retireColorFromLevel(color);
+    if (cubeRack.isColorComplete(color)) {
+      retireColorFromLevel(color.i);
     } else if (left >= PER_COLOR) {
       puzzle.reset();
     } else {
       puzzle.remove();
     }
 
-    if (cubeRack.allComplete?.()) {
+    await wait(300);
+    if (bodyHas("won")) return;
+    await powers.offerUpgrade();
+    if (bodyHas("won") || rewardInflight > 1) return;
+
+    if (cubeRack.allComplete()) {
       endGameWon();
       return;
     }
-    await powers.offerUpgrade();
     if (levelCleared()) await transitionToLevel(levelIndex + 1);
   } finally {
-    bodyOff("rewarding");
-    powers?.syncAll?.();
+    rewardInflight--;
+    if (!bodyHas("won") && !qs(".pmod")) bodyOff("rewarding");
+    powers.syncAll();
   }
 }
 
@@ -2868,9 +2468,38 @@ function endGameWon() {
   if (bodyHas("won")) return;
   bodyOn("won");
   qs(".pmod")?.remove();
-  if (!document.getElementById("win")) {
-    document.body.append(div({ id: "win" }, "You win"));
-  }
+  bodyOff("rewarding");
+  document.body.append(div({ id: "win" }, "You Won!"));
+  musicWin();
+  cubeRack.slots.forEach((_, i) =>
+    setTimeout(() => sfxReward(4 / 3), i * 200)
+  );
+  powers.syncAll();
+}
+
+function showHelp() {
+  const modal = showModal([
+    v.h2(
+      { className: "ph" },
+      "Find the Triangles: Save the Rainbow"
+    ),
+    div(
+      { className: "ph" },
+      "Swipe or arrows to turn\nTap or space to move\nPowerups will help"
+    ),
+  ]);
+  const go = () => {
+    removeEventListener("keydown", go);
+    modal.onclick = null;
+    on(modal, "out");
+    setTimeout(() => {
+      modal.remove();
+      bodyOff("rewarding");
+      powers.syncAll();
+    }, 520);
+  };
+  addEventListener("keydown", go);
+  modal.onclick = go;
 }
 
 async function transitionToLevel(index) {
@@ -2878,7 +2507,10 @@ async function transitionToLevel(index) {
   player.inspecting = false;
   clearInspectTarget();
   stopHitTracking();
+  off(viewport, "inspecting");
 
+  haltTurns();
+  doTurn((Math.random() * 4) | 0);
   on(viewport, "lx");
   await wait(OPTS.time.levelExitMs);
 
@@ -2887,25 +2519,26 @@ async function transitionToLevel(index) {
   off(viewport, "lx");
   on(viewport, "le");
   void world.offsetWidth;
-  await wait(OPTS.time.levelEnterPadMs);
   on(viewport, "li");
   await wait(OPTS.time.levelEnterMs);
   off(viewport, "le", "li");
 }
 
 function startLevel(index) {
-  const exclude = cubeRack.completedNames?.() || [];
+  const exclude = cubeRack.completed();
   const L = buildLevel(index, exclude);
   if (!L.colors.length) {
     endGameWon();
     return;
   }
+  applyLevelMood(index);
   levelIndex = L.index;
   rooms = L.rooms;
   triangles = L.triangles;
   levelColors = L.colors;
   collected = new Set();
   solvedColors = new Set();
+  haltTurns();
   player.room = 0;
   player.inspecting = false;
   player.right = [1, 0, 0];
@@ -2915,10 +2548,11 @@ function startLevel(index) {
   puzzles?.destroy();
   puzzles = createPuzzleSet(L.colors, L.perColor, onColorComplete);
 
-  clearAllHintMasks?.();
+  clearAllHintMasks();
   world.replaceChildren(...rooms.map(buildRoom));
   updateView(false);
-  powers?.syncAll?.();
+  if (index === 0 && powerState.wash.level < 1) powerState.wash.level = 1;
+  powers.syncAll();
 }
 
 function passageTarget() {
@@ -2939,52 +2573,28 @@ function updateView(animate = true) {
   tog(world, "na", !animate);
   tog(camera, "na", !animate);
 
-  if (!turnBusy) {
-    pivot.style.transform = basisToCSS(player.right, player.up, player.forward);
-  }
+  if (!turnBusy) look();
   const r = rooms[player.room];
   if (!r) return;
   world.style.transform = `translate3d(calc(${-r.x} * var(--span)), 0px, calc(${-r.z} * var(--span)))`;
   tog(viewport, "inspecting", player.inspecting);
-
-  const passage = passageTarget();
-
-  if (player.inspecting) {
-    setNavDisabled(turnBusy);
-    actionBtn.disabled = false;
-    actionBtn.textContent = "Back";
-  } else {
-    setNavDisabled(turnBusy);
-    actionBtn.disabled = turnBusy;
-    actionBtn.textContent = passage !== null ? "Go" : "Inspect";
-  }
 }
 
-function setNavDisabled(busy) {
-  leftBtn.disabled = busy;
-  rightBtn.disabled = busy;
-  upBtn.disabled = busy;
-  downBtn.disabled = busy;
-}
-
-function navigateFromView(applyBasis) {
-  if (turnBusy) return;
-
-  const startTurn = () => {
+function navigateFromView(applyBasis, axis, s) {
+  const kick = () => {
     const fr = [...player.right],
       fu = [...player.up],
       ff = [...player.forward];
     applyBasis();
-    animateTurn(fr, fu, ff);
-    updateView(false);
+    animateTurn(fr, fu, ff, axis, s);
   };
 
   if (!player.inspecting) {
-    startTurn();
+    kick();
     return;
   }
 
-  turnBusy = true;
+  turnBusy = 1;
   const face = inspectFace();
   const layers = faceLayers(face);
   stopHitTracking();
@@ -2996,55 +2606,36 @@ function navigateFromView(applyBasis) {
   off(camera, "na");
   off(world, "na");
   off(viewport, "inspecting");
-  setNavDisabled(true);
-  actionBtn.disabled = true;
 
   onceEndOrTimeout(
     camera,
-    INSPECT_OUT_MS + 80,
+    OPTS.time.camMs + 80,
     () => {
-      turnBusy = false;
-      startTurn();
+      turnBusy = 0;
+      kick();
     },
     (e) => e.target === camera && e.propertyName === "transform"
   );
 }
 
-function turnLeft() {
+const TURNS = [
+  ["up", "right", 1],
+  ["up", "right", -1],
+  ["right", "up", -1],
+  ["right", "up", 1],
+];
+const doTurn = (i) => {
+  if (turnBusy || walkBusy) return turnQ.length < 8 && turnQ.push(i);
+  const [ax, other, s] = TURNS[i];
+  const axis = player[ax];
   navigateFromView(() => {
-    player.forward = rot90(player.forward, player.up, 1);
-    player.right = rot90(player.right, player.up, 1);
-  });
-}
-
-function turnRight() {
-  navigateFromView(() => {
-    player.forward = rot90(player.forward, player.up, -1);
-    player.right = rot90(player.right, player.up, -1);
-  });
-}
-
-function lookUp() {
-  navigateFromView(() => {
-    player.forward = rot90(player.forward, player.right, -1);
-    player.up = rot90(player.up, player.right, -1);
-  });
-}
-
-function lookDown() {
-  navigateFromView(() => {
-    player.forward = rot90(player.forward, player.right, 1);
-    player.up = rot90(player.up, player.right, 1);
-  });
-}
+    player.forward = rot90(player.forward, axis, s);
+    player[other] = rot90(player[other], axis, s);
+  }, axis, s);
+};
 
 function clearInspectTarget() {
-  document
-    .querySelectorAll(".face.it")
-    .forEach((f) => off(f, "it"));
-  document
-    .querySelectorAll(".cl.hot, .ctri.hot")
-    .forEach((el) => off(el, "hot"));
+  qsa(".face.it").forEach((f) => off(f, "it"));
 }
 
 let hitRaf = null;
@@ -3068,8 +2659,6 @@ function trackInspectHits(layers) {
     const hit = button({
       className: "ihit",
     });
-    hit.addEventListener("pointerenter", () => on(layer, "hot"));
-    hit.addEventListener("pointerleave", () => off(layer, "hot"));
     hit.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -3106,13 +2695,13 @@ function trackInspectHits(layers) {
 
 function enterInspect() {
   if (passageTarget() !== null) return;
+  pruneWashes();
   player.inspecting = true;
   clearInspectTarget();
 
   const face = getFacingFaceEl();
   if (face) {
     on(face, "it");
-    clearFaceHints(face);
     const layers = faceLayers(face);
     if (layers.length) {
       playRevealMask(layers);
@@ -3144,15 +2733,22 @@ function exitInspect() {
 }
 
 function primaryAction() {
-  if (turnBusy || puzzles?.isOpen()) return;
+  if (turnBusy) return;
   if (player.inspecting) {
-        exitInspect();
+    exitInspect();
     return;
   }
   const to = passageTarget();
   if (to !== null) {
-        player.room = to;
+    player.room = to;
+    walkBusy = 1;
+    const gen = ++walkGen;
     updateView();
+    setTimeout(() => {
+      if (gen !== walkGen) return;
+      walkBusy = 0;
+      pumpQ();
+    }, 780);
     return;
   }
   enterInspect();
@@ -3168,7 +2764,7 @@ function claimTriangle(id, el) {
     el ||
     layerById(id);
   const face = layer?.closest?.(".face");
-  powers?.noteCollected?.(id);
+  powers.noteCollected(id);
   if (layer) layer.style.visibility = "hidden";
   return { tri, layer, face };
 }
@@ -3176,8 +2772,7 @@ function claimTriangle(id, el) {
 function collectTriangle(id, el) {
   const claim = claimTriangle(id, el);
   if (!claim) return;
-    const { tri, layer, face } = claim;
-  clearFaceHints(face);
+  const { tri, layer, face } = claim;
   const others = face
     ? faceLayers(face).filter((l) => l !== layer)
     : [];
@@ -3203,39 +2798,13 @@ function collectTriangle(id, el) {
   puzzles?.flyIn(id, layer, tri.color);
 }
 
-controls.addEventListener("click", (e) => {
-  const btn = e.target.closest("button");
-  if (!btn) return;
-  ({
-    left: turnLeft,
-    right: turnRight,
-    up: lookUp,
-    down: lookDown,
-    action: primaryAction,
-  })[btn.dataset.act]?.();
-});
-
 window.addEventListener("keydown", (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
-  if (e.key.toLowerCase() === "m") {
-    e.preventDefault();
-    toggleMute();
-    return;
-  }
+  if (bodyHas("rewarding") || bodyHas("won")) return;
   const powerId = POWER_KEY[e.key.toLowerCase()];
   if (powerId) {
     e.preventDefault();
-    if (
-      bodyHas("rewarding") ||
-      qs(".pmod")
-    )
-      return;
-    if (puzzles?.isOpen()) return;
     powers.activatePower(powerId);
-    return;
-  }
-  if (puzzles?.isOpen()) {
-    if (e.key === " " || e.key === "Enter") e.preventDefault();
     return;
   }
   if (e.key === " " || e.key === "Enter") {
@@ -3244,21 +2813,20 @@ window.addEventListener("keydown", (e) => {
     return;
   }
   const map = {
-    ArrowLeft: turnLeft,
-    ArrowRight: turnRight,
-    ArrowUp: lookUp,
-    ArrowDown: lookDown,
+    ArrowLeft: 0,
+    ArrowRight: 1,
+    ArrowUp: 2,
+    ArrowDown: 3,
   };
-  if (map[e.key]) {
+  if (map[e.key] != null) {
     e.preventDefault();
-    map[e.key]();
+    if (!e.repeat) doTurn(map[e.key]);
   }
 });
 
 ensureRevealDefs();
 startLevel(0);
-powerState.perception.level = 1;
-powers.syncAll();
+showHelp();
 
 </script>
 </body>

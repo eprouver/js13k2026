@@ -89,8 +89,8 @@ Omit unused files (e.g. maze helpers) from the bundle.
 
 ```bash
 npm install
-npm run build        # --opt 1 (default)
-npm run build:max    # --opt 2 (slower, better ratio)
+npm run build        # Roadroller O2 + allowFreeVars (submission)
+npm run build:fast   # Roadroller O1 (iterate)
 ```
 
 Report must include **zip bytes** vs **13312** (13 × 1024).
@@ -105,5 +105,5 @@ Report must include **zip bytes** vs **13312** (13 × 1024).
 ## Notes
 
 - Roadroller on the **concatenated JS** with `action: "eval"`, then minimal HTML around `<script>…</script>`.
-- Zip with `zip -9` when available; that file is the competition metric.
+- Zip with `zip -9 -X`, Python `zipfile` level 9, and Zopfli; keep the smallest archive.
 - Do not commit `node_modules/` or usually `dist/` (regenerate).

@@ -1,7 +1,5 @@
 const PER_COLOR = OPTS.level.perColor;
 
-const LEVEL_DEFS = OPTS.level.defs;
-
 const shuffle = (a) => {
   for (let i = a.length - 1; i > 0; i--) {
     const j = (Math.random() * (i + 1)) | 0;
@@ -28,16 +26,15 @@ const mazeRooms = (size) => {
   });
 };
 
-const pickLevelColors = (count, excludeNames = []) => {
-  const ban = new Set(excludeNames);
-  const pool = RAINBOW.filter((c) => !ban.has(c.name));
-  return shuffle(pool.slice()).slice(0, Math.min(count, pool.length));
+const pickLevelColors = (count, exclude = []) => {
+  const ban = new Set(exclude);
+  return shuffle(RAINBOW.filter((c) => !ban.has(c.i))).slice(0, count);
 };
 
 const placeTriangles = (rooms, colors, perColor = PER_COLOR) => {
   const slots = [];
   for (const r of rooms) {
-    for (const face of ["N", "E", "S", "W"]) {
+    for (const face of ["N", "E", "S", "W", "U", "D"]) {
       if (face in r.doors) continue;
       slots.push({ room: r.id, face });
     }
@@ -60,23 +57,17 @@ const placeTriangles = (rooms, colors, perColor = PER_COLOR) => {
   return tris;
 };
 
-const buildLevel = (index, excludeNames = []) => {
+const buildLevel = (index, exclude = []) => {
   const maxSize = OPTS.level.maxMazeSize;
   const raw =
-    LEVEL_DEFS[index] || {
+    OPTS.level.defs[index] || {
       mazeSize: Math.min(maxSize, 2 + index),
-      colorCount: Math.min(6, 1 + index),
+      colorCount: 1 + index,
     };
   const mazeSize =
     raw.mazeSize <= 0 ? 0 : Math.min(maxSize, raw.mazeSize);
-  const ban = new Set(excludeNames);
-  const pool = RAINBOW.filter((c) => !ban.has(c.name));
-  const colorCount = Math.min(
-    pool.length,
-    Math.min(6, Math.max(1, raw.colorCount || 1))
-  );
-  const rooms = mazeSize <= 0 ? tutorialRooms() : mazeRooms(mazeSize);
-  const colors = pickLevelColors(colorCount, excludeNames);
+  const rooms = mazeSize ? mazeRooms(mazeSize) : tutorialRooms();
+  const colors = pickLevelColors(Math.min(6, raw.colorCount || 1), exclude);
   return {
     index,
     mazeSize,
