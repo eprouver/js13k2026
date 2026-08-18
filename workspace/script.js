@@ -132,8 +132,15 @@ const inspectStage = div({ id: "istage", hidden: true });
 
 document.body.append(viewport, inspectStage);
 
+let chromeless;
+const tryChromeless = () => {
+  if (chromeless++) return;
+  document.documentElement.requestFullscreen?.().catch?.(() => {});
+};
+
 let sx, sy, swiped;
 viewport.addEventListener("click", () => {
+  tryChromeless();
   if (swiped) return void (swiped = 0);
   if (turnBusy || bodyHas("rewarding") || bodyHas("won")) return;
   primaryAction();
@@ -260,6 +267,7 @@ function showHelp() {
     ),
   ]);
   const go = () => {
+    tryChromeless();
     removeEventListener("keydown", go);
     modal.onclick = null;
     on(modal, "out");

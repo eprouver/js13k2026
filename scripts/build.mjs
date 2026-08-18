@@ -84,7 +84,7 @@ function wrapPacked(js) {
 }
 
 function wrapPages(js) {
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>${TITLE}</title></head>${wrapPacked(js)}</html>`;
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#121621"><link rel="manifest" href="manifest.webmanifest"><title>${TITLE}</title></head>${wrapPacked(js)}</html>`;
 }
 
 function kb(n) {
@@ -318,6 +318,17 @@ const packedPath = join(dist, "index.html");
 writeFileSync(packedPath, packed);
 mkdirSync(join(dist, "pages"), { recursive: true });
 writeFileSync(join(dist, "pages", "index.html"), wrapPages(rolled));
+writeFileSync(
+  join(dist, "pages", "manifest.webmanifest"),
+  JSON.stringify({
+    name: "Unicorns and Rainbows",
+    short_name: "js13k",
+    display: "standalone",
+    background_color: "#121621",
+    theme_color: "#121621",
+    start_url: "./",
+  })
+);
 
 const zipPath = join(dist, "game.zip");
 const { zipBytes, infozip, pyzip, zopfli, advzip } = await zipStore(packedPath, zipPath);
