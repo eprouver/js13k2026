@@ -134,7 +134,7 @@ document.body.append(viewport, inspectStage);
 
 let chromeless;
 const tryChromeless = () => {
-  if (chromeless++) return;
+  if (chromeless++ || !matchMedia("(hover:none)").matches) return;
   document.documentElement.requestFullscreen?.().catch?.(() => {});
 };
 
@@ -256,6 +256,7 @@ function endGameWon() {
 }
 
 function showHelp() {
+  bodyOn("hi");
   const modal = showModal([
     v.h2(
       { className: "ph" },
@@ -273,7 +274,7 @@ function showHelp() {
     on(modal, "out");
     setTimeout(() => {
       modal.remove();
-      bodyOff("rewarding");
+      bodyOff("rewarding", "hi");
       powers.syncAll();
     }, 520);
   };

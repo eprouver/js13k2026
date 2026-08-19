@@ -20,7 +20,7 @@ function ensureRevealDefs() {
   wrap.setAttribute("aria-hidden", "true");
   wrap.style.cssText =
     "position:absolute;width:0;height:0;overflow:hidden;pointer-events:none";
-  wrap.innerHTML = `<defs>${filt("df", 1, ".05")}${filt("wf", 9)}<filter id="sf" x="-50%" y="-50%" width="200%" height="200%"><feTurbulence type="fractalNoise" baseFrequency=".08" numOctaves="4"/><feDiffuseLighting diffuseConstant=".6" surfaceScale=".7"><feDistantLight elevation="50"/></feDiffuseLighting><feBlend in2="SourceGraphic" mode="multiply"/></filter></defs>`;
+  wrap.innerHTML = `<defs>${filt("df", 1, ".05")}${filt("wf", 9)}</defs>`;
   document.body.prepend(wrap);
 }
 

@@ -13,10 +13,10 @@ const tutorialRooms = () => [
   { id: 1, x: 0, z: -1, doors: { S: 0 } },
 ];
 
-const mazeRooms = (size) => {
-  const { doors } = generateMaze(size);
+const mazeRooms = (cols, rows = cols) => {
+  const { doors } = generateMaze(cols, rows);
   return doors.map((d, id) => {
-    const { row, col } = indexToRC(id, size);
+    const { row, col } = indexToRC(id, cols);
     return {
       id,
       x: col,
@@ -58,19 +58,21 @@ const placeTriangles = (rooms, colors, perColor = PER_COLOR) => {
 };
 
 const buildLevel = (index, exclude = []) => {
-  const maxSize = OPTS.level.maxMazeSize;
+  const maxC = OPTS.level.maxMazeSize;
+  const maxR = OPTS.level.maxMazeRows;
   const raw =
     OPTS.level.defs[index] || {
-      mazeSize: Math.min(maxSize, 2 + index),
+      mazeSize: maxC,
+      mazeRows: maxR,
       colorCount: 1 + index,
     };
-  const mazeSize =
-    raw.mazeSize <= 0 ? 0 : Math.min(maxSize, raw.mazeSize);
-  const rooms = mazeSize ? mazeRooms(mazeSize) : tutorialRooms();
+  const cols = raw.mazeSize <= 0 ? 0 : Math.min(maxC, raw.mazeSize);
+  const rows = cols ? Math.min(maxR, raw.mazeRows || raw.mazeSize) : 0;
+  const rooms = cols ? mazeRooms(cols, rows) : tutorialRooms();
   const colors = pickLevelColors(Math.min(6, raw.colorCount || 1), exclude);
   return {
     index,
-    mazeSize,
+    mazeSize: cols,
     rooms,
     colors,
     triangles: colors.length

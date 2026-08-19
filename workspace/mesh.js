@@ -66,17 +66,15 @@ const createMeshData = (seed) => {
     preserveAspectRatio: "none",
     class: "wm",
   });
-  const g = svgEl("g", matchMedia("(hover:none)").matches ? {} : { filter: "url(#sf)" });
-  g.append(svgEl("rect", { width: 100, height: 100, fill: "var(--wall-lo)" }));
+  svg.append(svgEl("rect", { width: 100, height: 100, fill: "var(--wall-lo)" }));
   for (const [a, b, c] of tris) {
-    g.append(
+    svg.append(
       svgEl("polygon", {
         points: [a, b, c].map(([x, y]) => `${x * 100},${y * 100}`).join(" "),
         fill: `color-mix(in srgb,var(--wall-lo) ${(rand() * 100) | 0}%,var(--wall-hi))`,
       })
     );
   }
-  svg.append(g);
   return { svg, tris };
 };
 

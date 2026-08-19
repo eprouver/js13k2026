@@ -3,8 +3,8 @@ const indexToRC = (index, cols) => ({
   col: index % cols,
 });
 
-const generateMaze = (size = 5) => {
-  const n = size * size;
+const generateMaze = (cols = 5, rows = cols) => {
+  const n = cols * rows;
   const doors = Array.from({ length: n }, () => ({}));
   const seen = new Uint8Array(n);
   const stack = [0];
@@ -17,13 +17,13 @@ const generateMaze = (size = 5) => {
   ];
   while (stack.length) {
     const cur = stack[stack.length - 1];
-    const { row, col } = indexToRC(cur, size);
+    const { row, col } = indexToRC(cur, cols);
     const opts = [];
     for (const [dr, dc, d, opp] of dirs) {
       const r = row + dr;
       const c = col + dc;
-      if (r < 0 || c < 0 || r >= size || c >= size) continue;
-      const id = r * size + c;
+      if (r < 0 || c < 0 || r >= rows || c >= cols) continue;
+      const id = r * cols + c;
       if (!seen[id]) opts.push([id, d, opp]);
     }
     if (!opts.length) {
@@ -36,5 +36,5 @@ const generateMaze = (size = 5) => {
     seen[id] = 1;
     stack.push(id);
   }
-  return { size, doors };
+  return { cols, rows, doors };
 };

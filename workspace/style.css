@@ -23,10 +23,11 @@
   --bow: repeating-linear-gradient(90deg,var(--c0),var(--c1),var(--c2),var(--c3),var(--c4),var(--c5),var(--c0) 50%);
   --ease: cubic-bezier(0.4, 0.05, 0.2, 1);
   --side-orb: max(7.25vmin, 3rem);
-  --orb-font: calc(var(--side-orb) * 0.3);
+  --orb-font: calc(var(--side-orb) * 0.36);
   --dim: grayscale(1) brightness(0.55);
   --line: 0.2rem;
   --bow-line: 0.6rem;
+  font-size: 120%;
 }
 
 @supports not (corner-shape: squircle) {
@@ -65,11 +66,15 @@ body {
   border-radius: var(--radius);
 }
 
-#viewport,
 #camera,
-#istage,
 .cl,
 .wl {
+  position: absolute;
+  inset: 0;
+}
+
+#viewport,
+#istage {
   position: absolute;
   inset: 0;
 }
@@ -96,6 +101,15 @@ body.rewarding::after,
   .face {
     backface-visibility: visible;
   }
+  #viewport,
+  #istage {
+    width: min(100vw, 48rem);
+    height: min(100dvh, 48rem);
+    inset: auto;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+  }
 }
 
 .room,
@@ -108,6 +122,11 @@ body.rewarding::after,
 }
 
 #viewport {
+  container-type: size;
+  --dist: 40cqmin;
+  --face: calc(2 * var(--dist) - 10cqmin);
+  --persp: 40cqmin;
+  --span: calc(2 * var(--dist));
   perspective: var(--persp);
   overflow: hidden;
   background: var(--bg);
@@ -133,7 +152,7 @@ body.rewarding::after,
 }
 
 #viewport.inspecting #camera {
-  transform: translateZ(16vmin);
+  transform: translateZ(16cqmin);
 }
 
 #pivot,
@@ -433,27 +452,34 @@ body.won #drk { z-index: 85; }
 body.won #prk { display: none; }
 
 #uni {
+  --u: 25vmin;
   position: absolute;
-  right: -3vmin;
+  right: calc(-3vmin - var(--u) / 16);
   bottom: -5vmin;
-  width: 25vmin;
-  height: 25vmin;
+  width: var(--u);
+  height: var(--u);
   z-index: 210;
   pointer-events: none;
   overflow: visible;
   filter: brightness(0.65) drop-shadow(0 0 0 #fff);
-  transition: filter 0.35s ease;
+  transition: 0.5s var(--ease);
 }
 #uni svg {
   transform: scaleX(-1);
   transform-origin: 50% 80%;
+  overflow: visible;
 }
 #uni.go,
+body.hi #uni,
 body.won #uni {
   filter: brightness(1) drop-shadow(0 0 0 #fff);
 }
 #uni.go {
   animation: uni-gallop 0.5s ease;
+}
+body.hi #uni,
+body.won #uni {
+  --u: 38vmin;
 }
 body.won #uni {
   animation: uni-gallop 0.74s ease infinite;
@@ -502,7 +528,7 @@ body.won .ds::before {
 }
 
 .ds .cube {
-  font-size: calc(var(--side-orb) * 0.17);
+  font-size: calc(var(--side-orb) * 0.2);
   z-index: 1;
 }
 
@@ -545,12 +571,12 @@ body.won .ds::before {
   left: 50%;
   top: 50%;
   z-index: 100;
-  width: min(92vw, 80vmin);
+  white-space: nowrap;
   transform: translate(-50%, -50%) rotate(-16deg);
   pointer-events: none;
   text-align: center;
   font-weight: 700;
-  font-size: 16vmin;
+  font-size: 19vmin;
   color: #fff;
   -webkit-text-stroke: .025em #000;
 }

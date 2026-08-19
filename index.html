@@ -32,10 +32,11 @@ document.head.appendChild(document.createElement("style")).append(`*,
   --bow: repeating-linear-gradient(90deg,var(--c0),var(--c1),var(--c2),var(--c3),var(--c4),var(--c5),var(--c0) 50%);
   --ease: cubic-bezier(0.4, 0.05, 0.2, 1);
   --side-orb: max(7.25vmin, 3rem);
-  --orb-font: calc(var(--side-orb) * 0.3);
+  --orb-font: calc(var(--side-orb) * 0.36);
   --dim: grayscale(1) brightness(0.55);
   --line: 0.2rem;
   --bow-line: 0.6rem;
+  font-size: 120%;
 }
 
 @supports not (corner-shape: squircle) {
@@ -74,11 +75,15 @@ body {
   border-radius: var(--radius);
 }
 
-#viewport,
 #camera,
-#istage,
 .cl,
 .wl {
+  position: absolute;
+  inset: 0;
+}
+
+#viewport,
+#istage {
   position: absolute;
   inset: 0;
 }
@@ -105,6 +110,15 @@ body.rewarding::after,
   .face {
     backface-visibility: visible;
   }
+  #viewport,
+  #istage {
+    width: min(100vw, 48rem);
+    height: min(100dvh, 48rem);
+    inset: auto;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+  }
 }
 
 .room,
@@ -117,6 +131,11 @@ body.rewarding::after,
 }
 
 #viewport {
+  container-type: size;
+  --dist: 40cqmin;
+  --face: calc(2 * var(--dist) - 10cqmin);
+  --persp: 40cqmin;
+  --span: calc(2 * var(--dist));
   perspective: var(--persp);
   overflow: hidden;
   background: var(--bg);
@@ -142,7 +161,7 @@ body.rewarding::after,
 }
 
 #viewport.inspecting #camera {
-  transform: translateZ(16vmin);
+  transform: translateZ(16cqmin);
 }
 
 #pivot,
@@ -442,27 +461,34 @@ body.won #drk { z-index: 85; }
 body.won #prk { display: none; }
 
 #uni {
+  --u: 25vmin;
   position: absolute;
-  right: -3vmin;
+  right: calc(-3vmin - var(--u) / 16);
   bottom: -5vmin;
-  width: 25vmin;
-  height: 25vmin;
+  width: var(--u);
+  height: var(--u);
   z-index: 210;
   pointer-events: none;
   overflow: visible;
   filter: brightness(0.65) drop-shadow(0 0 0 #fff);
-  transition: filter 0.35s ease;
+  transition: 0.5s var(--ease);
 }
 #uni svg {
   transform: scaleX(-1);
   transform-origin: 50% 80%;
+  overflow: visible;
 }
 #uni.go,
+body.hi #uni,
 body.won #uni {
   filter: brightness(1) drop-shadow(0 0 0 #fff);
 }
 #uni.go {
   animation: uni-gallop 0.5s ease;
+}
+body.hi #uni,
+body.won #uni {
+  --u: 38vmin;
 }
 body.won #uni {
   animation: uni-gallop 0.74s ease infinite;
@@ -511,7 +537,7 @@ body.won .ds::before {
 }
 
 .ds .cube {
-  font-size: calc(var(--side-orb) * 0.17);
+  font-size: calc(var(--side-orb) * 0.2);
   z-index: 1;
 }
 
@@ -554,12 +580,12 @@ body.won .ds::before {
   left: 50%;
   top: 50%;
   z-index: 100;
-  width: min(92vw, 80vmin);
+  white-space: nowrap;
   transform: translate(-50%, -50%) rotate(-16deg);
   pointer-events: none;
   text-align: center;
   font-weight: 700;
-  font-size: 16vmin;
+  font-size: 19vmin;
   color: #fff;
   -webkit-text-stroke: .025em #000;
 }
@@ -760,7 +786,7 @@ const OPTS = {
     trophyCrazy: 0.9,
   },
   powers: {
-    rallyFromLevel: 3,
+    rallyFromLevel: 4,
     washFadeMs: 3e4,
     cd: [24e3, 4e3, 5e3],
     evokeCd: [48e3, 4e3, 16e3],
@@ -770,9 +796,11 @@ const OPTS = {
   level: {
     perColor: 4,
     maxMazeSize: 4,
+    maxMazeRows: 3,
     defs: [
       { mazeSize: 0, colorCount: 1 },
       { mazeSize: 2, colorCount: 2 },
+      { mazeSize: 2, mazeRows: 3, colorCount: 2 },
       { mazeSize: 3, colorCount: 3 },
       { mazeSize: 4, colorCount: 4 },
     ],
@@ -1019,7 +1047,7 @@ const uniCyan = "#7fdbff";
 const uniGold = "#ffdc00";
 
 const uni = div({ id: "uni" });
-uni.innerHTML = `<svg viewBox="0 0 128 128"><ellipse cx="55" cy="49" fill="${uniPink}" rx="24" ry="16" transform="rotate(-19 55 49)"/><path fill="#fff" d="m32 112 19-66 32 2 7 37-18 4 6 24z"/><path fill="${uniCyan}" d="M31 78c-5-2-6-13-2-24q9-19 18-17c5 2 6 13 2 24q-8 19-18 17z"/><path fill="#fff" d="m50 56 4-21 12 18zm20-4 11-17 3 21z"/><circle cx="60" cy="64" r="5" fill="#222"/><circle cx="80" cy="64" r="5" fill="#222"/><ellipse cx="79" cy="84" fill="#fde8f6" rx="11" ry="10"/><path fill="${uniGold}" d="m63 49 7-35 2 36z"/><ellipse cx="59" cy="63" fill="#fff" rx="1.4" ry="1.3"/><ellipse cx="78" cy="63" fill="#fff" rx="1.4" ry="1.3"/><ellipse cx="78" cy="82" fill="${uniPink}" rx="2.4" ry="2.6"/><ellipse cx="86" cy="82" fill="${uniPink}" rx="2.4" ry="2.6"/><g fill="none" stroke-linecap="round" stroke-width="21"><path stroke="${uniPink}" d="m38 62-12 59"/><path stroke="${uniCyan}" d="m33 86-12 60"/></g></svg>`;
+uni.innerHTML = `<svg viewBox="0 0 128 128"><ellipse cx="63" cy="49.4" fill="${uniPink}" rx="24" ry="16.4" transform="rotate(-19 63 49)"/><path fill="#fff" d="m37 130 23-84 31 2 7 37-18 4 7 41z"/><path fill="${uniCyan}" d="M39 78c-5-2-6-13-2-24q9-19 18-17c5 2 6 13 2 24q-8 19-18 17"/><path fill="#fff" d="m58 57 4-22 12 18zm20-5 11-17 3 21z"/><circle cx="67.9" cy="64" r="5" fill="#222"/><circle cx="87.9" cy="64" r="5" fill="#222"/><ellipse cx="86.9" cy="84" fill="#fde8f6" rx="11" ry="10"/><path fill="${uniGold}" d="m71 49 7-35 2 36z"/><circle cx="66.6" cy="62.9" r="1.4" fill="#fff"/><circle cx="86.2" cy="62.9" r="1.4" fill="#fff"/><ellipse cx="85.1" cy="81.6" fill="${uniPink}" rx="2.4" ry="2.2"/><g fill="none" stroke-linecap="round" stroke-width="21"><path stroke="${uniPink}" d="m46 62-12 59"/><path stroke="${uniCyan}" d="m41 86-12 60"/></g><path fill="${uniPink}" d="m94 84-2-2q0-3 2-3t2 3z"/><path fill="none" stroke="#fff" stroke-linecap="round" stroke-width="39" d="m61 112-64 8"/></svg>`;
 document.body.append(uni);
 const uniDone = () => off(uni, "go");
 const uniGo = () => {
@@ -1231,17 +1259,15 @@ const createMeshData = (seed) => {
     preserveAspectRatio: "none",
     class: "wm",
   });
-  const g = svgEl("g", matchMedia("(hover:none)").matches ? {} : { filter: "url(#sf)" });
-  g.append(svgEl("rect", { width: 100, height: 100, fill: "var(--wall-lo)" }));
+  svg.append(svgEl("rect", { width: 100, height: 100, fill: "var(--wall-lo)" }));
   for (const [a, b, c] of tris) {
-    g.append(
+    svg.append(
       svgEl("polygon", {
         points: [a, b, c].map(([x, y]) => `${x * 100},${y * 100}`).join(" "),
         fill: `color-mix(in srgb,var(--wall-lo) ${(rand() * 100) | 0}%,var(--wall-hi))`,
       })
     );
   }
-  svg.append(g);
   return { svg, tris };
 };
 
@@ -1341,7 +1367,7 @@ function ensureRevealDefs() {
   wrap.setAttribute("aria-hidden", "true");
   wrap.style.cssText =
     "position:absolute;width:0;height:0;overflow:hidden;pointer-events:none";
-  wrap.innerHTML = `<defs>${filt("df", 1, ".05")}${filt("wf", 9)}<filter id="sf" x="-50%" y="-50%" width="200%" height="200%"><feTurbulence type="fractalNoise" baseFrequency=".08" numOctaves="4"/><feDiffuseLighting diffuseConstant=".6" surfaceScale=".7"><feDistantLight elevation="50"/></feDiffuseLighting><feBlend in2="SourceGraphic" mode="multiply"/></filter></defs>`;
+  wrap.innerHTML = `<defs>${filt("df", 1, ".05")}${filt("wf", 9)}</defs>`;
   document.body.prepend(wrap);
 }
 
@@ -1509,8 +1535,8 @@ const indexToRC = (index, cols) => ({
   col: index % cols,
 });
 
-const generateMaze = (size = 5) => {
-  const n = size * size;
+const generateMaze = (cols = 5, rows = cols) => {
+  const n = cols * rows;
   const doors = Array.from({ length: n }, () => ({}));
   const seen = new Uint8Array(n);
   const stack = [0];
@@ -1523,13 +1549,13 @@ const generateMaze = (size = 5) => {
   ];
   while (stack.length) {
     const cur = stack[stack.length - 1];
-    const { row, col } = indexToRC(cur, size);
+    const { row, col } = indexToRC(cur, cols);
     const opts = [];
     for (const [dr, dc, d, opp] of dirs) {
       const r = row + dr;
       const c = col + dc;
-      if (r < 0 || c < 0 || r >= size || c >= size) continue;
-      const id = r * size + c;
+      if (r < 0 || c < 0 || r >= rows || c >= cols) continue;
+      const id = r * cols + c;
       if (!seen[id]) opts.push([id, d, opp]);
     }
     if (!opts.length) {
@@ -1542,7 +1568,7 @@ const generateMaze = (size = 5) => {
     seen[id] = 1;
     stack.push(id);
   }
-  return { size, doors };
+  return { cols, rows, doors };
 };
 
 ;
@@ -1561,10 +1587,10 @@ const tutorialRooms = () => [
   { id: 1, x: 0, z: -1, doors: { S: 0 } },
 ];
 
-const mazeRooms = (size) => {
-  const { doors } = generateMaze(size);
+const mazeRooms = (cols, rows = cols) => {
+  const { doors } = generateMaze(cols, rows);
   return doors.map((d, id) => {
-    const { row, col } = indexToRC(id, size);
+    const { row, col } = indexToRC(id, cols);
     return {
       id,
       x: col,
@@ -1606,19 +1632,21 @@ const placeTriangles = (rooms, colors, perColor = PER_COLOR) => {
 };
 
 const buildLevel = (index, exclude = []) => {
-  const maxSize = OPTS.level.maxMazeSize;
+  const maxC = OPTS.level.maxMazeSize;
+  const maxR = OPTS.level.maxMazeRows;
   const raw =
     OPTS.level.defs[index] || {
-      mazeSize: Math.min(maxSize, 2 + index),
+      mazeSize: maxC,
+      mazeRows: maxR,
       colorCount: 1 + index,
     };
-  const mazeSize =
-    raw.mazeSize <= 0 ? 0 : Math.min(maxSize, raw.mazeSize);
-  const rooms = mazeSize ? mazeRooms(mazeSize) : tutorialRooms();
+  const cols = raw.mazeSize <= 0 ? 0 : Math.min(maxC, raw.mazeSize);
+  const rows = cols ? Math.min(maxR, raw.mazeRows || raw.mazeSize) : 0;
+  const rooms = cols ? mazeRooms(cols, rows) : tutorialRooms();
   const colors = pickLevelColors(Math.min(6, raw.colorCount || 1), exclude);
   return {
     index,
-    mazeSize,
+    mazeSize: cols,
     rooms,
     colors,
     triangles: colors.length
@@ -2381,7 +2409,7 @@ document.body.append(viewport, inspectStage);
 
 let chromeless;
 const tryChromeless = () => {
-  if (chromeless++) return;
+  if (chromeless++ || !matchMedia("(hover:none)").matches) return;
   document.documentElement.requestFullscreen?.().catch?.(() => {});
 };
 
@@ -2503,6 +2531,7 @@ function endGameWon() {
 }
 
 function showHelp() {
+  bodyOn("hi");
   const modal = showModal([
     v.h2(
       { className: "ph" },
@@ -2520,7 +2549,7 @@ function showHelp() {
     on(modal, "out");
     setTimeout(() => {
       modal.remove();
-      bodyOff("rewarding");
+      bodyOff("rewarding", "hi");
       powers.syncAll();
     }, 520);
   };

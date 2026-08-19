@@ -14,7 +14,7 @@ const OPTS = {
     trophyCrazy: 0.9,
   },
   powers: {
-    rallyFromLevel: 3,
+    rallyFromLevel: 4,
     washFadeMs: 3e4,
     cd: [24e3, 4e3, 5e3],
     evokeCd: [48e3, 4e3, 16e3],
@@ -24,9 +24,11 @@ const OPTS = {
   level: {
     perColor: 4,
     maxMazeSize: 4,
+    maxMazeRows: 3,
     defs: [
       { mazeSize: 0, colorCount: 1 },
       { mazeSize: 2, colorCount: 2 },
+      { mazeSize: 2, mazeRows: 3, colorCount: 2 },
       { mazeSize: 3, colorCount: 3 },
       { mazeSize: 4, colorCount: 4 },
     ],
