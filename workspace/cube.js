@@ -10,7 +10,7 @@ const CUBE_TURNS = [
 ];
 
 const cubeFill = (c) =>
-  colorHsl({ ...c, l: Math.max(c.l, OPTS.cube.minLightness) });
+  colorHsl({ ...c, l: Math.max(c.l, O.minL) });
 
 const makeGem = (color, slot) => {
   const fill = cubeFill(color);
@@ -18,7 +18,7 @@ const makeGem = (color, slot) => {
   const endSize = Math.max(
     16,
     cubeFace?.getBoundingClientRect?.().width ||
-      (slot?.getBoundingClientRect?.().width || 52) * 0.34
+      (slot ? rect(slot).width : 52) * 0.34
   );
   const gem = div({ className: "gem" });
   gem.style.setProperty("--fly", fill);
@@ -27,16 +27,16 @@ const makeGem = (color, slot) => {
   return { gem, fill, endSize };
 };
 
-function createCube({ color, unlockedFaces = [], pendingFaces = [] }) {
-  const lit = new Set(unlockedFaces);
-  const pending = new Set(pendingFaces);
+function createCube({ color, lit = [], pd = [] }) {
+  const litSet = new Set(lit);
+  const pending = new Set(pd);
   const fill = cubeFill(color);
 
   const faces = CUBE_TURNS.map(([ry, rx], i) => {
     const isPending = pending.has(i);
-    const on = lit.has(i) && !isPending;
+    const on = litSet.has(i) && !isPending;
     const face = div({
-      className: on ? "cf lit" : isPending ? "cf pending" : "cf",
+      className: on ? "cf lit" : isPending ? "cf pd" : "cf",
       style: {
         background: on ? fill : "#3a3a42",
         transform: `rotateY(${ry}deg) rotateX(${rx}deg) translateZ(1em)`,
@@ -77,8 +77,8 @@ function createCubeRack() {
     slot.replaceChildren(
       createCube({
         color: rainbow,
-        unlockedFaces: [...new Set([...lit, ...pending])],
-        pendingFaces: [...pending],
+        lit: [...new Set([...lit, ...pending])],
+        pd: [...pending],
       })
     );
     return slot;
@@ -93,9 +93,9 @@ function createCubeRack() {
   function igniteFace(slot, faceIndex) {
     const face = slot?.querySelector?.(`.cf[data-i="${faceIndex}"]`);
     if (!face) return;
-    off(face, "pending");
+    off(face, "pd");
     void face.offsetWidth;
-    on(face, "lit", "ignite");
+    on(face, "lit", "ig");
     const fill = slot.querySelector(".cube")?.style.getPropertyValue("--cube");
     if (fill) face.style.background = fill;
   }
@@ -112,8 +112,8 @@ function createCubeRack() {
     if (!slot) return null;
     const face = nextFace(color.i);
     if (face < 0) return retireFull(color, slot, gemEl);
-    await flyThen(gemEl, slot, { node: gemEl, ms: OPTS.fly.trophyMs, sfx: sfxReward });
-    if (bodyHas("won")) return null;
+    await flyThen(gemEl, slot, { node: gemEl, ms: O.tfly, sfx: sfxReward });
+    if (isWon()) return null;
     return settleFace(color, face);
   }
 
@@ -164,7 +164,7 @@ function createCubeRack() {
         const slot = slotFor(c);
         const { gem } = makeGem(c, slot);
         return flyIn(null, slot, { node: gem, sfx: sfxReward }, () => {
-          if (bodyHas("won")) return;
+          if (isWon()) return;
           igniteFace(slot, f);
           if (isFull(c.i)) retireColorFromLevel(c.i);
         });
@@ -186,6 +186,7 @@ function createCubeRack() {
     addFaces,
     rallyRoom,
     isColorComplete,
+    lit: (i) => litByColor[i].size,
     completed,
     allComplete,
   };

@@ -1,31 +1,39 @@
+const W = 0,
+  E = 1,
+  R = 2;
 const POWERS = [
-  ["wash", "W", uniCyan],
-  ["evoke", "E", uniPink],
-  ["rally", "R", uniGold],
+  ["W", uniCyan],
+  ["E", uniPink],
+  ["R", uniGold],
 ];
-const POWER_IDS = POWERS.map((p) => p[0]);
-const POWER_KEY = { w: "wash", e: "evoke", r: "rally" };
+const PK = { w: W, e: E, r: R };
+const PCD = [
+  [24e3, 4e3, 5e3],
+  [48e3, 4e3, 16e3],
+  [12e4, 16e3, 28e3],
+];
 const powStyle = (fill) => ({
   "--pow": `color-mix(in srgb, ${fill} 65%, #000)`,
-  "--pow-dark": `color-mix(in srgb, ${fill} 27%, #201018)`,
+  "--powd": `color-mix(in srgb, ${fill} 27%, #201018)`,
 });
 
-const powerState = Object.fromEntries(
-  POWER_IDS.map((id) => [id, { level: 0, active: false, cooling: false }])
-);
+const powerState = [
+  { l: 0, a: 0, c: 0 },
+  { l: 0, a: 0, c: 0 },
+  { l: 0, a: 0, c: 0 },
+];
 
 const lv1 = (n) => Math.max(1, n | 0);
 const powerCd = (id, level) => {
-  const [base, step, min] = OPTS.powers[id + "Cd"] || OPTS.powers.cd;
+  const [base, step, min] = PCD[id];
   return Math.max(min, base - (lv1(level) - 1) * step);
 };
 
-const powerBtn = ([id, glyph, fill], n, extra) => {
+const powerBtn = ([glyph, fill], n, extra) => {
   const btn = button({
     className: extra ? `ps ${extra}` : "ps",
     style: powStyle(fill),
   });
-  btn.dataset.power = id;
   btn.append(div({ className: "pg" }, glyph), div({ className: "pl" }, String(n)));
   return btn;
 };
@@ -34,17 +42,16 @@ let upgradeQueue = Promise.resolve();
 let upgradeWait = 0;
 
 function createPowerSystem() {
-  const slots = POWERS.map((p) => {
-    const slot = powerBtn(p, 0, "locked");
+  const slots = POWERS.map((p, id) => {
+    const slot = powerBtn(p, 0, "lk");
     slot.disabled = true;
-    slot.onclick = () => activatePower(p[0]);
+    slot.onclick = () => activatePower(id);
     return slot;
   });
   document.body.append(div({ id: "prk" }, ...slots));
 
-  const gate = (id) =>
-    id === "rally" ? levelIndex >= OPTS.powers.rallyFromLevel : true;
-  const unlocked = (id) => powerState[id].level > 0 && gate(id);
+  const gate = (id) => (id === R ? levelIndex >= O.rallyLv : true);
+  const unlocked = (id) => powerState[id].l > 0 && gate(id);
 
   const openPool = () => {
     const ids = new Set(levelColors.map((c) => c.i));
@@ -61,39 +68,38 @@ function createPowerSystem() {
 
   function syncSlot(id) {
     const st = powerState[id];
-    const slot = slots[POWER_IDS.indexOf(id)];
-    slot.querySelector(".pl").textContent = String(st.level);
+    const slot = slots[id];
+    slot.querySelector(".pl").textContent = String(st.l);
     const lock = !unlocked(id);
     const empty =
       !lock &&
-      ((id === "evoke" && !openPool().length) ||
-        (id === "rally" && !(cubeRack.rallyRoom() > 0)));
-    const held = bodyHas("rewarding");
-    tog(slot, "locked", lock || empty);
-    tog(slot, "active", st.active);
-    tog(slot, "cooling", st.cooling);
-    slot.disabled = lock || empty || st.active || st.cooling || held;
+      ((id === E && !openPool().length) || (id === R && !(cubeRack.rallyRoom() > 0)));
+    const held = hasRw();
+    tog(slot, "lk", lock || empty);
+    tog(slot, "on", st.a);
+    tog(slot, "co", st.c);
+    slot.disabled = lock || empty || st.a || st.c || held;
   }
-  const syncAll = () => POWER_IDS.forEach(syncSlot);
+  const syncAll = () => POWERS.forEach((_, id) => syncSlot(id));
 
   function beginBusy(id, activeMs) {
     const st = powerState[id];
-    st.active = st.cooling = true;
+    st.a = st.c = true;
     syncSlot(id);
-    const cd = powerCd(id, st.level);
+    const cd = powerCd(id, st.l);
     setTimeout(() => {
-      st.active = false;
+      st.a = false;
       syncSlot(id);
     }, Math.min(activeMs, cd));
     setTimeout(() => {
-      st.cooling = false;
+      st.c = false;
       syncSlot(id);
     }, cd);
   }
 
   function showUpgrade() {
     return new Promise((resolve) => {
-      if (bodyHas("won")) {
+      if (isWon()) {
         upgradeWait--;
         resolve();
         return;
@@ -102,14 +108,9 @@ function createPowerSystem() {
       let picked = false;
       let onKey;
 
-      const choices = POWERS.map((p) => {
-        const [id] = p;
+      const choices = POWERS.map((p, id) => {
         const ok = canPick(id);
-        const btn = powerBtn(
-          p,
-          "+",
-          ok ? "ppk" : "ppk locked"
-        );
+        const btn = powerBtn(p, "+", ok ? "ppk" : "ppk lk");
         btn.disabled = !ok;
         if (ok) btn.onclick = () => commit(id);
         return btn;
@@ -119,7 +120,7 @@ function createPowerSystem() {
 
       const finish = (id) => {
         upgradeWait--;
-        if (bodyHas("won")) {
+        if (isWon()) {
           resolve(id);
           return;
         }
@@ -128,12 +129,12 @@ function createPowerSystem() {
           return;
         }
         modal?.remove();
-        bodyOff("rewarding");
+        bodyOff("rw");
         syncAll();
         resolve(id);
       };
       const close = (id) => {
-        if (picked || bodyHas("won")) return;
+        if (picked || isWon()) return;
         picked = true;
         removeEventListener("keydown", onKey);
         const more = upgradeWait > 1;
@@ -141,19 +142,18 @@ function createPowerSystem() {
         setTimeout(() => finish(id), more ? 400 : 520);
       };
       const commit = (id) => {
-        if (picked || bodyHas("won") || !canPick(id)) return;
-        sfxPick();
-        on(choices[POWER_IDS.indexOf(id)], "picked");
+        if (picked || isWon() || !canPick(id)) return;
+        sfxReward(16 / 9);
+        on(choices[id], "pk");
         close(id);
-        const st = powerState[id];
-        st.level++;
+        powerState[id].l++;
         syncSlot(id);
       };
 
       onKey = (e) => {
         if (e.metaKey || e.ctrlKey || e.altKey) return;
-        const id = POWER_KEY[e.key.toLowerCase()];
-        if (!id) return;
+        const id = PK[e.key.toLowerCase()];
+        if (id == null) return;
         e.preventDefault();
         commit(id);
       };
@@ -162,7 +162,7 @@ function createPowerSystem() {
   }
 
   const offerUpgrade = () => {
-    if (bodyHas("won")) return Promise.resolve();
+    if (isWon()) return Promise.resolve();
     upgradeWait++;
     const p = upgradeQueue.then(showUpgrade, showUpgrade);
     upgradeQueue = p.catch(() => {});
@@ -195,10 +195,7 @@ function createPowerSystem() {
     const pool = openPool();
     if (!pool.length) return;
     const i = shuffle([...new Set(pool.map((t) => t.color.i))])[0];
-    const picks = shuffle(pool.filter((t) => t.color.i === i)).slice(
-      0,
-      lv1(level)
-    );
+    const picks = shuffle(pool.filter((t) => t.color.i === i)).slice(0, lv1(level));
     const puzzle = puzzles.map[i];
     if (!puzzle) return;
 
@@ -224,19 +221,19 @@ function createPowerSystem() {
 
   function activatePower(id) {
     const st = powerState[id];
-    if (!unlocked(id) || st.active || st.cooling || bodyHas("rewarding") || bodyHas("won")) return;
-    if (id === "evoke" && !openPool().length) return;
-    if (id === "rally" && !(cubeRack.rallyRoom() > 0)) return;
+    if (!unlocked(id) || st.a || st.c || hasRw() || isWon()) return;
+    if (id === E && !openPool().length) return;
+    if (id === R && !(cubeRack.rallyRoom() > 0)) return;
 
     uniGo();
     sfxReward(4 / 3);
 
-    if (id === "rally") {
-      runRally(lv1(st.level));
-      beginBusy(id, OPTS.fly.trophyMs + 400);
+    if (id === R) {
+      runRally(lv1(st.l));
+      beginBusy(id, O.tfly + 400);
     } else {
-      if (id === "wash") runWash(st.level);
-      else runEvoke(st.level);
+      if (id === W) runWash(st.l);
+      else runEvoke(st.l);
       beginBusy(id, 900);
     }
   }

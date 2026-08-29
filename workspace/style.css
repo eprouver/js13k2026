@@ -10,29 +10,30 @@
 }
 
 :root {
-  --dist: 40vmin;
-  --face: calc(2 * var(--dist) - 10vmin);
-  --radius: 100%;
-  --pill-radius: 2rem;
-  --persp: 40vmin;
-  --span: calc(2 * var(--dist));
+  --D: 40vmin;
+  --F: calc(2 * var(--D) - 10vmin);
+  --R: 100%;
+  --Pr: 2rem;
+  --P: 40vmin;
+  --S: calc(2 * var(--D));
   --bg: #121621;
-  --wall-lo: #2c313d;
-  --wall-hi: #4f576d;
+  --W1: #2c313d;
+  --W2: #4f576d;
   --fg: #f8e8ff;
   --bow: repeating-linear-gradient(90deg,var(--c0),var(--c1),var(--c2),var(--c3),var(--c4),var(--c5),var(--c0) 50%);
-  --ease: cubic-bezier(0.4, 0.05, 0.2, 1);
-  --side-orb: max(7.25vmin, 3rem);
-  --orb-font: calc(var(--side-orb) * 0.36);
+  --E: cubic-bezier(0.4, 0.05, 0.2, 1);
+  --O: max(7.25vmin, 3rem);
+  --Of: calc(var(--O) * 0.36);
   --dim: grayscale(1) brightness(0.55);
   --line: 0.2rem;
-  --bow-line: 0.6rem;
+  --Bl: 0.6rem;
+  --Ts: drop-shadow(0 .2em .45em rgba(0,0,0,.55));
   font-size: 120%;
 }
 
 @supports not (corner-shape: squircle) {
   :root {
-    --radius: 32%;
+    --R: 32%;
   }
 }
 
@@ -47,7 +48,7 @@ body {
 }
 
 .pmc {
-  border-radius: var(--pill-radius);
+  border-radius: var(--Pr);
   corner-shape: round;
   position: relative;
   z-index: 1;
@@ -63,37 +64,36 @@ body {
 .pl,
 .gem,
 .face {
-  border-radius: var(--radius);
+  border-radius: var(--R);
 }
 
-#camera,
+#cam,
 .cl,
 .wl {
   position: absolute;
   inset: 0;
 }
 
-#viewport,
-#istage {
+#vp,
+#is {
   position: absolute;
   inset: 0;
 }
 
-body.rewarding::after,
+body.rw::after,
 .pmod {
   position: fixed;
   inset: 0;
 }
 
 .face {
-  width: var(--face);
-  height: var(--face);
-  left: calc(var(--face) / -2);
-  top: calc(var(--face) / -2);
+  width: var(--F);
+  height: var(--F);
+  left: calc(var(--F) / -2);
+  top: calc(var(--F) / -2);
   position: absolute;
   overflow: hidden;
-  background: linear-gradient(var(--wall-lo), var(--wall-hi));
-  opacity: 1;
+  background: linear-gradient(var(--W1), var(--W2));
   backface-visibility: hidden;
 }
 
@@ -101,8 +101,8 @@ body.rewarding::after,
   .face {
     backface-visibility: visible;
   }
-  #viewport,
-  #istage {
+  #vp,
+  #is {
     width: min(100vw, 48rem);
     height: min(100dvh, 48rem);
     inset: auto;
@@ -121,13 +121,13 @@ body.rewarding::after,
   backface-visibility: hidden;
 }
 
-#viewport {
+#vp {
   container-type: size;
-  --dist: 40cqmin;
-  --face: calc(2 * var(--dist) - 10cqmin);
-  --persp: 40cqmin;
-  --span: calc(2 * var(--dist));
-  perspective: var(--persp);
+  --D: 40cqmin;
+  --F: calc(2 * var(--D) - 10cqmin);
+  --P: 40cqmin;
+  --S: calc(2 * var(--D));
+  perspective: var(--P);
   overflow: hidden;
   background: var(--bg);
   pointer-events: auto;
@@ -136,27 +136,27 @@ body.rewarding::after,
   outline: none;
 }
 
-#viewport.inspecting {
+#vp.ins {
   cursor: default;
 }
 
-#camera {
+#cam {
   transform-style: preserve-3d;
   transform: translateZ(0);
-  transition: transform 550ms var(--ease);
+  transition: transform 495ms var(--E);
 }
 
-#camera.na,
-#world.na {
+#cam.na,
+#w.na {
   transition: none;
 }
 
-#viewport.inspecting #camera {
+#vp.ins #cam {
   transform: translateZ(16cqmin);
 }
 
-#pivot,
-#world,
+#pv,
+#w,
 .room,
 .wall {
   position: absolute;
@@ -167,28 +167,28 @@ body.rewarding::after,
   transform-style: preserve-3d;
 }
 
-#pivot {
+#pv {
   left: 50%;
   top: 50%;
   transform-origin: 0 0;
 }
 
-#world {
-  transition: transform 700ms var(--ease);
+#w {
+  transition: transform 700ms var(--E);
 }
 
 .wall {
   transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))
-    translateZ(calc(-1 * var(--dist) + 1px));
+    translateZ(calc(-1 * var(--D) + 1px));
 }
-.wall.face-n { --ry: 0deg; }
-.wall.face-s { --ry: 180deg; }
-.wall.face-e { --ry: -90deg; }
-.wall.face-w { --ry: 90deg; }
-.wall.face-u { --rx: 90deg; }
-.wall.face-d { --rx: -90deg; }
+.wall.fn { --ry: 0deg; }
+.wall.fs { --ry: 180deg; }
+.wall.fe { --ry: -90deg; }
+.wall.fw { --ry: 90deg; }
+.wall.fu { --rx: 90deg; }
+.wall.fd { --rx: -90deg; }
 
-body.rewarding::after,
+body.rw::after,
 .ds::before,
 .pmc::before,
 .pmc::after,
@@ -196,19 +196,19 @@ body.rewarding::after,
   content: "";
 }
 
-#viewport.lx .face {
+#vp.lx .face {
   opacity: 0;
-  transition: opacity 0.55s var(--ease);
+  transition: opacity 0.55s var(--E);
 }
 
-#viewport.le .face {
+#vp.le .face {
   opacity: 0;
   transition: none;
 }
 
-#viewport.le.li .face {
+#vp.le.li .face {
   opacity: 1;
-  transition: opacity 0.65s var(--ease);
+  transition: opacity .78s var(--E);
 }
 
 .face .wm,
@@ -223,7 +223,7 @@ body.rewarding::after,
 
 .face .wm {
   pointer-events: none;
-  transition: filter 0.45s var(--ease);
+  transition: filter 0.45s var(--E);
 }
 .face.it .wm {
   filter: grayscale(1);
@@ -253,9 +253,15 @@ body.rewarding::after,
   overflow: visible;
 }
 
-#viewport.inspecting .face.it .cl,
-.face.it .cl.hiding {
+#vp.ins .face.it .cl,
+.face.it .cl.hd {
   opacity: 1;
+}
+
+.cl.rv,
+.cl.rd,
+.cl.hd {
+  filter: var(--Ts);
 }
 
 .wl {
@@ -263,7 +269,7 @@ body.rewarding::after,
   pointer-events: none;
 }
 
-#viewport.inspecting .face.it .wl {
+#vp.ins .face.it .wl {
   visibility: hidden;
 }
 
@@ -277,12 +283,12 @@ body.rewarding::after,
   }
 }
 
-#istage {
+#is {
   z-index: 5;
   pointer-events: none;
 }
 
-#istage .ihit {
+#is .ihit {
   position: absolute;
   border: none;
   background: transparent;
@@ -290,11 +296,11 @@ body.rewarding::after,
   pointer-events: auto;
 }
 
-body.rewarding::after {
+body.rw::after {
   z-index: 80;
 }
 
-#proot {
+#pr {
   position: absolute;
   left: 50%;
   bottom: 0;
@@ -305,7 +311,7 @@ body.rewarding::after {
   pointer-events: none;
 }
 
-#ctabs {
+#tb {
   position: relative;
   display: flex;
   justify-content: center;
@@ -330,31 +336,31 @@ body.rewarding::after {
   cursor: default;
   overflow: hidden;
   --sh: inset 0 0 0 var(--line) color-mix(in srgb, var(--tab) 45%, transparent);
-  background: var(--tab-dark);
+  background: var(--tabd);
   box-shadow: var(--sh);
-  transition: 0.8s var(--ease);
+  transition: 0.8s var(--E);
 }
 
-.ct.ready {
+.ct.ry {
   box-shadow: var(--sh), 0 0 0 var(--line) var(--tab);
 }
 
-.ct.sealing {
+.ct.sl {
   z-index: 121;
   min-width: 0;
   padding: 0;
   border-radius: 0.35rem;
   background: var(--tab);
   box-shadow: 0 0 1.2rem var(--tab);
-  animation: tab-seal 0.8s var(--ease) both;
+  animation: tab-seal 0.8s var(--E) both;
 }
 
-.ct.sealing .tps {
+.ct.sl .tps {
   opacity: 0;
   transform: scale(0.15);
 }
 
-.ct.sealed {
+.ct.sd {
   width: 0;
   min-width: 0;
   height: 0;
@@ -373,7 +379,7 @@ body.rewarding::after {
   position: relative;
   width: 1.85rem;
   height: 1.85rem;
-  transition: opacity 0.4s ease, transform 0.7s var(--ease);
+  transition: opacity 0.4s ease, transform 0.7s var(--E);
 }
 
 .tpw {
@@ -461,25 +467,30 @@ body.won #prk { display: none; }
   z-index: 210;
   pointer-events: none;
   overflow: visible;
-  filter: brightness(0.65) drop-shadow(0 0 0 #fff);
-  transition: 0.5s var(--ease);
+  filter: brightness(0.65);
+  transition: 0.5s var(--E);
 }
 #uni svg {
   transform: scaleX(-1);
   transform-origin: 50% 80%;
-  overflow: visible;
 }
 #uni.go,
+#uni.act,
 body.hi #uni,
 body.won #uni {
-  filter: brightness(1) drop-shadow(0 0 0 #fff);
+  filter: brightness(1);
+}
+#uni.act {
+  --u: 28vmin;
+  animation: none;
+  transform: rotate(-12deg) translate(-14%, -7%) scale(1.18);
 }
 #uni.go {
   animation: uni-gallop 0.5s ease;
 }
 body.hi #uni,
 body.won #uni {
-  --u: 38vmin;
+  --u: 42vmin;
 }
 body.won #uni {
   animation: uni-gallop 0.74s ease infinite;
@@ -493,19 +504,19 @@ body.won #uni {
 .ds,
 .ps,
 .ppk {
-  width: var(--side-orb);
-  height: var(--side-orb);
-  font-size: var(--orb-font);
+  width: var(--O);
+  height: var(--O);
+  font-size: var(--Of);
   display: grid;
   place-items: center;
-  background: var(--orb-base);
-  box-shadow: inset 0 0 0 var(--line) var(--orb-ring);
+  background: var(--Ob);
+  box-shadow: inset 0 0 0 var(--line) var(--Or);
 }
 .ds {
   position: relative;
   overflow: visible;
-  --orb-base: var(--slot-dark);
-  --orb-ring: color-mix(in srgb, var(--slot) 50%, transparent);
+  --Ob: var(--slotd);
+  --Or: color-mix(in srgb, var(--slot) 50%, transparent);
 }
 .ds::before {
   position: absolute;
@@ -515,7 +526,7 @@ body.won #uni {
   width: 0;
   background: var(--slot);
   border-radius: 0;
-  transition: width 0.8s var(--ease) var(--d, 0s);
+  transition: width 0.8s var(--E) var(--d, 0s);
   pointer-events: none;
 }
 body.won .ds::before {
@@ -528,7 +539,7 @@ body.won .ds::before {
 }
 
 .ds .cube {
-  font-size: calc(var(--side-orb) * 0.2);
+  font-size: calc(var(--O) * 0.2);
   z-index: 1;
 }
 
@@ -547,18 +558,18 @@ body.won .ds::before {
   left: 50%;
   transform-style: preserve-3d;
   backface-visibility: visible;
-  width: 2em;
-  height: 2em;
-  margin: -1em 0 0 -1em;
+  width: calc(2em - 4px);
+  height: calc(2em - 4px);
+  margin: calc(2px - 1em) 0 0 calc(2px - 1em);
   opacity: 0.7;
   transition: background 0.45s ease, opacity 0.45s ease;
 }
 
-.cf.pending { opacity: 0.85; }
+.cf.pd { opacity: 0.85; }
 .cf.lit { opacity: 1; }
-.cf.lit.ignite { animation: cube-ignite 0.6s ease; }
+.cf.lit.ig { animation: cube-ig 0.6s ease; }
 
-@keyframes cube-ignite {
+@keyframes cube-ig {
   35% { filter: brightness(1.65); }
 }
 
@@ -588,40 +599,36 @@ body.won .ds::before {
   border: none;
   cursor: pointer;
   color: #fff;
-  --orb-base: var(--pow-dark);
-  --orb-ring: var(--pow);
+  --Ob: var(--powd);
+  --Or: var(--pow);
 }
 
 .ps {
   transition: transform 0.4s ease, filter 0.3s ease, opacity 0.3s ease;
 }
 
-.ps.locked,
-body.rewarding #prk .ps,
-.ppk.locked,
+.ps.lk,
+body.rw #prk .ps,
+.ppk.lk,
 .ppk:disabled {
   filter: var(--dim);
   opacity: 0.5;
   cursor: default;
-}
-
-.ps.locked,
-body.rewarding #prk .ps {
   pointer-events: none;
 }
 
-.ps.active,
-.ps.cooling:not(.active) {
+.ps.on,
+.ps.co:not(.on) {
   transform: translateX(50%);
   cursor: default;
 }
 
-.ps.active {
+.ps.on {
   filter: none;
   opacity: 1;
 }
 
-.ps.cooling:not(.active) {
+.ps.co:not(.on) {
   filter: grayscale(1) brightness(0.7);
   opacity: 0.55;
 }
@@ -684,16 +691,16 @@ body.rewarding #prk .ps {
 }
 
 .pmc::before {
-  inset: calc(-1 * var(--bow-line));
+  inset: calc(-1 * var(--Bl));
 }
 
 .wall:has(.it)::before {
-  --bow-line: 1.5rem;
-  width: calc(var(--face) + 2 * var(--bow-line));
-  height: calc(var(--face) + 2 * var(--bow-line));
-  left: calc(var(--face) / -2 - var(--bow-line));
-  top: calc(var(--face) / -2 - var(--bow-line));
-  border-radius: var(--radius);
+  --Bl: 1.5rem;
+  width: calc(var(--F) + 2 * var(--Bl));
+  height: calc(var(--F) + 2 * var(--Bl));
+  left: calc(var(--F) / -2 - var(--Bl));
+  top: calc(var(--F) / -2 - var(--Bl));
+  border-radius: var(--R);
 }
 
 @keyframes bow {
@@ -748,7 +755,7 @@ body.rewarding #prk .ps {
   gap: 0.7rem;
 }
 
-.ppk.picked {
+.ppk.pk {
   animation: ppk-pop 0.5s ease;
   filter: brightness(1.7);
 }

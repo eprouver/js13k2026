@@ -45,7 +45,7 @@ function createPuzzleUI(opts) {
           i < n ? fill : "#333"
         );
     });
-    tog(tab, "ready", n >= total && !solved);
+    tog(tab, "ry", n >= total && !solved);
   }
 
   function tryComplete() {
@@ -54,7 +54,7 @@ function createPuzzleUI(opts) {
     solved = true;
     ids.forEach(clearHintMask);
     pruneWashes();
-    on(tab, "ready");
+    on(tab, "ry");
     syncPow();
     onComplete();
   }
@@ -79,7 +79,7 @@ function createPuzzleUI(opts) {
     solved = false;
     completing = false;
     ids.length = 0;
-    off(tab, "ready", "sealing", "sealed");
+    off(tab, "ry", "sl", "sd");
     clrTab();
     if (tab.parentNode !== hold) hold.append(tab);
     tab.hidden = false;
@@ -89,14 +89,14 @@ function createPuzzleUI(opts) {
 
   function removeTab() {
     hold.remove();
-    const root = tabsBar.closest("#proot");
+    const root = tabsBar.closest("#pr");
     if (tabsBar && !tabsBar.childElementCount) root?.remove();
   }
 
   async function collapseToGem() {
     const slot = cubeRack.slots[color.i];
     const { gem, endSize } = makeGem(color, slot);
-    const r0 = tab.getBoundingClientRect();
+    const r0 = rect(tab);
     hold.style.width = hold.style.minWidth = `${r0.width}px`;
     hold.style.height = `${r0.height}px`;
     tab.style.transition = "none";
@@ -108,14 +108,14 @@ function createPuzzleUI(opts) {
     tab.style.width = `${r0.width}px`;
     tab.style.height = `${r0.height}px`;
     tab.style.margin = "0";
-    const r1 = tab.getBoundingClientRect();
+    const r1 = rect(tab);
     tab.style.transition = "";
-    on(tab, "sealing");
+    on(tab, "sl");
     tab.style.width = tab.style.height = `${endSize}px`;
     tab.style.left = `${r1.left + r1.width / 2 - endSize / 2}px`;
     tab.style.top = `${r1.top + r1.height / 2 - endSize / 2}px`;
-    await wait(OPTS.time.sealMs);
-    const r = tab.getBoundingClientRect();
+    await wait(O.seal);
+    const r = rect(tab);
     gem.style.position = "fixed";
     gem.style.zIndex = "121";
     gem.style.width = gem.style.height = `${endSize}px`;
@@ -123,8 +123,8 @@ function createPuzzleUI(opts) {
     gem.style.top = `${r.top + r.height / 2 - endSize / 2}px`;
     document.body.append(gem);
     clrTab();
-    off(tab, "sealing", "ready");
-    on(tab, "sealed");
+    off(tab, "sl", "ry");
+    on(tab, "sd");
     hold.append(tab);
     await nextFrame();
     return gem;
@@ -142,8 +142,8 @@ function createPuzzleUI(opts) {
 }
 
 function createPuzzleSet(colors, perColor, onColorComplete) {
-  const root = div({ id: "proot" });
-  const tabsBar = div({ id: "ctabs" });
+  const root = div({ id: "pr" });
+  const tabsBar = div({ id: "tb" });
   root.append(tabsBar);
   document.body.append(root);
   const map = {};

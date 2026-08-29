@@ -6,7 +6,7 @@
   <circle cx="67.9" cy="64" r="5" fill="#222"/>
   <circle cx="87.9" cy="64" r="5" fill="#222"/>
   <ellipse cx="86.9" cy="84" fill="#fde8f6" rx="11" ry="10"/>
-  <path fill="#ffdc00" d="m71 49 7-35 2 36z"/>
+  <path fill="#ffdc00" d="m71 49 7-35 2 35z"/>
   <circle cx="66.6" cy="62.9" r="1.4" fill="#fff"/>
   <circle cx="86.2" cy="62.9" r="1.4" fill="#fff"/>
   <ellipse cx="85.1" cy="81.6" fill="#f9a0e5" rx="2.4" ry="2.2"/>

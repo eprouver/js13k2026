@@ -9,7 +9,7 @@ const bodyOn = (...c) => on(document.body, ...c);
 const bodyOff = (...c) => off(document.body, ...c);
 const bodyHas = (c) => document.body.classList.contains(c);
 const showModal = (kids, ding) => {
-  if (bodyHas("won")) return qs(".pmod");
+  if (isWon()) return qs(".pmod");
   const card = div(
     { className: "pmc" },
     ...(typeof kids === "string" ? [div({ className: "ph" }, kids)] : [].concat(kids))
@@ -20,7 +20,7 @@ const showModal = (kids, ding) => {
     modal.replaceChildren(card);
   } else {
     modal = div({ className: "pmod" }, card);
-    bodyOn("rewarding");
+    bodyOn("rw");
     document.body.append(modal);
     void modal.offsetWidth;
     on(modal, "show");
@@ -28,6 +28,9 @@ const showModal = (kids, ding) => {
   ding && sfxReward(ding);
   return modal;
 };
+const isWon = () => bodyHas("won");
+const hasRw = () => bodyHas("rw");
+const rect = (el) => el.getBoundingClientRect();
 const px = (n) => n + "px";
 const easeOut3 = (t) => 1 - (1 - t) ** 3;
 const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);

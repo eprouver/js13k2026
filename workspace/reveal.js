@@ -1,8 +1,8 @@
 let revealRaf = null;
 let revealLayers = [];
 
-const REVEAL_MS = OPTS.reveal.ms;
-const R_MAX = OPTS.reveal.rMax;
+const REVEAL_MS = O.rev;
+const R_MAX = O.rMax;
 const filt = (id, seed, freq = ".03") =>
   `<filter id="${id}" x="-50%" y="-50%" width="200%" height="200%"><feTurbulence type="fractalNoise" baseFrequency="${freq}" numOctaves="2" seed="${seed}" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="48" xChannelSelector="R" yChannelSelector="G"/></filter>`;
 
@@ -14,9 +14,9 @@ const readCircleR = (circle, fallback = 0) => {
 };
 
 function ensureRevealDefs() {
-  if (document.getElementById("reveal-defs")) return;
+  if (document.getElementById("rd")) return;
   const wrap = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  wrap.id = "reveal-defs";
+  wrap.id = "rd";
   wrap.setAttribute("aria-hidden", "true");
   wrap.style.cssText =
     "position:absolute;width:0;height:0;overflow:hidden;pointer-events:none";
@@ -33,7 +33,7 @@ function stopRevealRaf() {
 
 function resetLayerMask(layer) {
   if (!layer) return;
-  off(layer, "revealing", "hiding", "revealed");
+  off(layer, "rv", "hd", "rd");
   setCircleR(layer.querySelector(".rc"), 0);
 }
 
@@ -56,8 +56,8 @@ function playRevealMask(layerOrLayers) {
   }
   revealLayers = layers;
   const circles = layers.map((layer) => {
-    off(layer, "revealed", "hiding");
-    on(layer, "revealing");
+    off(layer, "rd", "hd");
+    on(layer, "rv");
     const c = layer.querySelector(".rc");
     setCircleR(c, 0);
     return c;
@@ -71,8 +71,8 @@ function playRevealMask(layerOrLayers) {
     onDone: () =>
       layers.forEach((layer, i) => {
         setCircleR(circles[i], R_MAX);
-        off(layer, "revealing");
-        on(layer, "revealed");
+        off(layer, "rv");
+        on(layer, "rd");
       }),
   });
 }
@@ -84,8 +84,8 @@ function playHideMask(layerOrLayers, onDone) {
   if (!layers.length) return void onDone?.();
   revealLayers = layers;
   const circles = layers.map((layer) => {
-    off(layer, "revealed", "revealing");
-    on(layer, "hiding");
+    off(layer, "rd", "rv");
+    on(layer, "hd");
     return layer.querySelector(".rc");
   });
   if (circles.some((c) => !c)) return void onDone?.();
@@ -168,11 +168,11 @@ function playWash(cl, fill) {
     `<circle class="wc" cx="${cx}" cy="${cy}" r="0" fill="#fff" filter="url(#wf)"/>` +
     `</mask></defs>` +
     `<rect class="wr" width="100" height="100" fill="${fill}" fill-opacity="0.55" mask="url(#${mid})" ` +
-    `style="animation-duration:${OPTS.powers.washFadeMs}ms"/>`;
+    `style="animation-duration:${O.washMs}ms"/>`;
   wl.append(svg);
   face.insertBefore(wl, cl);
   const circle = wl.querySelector(".wc");
-  wl._wt = setTimeout(() => clearHintMask(id), OPTS.powers.washFadeMs);
+  wl._wt = setTimeout(() => clearHintMask(id), O.washMs);
   runTween(REVEAL_MS, {
     setRaf: (raf) => {
       wl._hintRaf = raf;

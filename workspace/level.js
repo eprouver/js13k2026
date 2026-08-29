@@ -1,5 +1,3 @@
-const PER_COLOR = OPTS.level.perColor;
-
 const shuffle = (a) => {
   for (let i = a.length - 1; i > 0; i--) {
     const j = (Math.random() * (i + 1)) | 0;
@@ -26,12 +24,14 @@ const mazeRooms = (cols, rows = cols) => {
   });
 };
 
-const pickLevelColors = (count, exclude = []) => {
+const pickLevelColors = (count, exclude = [], lit = () => 0) => {
   const ban = new Set(exclude);
-  return shuffle(RAINBOW.filter((c) => !ban.has(c.i))).slice(0, count);
+  return RAINBOW.filter((c) => !ban.has(c.i))
+    .sort((a, b) => lit(a.i) - lit(b.i) || a.i - b.i)
+    .slice(0, count);
 };
 
-const placeTriangles = (rooms, colors, perColor = PER_COLOR) => {
+const placeTriangles = (rooms, colors, perColor = O.per) => {
   const slots = [];
   for (const r of rooms) {
     for (const face of ["N", "E", "S", "W", "U", "D"]) {
@@ -57,27 +57,18 @@ const placeTriangles = (rooms, colors, perColor = PER_COLOR) => {
   return tris;
 };
 
-const buildLevel = (index, exclude = []) => {
-  const maxC = OPTS.level.maxMazeSize;
-  const maxR = OPTS.level.maxMazeRows;
-  const raw =
-    OPTS.level.defs[index] || {
-      mazeSize: maxC,
-      mazeRows: maxR,
-      colorCount: 1 + index,
-    };
-  const cols = raw.mazeSize <= 0 ? 0 : Math.min(maxC, raw.mazeSize);
-  const rows = cols ? Math.min(maxR, raw.mazeRows || raw.mazeSize) : 0;
+const buildLevel = (index, exclude = [], lit = () => 0) => {
+  const raw = O.defs[index] || [O.maxC, 1 + index];
+  const cols = raw[0] <= 0 ? 0 : Math.min(O.maxC, raw[0]);
+  const rows = cols ? Math.min(O.maxR, raw[2] || raw[0]) : 0;
   const rooms = cols ? mazeRooms(cols, rows) : tutorialRooms();
-  const colors = pickLevelColors(Math.min(6, raw.colorCount || 1), exclude);
+  const colors = pickLevelColors(Math.min(6, raw[1] || 1), exclude, lit);
   return {
     index,
     mazeSize: cols,
     rooms,
     colors,
-    triangles: colors.length
-      ? placeTriangles(rooms, colors, PER_COLOR)
-      : [],
-    perColor: PER_COLOR,
+    triangles: colors.length ? placeTriangles(rooms, colors) : [],
+    perColor: O.per,
   };
 };

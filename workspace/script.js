@@ -1,19 +1,12 @@
 const player = {
   room: 0,
-  inspecting: false,
+  ins: false,
   right: [1, 0, 0],
   up: [0, 1, 0],
   forward: [0, 0, -1],
 };
 
-const FACES = [
-  ["N", "face-n"],
-  ["E", "face-e"],
-  ["S", "face-s"],
-  ["W", "face-w"],
-  ["U", "face-u"],
-  ["D", "face-d"],
-];
+const FACE_KEYS = "NESWUD";
 
 let levelIndex = 0;
 let rooms = [];
@@ -71,7 +64,7 @@ const pumpQ = () => turnQ.length && doTurn(turnQ.shift());
 
 const animateTurn = (fr, fu, ff, axis, s) => {
   turnBusy = 1;
-  runTween(OPTS.time.turnMs, {
+  runTween(O.turn, {
     ease: easeInOut,
     setRaf: (id) => (turnRaf = id),
     onTick: (eased) => {
@@ -101,34 +94,36 @@ function facingFaceKey() {
 }
 
 function buildRoom(spec) {
-  const walls = FACES.filter(([key]) => !(key in spec.doors)).map(([key, cls]) => {
-    const face = div({ className: "face" });
-    face.dataset.face = key;
-    const hides = hiddensOn(spec.id, key);
-    paintWall(
-      face,
-      hides.map((h) => ({ id: h.id, color: h.color }))
-    );
-    return div({ className: `wall ${cls}` }, face);
-  });
+  const walls = [...FACE_KEYS]
+    .filter((key) => !(key in spec.doors))
+    .map((key) => {
+      const face = div({ className: "face" });
+      face.dataset.f = key;
+      const hides = hiddensOn(spec.id, key);
+      paintWall(
+        face,
+        hides.map((h) => ({ id: h.id, color: h.color }))
+      );
+      return div({ className: `wall f${key.toLowerCase()}` }, face);
+    });
 
   return div(
     {
-      id: `room-${spec.id}`,
+      id: `r${spec.id}`,
       className: "room",
       style: {
-        transform: `translate3d(calc(${spec.x} * var(--span)), 0px, calc(${spec.z} * var(--span)))`,
+        transform: `translate3d(calc(${spec.x} * var(--S)), 0px, calc(${spec.z} * var(--S)))`,
       },
     },
     ...walls
   );
 }
 
-const world = div({ id: "world" });
-const pivot = div({ id: "pivot" }, world);
-const camera = div({ id: "camera" }, pivot);
-const viewport = div({ id: "viewport" }, camera);
-const inspectStage = div({ id: "istage", hidden: true });
+const world = div({ id: "w" });
+const pivot = div({ id: "pv" }, world);
+const camera = div({ id: "cam" }, pivot);
+const viewport = div({ id: "vp" }, camera);
+const inspectStage = div({ id: "is", hidden: true });
 
 document.body.append(viewport, inspectStage);
 
@@ -138,27 +133,20 @@ const tryChromeless = () => {
   document.documentElement.requestFullscreen?.().catch?.(() => {});
 };
 
-let sx, sy, swiped;
-viewport.addEventListener("click", () => {
+viewport.addEventListener("click", (e) => {
   tryChromeless();
-  if (swiped) return void (swiped = 0);
-  if (turnBusy || bodyHas("rewarding") || bodyHas("won")) return;
+  if (turnBusy || hasRw() || isWon()) return;
+  const r = rect(viewport);
+  const x = (e.clientX - r.left) / r.width;
+  const y = (e.clientY - r.top) / r.height;
+  const t = 1 / 3;
+  if (x < t || x > 1 - t || y < t || y > 1 - t) {
+    const dx = Math.abs(x - 0.5);
+    const dy = Math.abs(y - 0.5);
+    if (dx >= dy) return doTurn(+(x > 0.5));
+    return doTurn(2 + +(y > 0.5));
+  }
   primaryAction();
-});
-viewport.addEventListener("touchstart", (e) => {
-  const t = e.changedTouches[0];
-  sx = t.clientX;
-  sy = t.clientY;
-  swiped = 0;
-}, { passive: true });
-viewport.addEventListener("touchend", (e) => {
-  if (bodyHas("rewarding") || bodyHas("won")) return;
-  const t = e.changedTouches[0];
-  const dx = t.clientX - sx;
-  const dy = t.clientY - sy;
-  if (dx * dx + dy * dy < 576) return;
-  swiped = 1;
-  doTurn(Math.abs(dx) > Math.abs(dy) ? +(dx > 0) : 2 + (dy > 0));
 });
 
 const cubeRack = createCubeRack();
@@ -186,7 +174,7 @@ function retireColorFromLevel(i) {
   puzzles?.map?.[i]?.remove();
   if (puzzles?.map) delete puzzles.map[i];
   levelColors = levelColors.filter((c) => c.i !== i);
-  if (stripped && player.inspecting) {
+  if (stripped && player.ins) {
     const layers = faceLayers(inspectFace());
     if (layers.length) trackInspectHits(layers);
     else stopHitTracking();
@@ -197,7 +185,7 @@ function retireColorFromLevel(i) {
 let rewardInflight = 0;
 
 async function onColorComplete(color, puzzle) {
-  if (bodyHas("won")) return;
+  if (isWon()) return;
   rewardInflight++;
   solvedColors.add(color.i);
   sfxReward(3 / 4, 0.2);
@@ -206,29 +194,29 @@ async function onColorComplete(color, puzzle) {
       (t) => t.color.i === color.i && !collected.has(t.id)
     ).length;
 
-    await wait(OPTS.time.solveHoldMs);
-    if (bodyHas("won")) return;
+    await wait(O.hold);
+    if (isWon()) return;
 
     const gem = await puzzle.collapseToGem();
-    if (bodyHas("won")) return;
+    if (isWon()) return;
     await cubeRack.deliver(color, gem);
-    if (bodyHas("won") || cubeRack.allComplete()) {
+    if (isWon() || cubeRack.allComplete()) {
       endGameWon();
       return;
     }
 
     if (cubeRack.isColorComplete(color)) {
       retireColorFromLevel(color.i);
-    } else if (left >= PER_COLOR) {
+    } else if (left >= O.per) {
       puzzle.reset();
     } else {
       puzzle.remove();
     }
 
     await wait(300);
-    if (bodyHas("won")) return;
+    if (isWon()) return;
     await powers.offerUpgrade();
-    if (bodyHas("won") || rewardInflight > 1) return;
+    if (isWon() || rewardInflight > 1) return;
 
     if (cubeRack.allComplete()) {
       endGameWon();
@@ -237,17 +225,17 @@ async function onColorComplete(color, puzzle) {
     if (levelCleared()) await transitionToLevel(levelIndex + 1);
   } finally {
     rewardInflight--;
-    if (!bodyHas("won") && !qs(".pmod")) bodyOff("rewarding");
+    if (!isWon() && !qs(".pmod")) bodyOff("rw");
     powers.syncAll();
   }
 }
 
 function endGameWon() {
-  if (bodyHas("won")) return;
+  if (isWon()) return;
   bodyOn("won");
   qs(".pmod")?.remove();
-  bodyOff("rewarding");
-  document.body.append(div({ id: "win" }, "You Won!"));
+  bodyOff("rw");
+  document.body.append(div({ id: "win" }, "Winner!"));
   musicWin();
   cubeRack.slots.forEach((_, i) =>
     setTimeout(() => sfxReward(4 / 3), i * 200)
@@ -264,7 +252,7 @@ function showHelp() {
     ),
     div(
       { className: "ph" },
-      "Swipe or arrows to turn\nTap or space to move\nPowerups will help"
+      "Tap edges or arrows to turn\nTap center or space to move\nPowerups will help"
     ),
   ]);
   const go = () => {
@@ -274,7 +262,7 @@ function showHelp() {
     on(modal, "out");
     setTimeout(() => {
       modal.remove();
-      bodyOff("rewarding", "hi");
+      bodyOff("rw", "hi");
       powers.syncAll();
     }, 520);
   };
@@ -283,30 +271,29 @@ function showHelp() {
 }
 
 async function transitionToLevel(index) {
-  bodyOff("rewarding");
-  player.inspecting = false;
+  bodyOff("rw");
+  player.ins = false;
   clearInspectTarget();
   stopHitTracking();
-  off(viewport, "inspecting");
+  off(viewport, "ins");
+  off(uni, "act");
 
   haltTurns();
   doTurn((Math.random() * 4) | 0);
   on(viewport, "lx");
-  await wait(OPTS.time.levelExitMs);
+  await wait(O.lx);
 
-  startLevel(index);
-
-  off(viewport, "lx");
   on(viewport, "le");
+  startLevel(index);
+  off(viewport, "lx");
   void world.offsetWidth;
   on(viewport, "li");
-  await wait(OPTS.time.levelEnterMs);
+  await wait(O.li);
   off(viewport, "le", "li");
 }
 
 function startLevel(index) {
-  const exclude = cubeRack.completed();
-  const L = buildLevel(index, exclude);
+  const L = buildLevel(index, cubeRack.completed(), cubeRack.lit);
   if (!L.colors.length) {
     endGameWon();
     return;
@@ -320,7 +307,7 @@ function startLevel(index) {
   solvedColors = new Set();
   haltTurns();
   player.room = 0;
-  player.inspecting = false;
+  player.ins = false;
   player.right = [1, 0, 0];
   player.up = [0, 1, 0];
   player.forward = [0, 0, -1];
@@ -331,7 +318,7 @@ function startLevel(index) {
   clearAllHintMasks();
   world.replaceChildren(...rooms.map(buildRoom));
   updateView(false);
-  if (index === 0 && powerState.wash.level < 1) powerState.wash.level = 1;
+  if (index === 0 && powerState[0].l < 1) powerState[0].l = 1;
   powers.syncAll();
 }
 
@@ -344,9 +331,7 @@ function passageTarget() {
 
 function getFacingFaceEl() {
   const key = facingFaceKey();
-  return qs(
-    `#room-${player.room} .face[data-face="${key}"]`
-  );
+  return qs(`#r${player.room} .face[data-f="${key}"]`);
 }
 
 function updateView(animate = true) {
@@ -356,8 +341,9 @@ function updateView(animate = true) {
   if (!turnBusy) look();
   const r = rooms[player.room];
   if (!r) return;
-  world.style.transform = `translate3d(calc(${-r.x} * var(--span)), 0px, calc(${-r.z} * var(--span)))`;
-  tog(viewport, "inspecting", player.inspecting);
+  world.style.transform = `translate3d(calc(${-r.x} * var(--S)), 0px, calc(${-r.z} * var(--S)))`;
+  tog(viewport, "ins", player.ins);
+  tog(uni, "act", player.ins);
 }
 
 function navigateFromView(applyBasis, axis, s) {
@@ -369,7 +355,7 @@ function navigateFromView(applyBasis, axis, s) {
     animateTurn(fr, fu, ff, axis, s);
   };
 
-  if (!player.inspecting) {
+  if (!player.ins) {
     kick();
     return;
   }
@@ -380,16 +366,17 @@ function navigateFromView(applyBasis, axis, s) {
   stopHitTracking();
   resetRevealMask();
   layers.forEach(resetLayerMask);
-  player.inspecting = false;
+  player.ins = false;
   clearInspectTarget();
 
   off(camera, "na");
   off(world, "na");
-  off(viewport, "inspecting");
+  off(viewport, "ins");
+  off(uni, "act");
 
   onceEndOrTimeout(
     camera,
-    OPTS.time.camMs + 80,
+    O.cam + 80,
     () => {
       turnBusy = 0;
       kick();
@@ -452,14 +439,14 @@ function trackInspectHits(layers) {
   inspectStage.replaceChildren(...inspectHits.map((h) => h.hit));
 
   const sync = () => {
-    if (!player.inspecting || !inspectHits.length) return;
-    const stage = inspectStage.getBoundingClientRect();
+    if (!player.ins || !inspectHits.length) return;
+    const stage = rect(inspectStage);
     const pad = 6;
     for (const { hit, layer } of inspectHits) {
       const poly = layer.querySelector(".ctri");
       const face = layer.closest(".face");
       const target = poly || face || layer;
-      const r = target.getBoundingClientRect();
+      const r = rect(target);
       box(hit, {
         x: r.left - stage.left - pad,
         y: r.top - stage.top - pad,
@@ -476,7 +463,7 @@ function trackInspectHits(layers) {
 function enterInspect() {
   if (passageTarget() !== null) return;
   pruneWashes();
-  player.inspecting = true;
+  player.ins = true;
   clearInspectTarget();
 
   const face = getFacingFaceEl();
@@ -498,7 +485,7 @@ function exitInspect() {
   const face = inspectFace();
   const layers = faceLayers(face);
 
-  player.inspecting = false;
+  player.ins = false;
   stopHitTracking();
   updateView();
 
@@ -514,7 +501,7 @@ function exitInspect() {
 
 function primaryAction() {
   if (turnBusy) return;
-  if (player.inspecting) {
+  if (player.ins) {
     exitInspect();
     return;
   }
@@ -557,20 +544,19 @@ function collectTriangle(id, el) {
     ? faceLayers(face).filter((l) => l !== layer)
     : [];
 
-  if (player.inspecting && others.length) {
+  if (player.ins && others.length) {
     for (const l of others) {
       const c = l.querySelector(".rc");
       setCircleR(c, R_MAX);
-      on(l, "revealed");
-      off(l, "revealing", "hiding");
-      l.style.filter = "none";
+      on(l, "rd");
+      off(l, "rv", "hd");
     }
     revealLayers = others;
     trackInspectHits(others);
   } else {
     stopHitTracking();
     resetRevealMask();
-    player.inspecting = false;
+    player.ins = false;
     clearInspectTarget();
     updateView();
   }
@@ -580,8 +566,8 @@ function collectTriangle(id, el) {
 
 window.addEventListener("keydown", (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
-  if (bodyHas("rewarding") || bodyHas("won")) return;
-  const powerId = POWER_KEY[e.key.toLowerCase()];
+  if (hasRw() || isWon()) return;
+  const powerId = PK[e.key.toLowerCase()];
   if (powerId) {
     e.preventDefault();
     powers.activatePower(powerId);

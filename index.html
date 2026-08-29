@@ -19,29 +19,30 @@ document.head.appendChild(document.createElement("style")).append(`*,
 }
 
 :root {
-  --dist: 40vmin;
-  --face: calc(2 * var(--dist) - 10vmin);
-  --radius: 100%;
-  --pill-radius: 2rem;
-  --persp: 40vmin;
-  --span: calc(2 * var(--dist));
+  --D: 40vmin;
+  --F: calc(2 * var(--D) - 10vmin);
+  --R: 100%;
+  --Pr: 2rem;
+  --P: 40vmin;
+  --S: calc(2 * var(--D));
   --bg: #121621;
-  --wall-lo: #2c313d;
-  --wall-hi: #4f576d;
+  --W1: #2c313d;
+  --W2: #4f576d;
   --fg: #f8e8ff;
   --bow: repeating-linear-gradient(90deg,var(--c0),var(--c1),var(--c2),var(--c3),var(--c4),var(--c5),var(--c0) 50%);
-  --ease: cubic-bezier(0.4, 0.05, 0.2, 1);
-  --side-orb: max(7.25vmin, 3rem);
-  --orb-font: calc(var(--side-orb) * 0.36);
+  --E: cubic-bezier(0.4, 0.05, 0.2, 1);
+  --O: max(7.25vmin, 3rem);
+  --Of: calc(var(--O) * 0.36);
   --dim: grayscale(1) brightness(0.55);
   --line: 0.2rem;
-  --bow-line: 0.6rem;
+  --Bl: 0.6rem;
+  --Ts: drop-shadow(0 .2em .45em rgba(0,0,0,.55));
   font-size: 120%;
 }
 
 @supports not (corner-shape: squircle) {
   :root {
-    --radius: 32%;
+    --R: 32%;
   }
 }
 
@@ -56,7 +57,7 @@ body {
 }
 
 .pmc {
-  border-radius: var(--pill-radius);
+  border-radius: var(--Pr);
   corner-shape: round;
   position: relative;
   z-index: 1;
@@ -72,37 +73,36 @@ body {
 .pl,
 .gem,
 .face {
-  border-radius: var(--radius);
+  border-radius: var(--R);
 }
 
-#camera,
+#cam,
 .cl,
 .wl {
   position: absolute;
   inset: 0;
 }
 
-#viewport,
-#istage {
+#vp,
+#is {
   position: absolute;
   inset: 0;
 }
 
-body.rewarding::after,
+body.rw::after,
 .pmod {
   position: fixed;
   inset: 0;
 }
 
 .face {
-  width: var(--face);
-  height: var(--face);
-  left: calc(var(--face) / -2);
-  top: calc(var(--face) / -2);
+  width: var(--F);
+  height: var(--F);
+  left: calc(var(--F) / -2);
+  top: calc(var(--F) / -2);
   position: absolute;
   overflow: hidden;
-  background: linear-gradient(var(--wall-lo), var(--wall-hi));
-  opacity: 1;
+  background: linear-gradient(var(--W1), var(--W2));
   backface-visibility: hidden;
 }
 
@@ -110,8 +110,8 @@ body.rewarding::after,
   .face {
     backface-visibility: visible;
   }
-  #viewport,
-  #istage {
+  #vp,
+  #is {
     width: min(100vw, 48rem);
     height: min(100dvh, 48rem);
     inset: auto;
@@ -130,13 +130,13 @@ body.rewarding::after,
   backface-visibility: hidden;
 }
 
-#viewport {
+#vp {
   container-type: size;
-  --dist: 40cqmin;
-  --face: calc(2 * var(--dist) - 10cqmin);
-  --persp: 40cqmin;
-  --span: calc(2 * var(--dist));
-  perspective: var(--persp);
+  --D: 40cqmin;
+  --F: calc(2 * var(--D) - 10cqmin);
+  --P: 40cqmin;
+  --S: calc(2 * var(--D));
+  perspective: var(--P);
   overflow: hidden;
   background: var(--bg);
   pointer-events: auto;
@@ -145,27 +145,27 @@ body.rewarding::after,
   outline: none;
 }
 
-#viewport.inspecting {
+#vp.ins {
   cursor: default;
 }
 
-#camera {
+#cam {
   transform-style: preserve-3d;
   transform: translateZ(0);
-  transition: transform 550ms var(--ease);
+  transition: transform 495ms var(--E);
 }
 
-#camera.na,
-#world.na {
+#cam.na,
+#w.na {
   transition: none;
 }
 
-#viewport.inspecting #camera {
+#vp.ins #cam {
   transform: translateZ(16cqmin);
 }
 
-#pivot,
-#world,
+#pv,
+#w,
 .room,
 .wall {
   position: absolute;
@@ -176,28 +176,28 @@ body.rewarding::after,
   transform-style: preserve-3d;
 }
 
-#pivot {
+#pv {
   left: 50%;
   top: 50%;
   transform-origin: 0 0;
 }
 
-#world {
-  transition: transform 700ms var(--ease);
+#w {
+  transition: transform 700ms var(--E);
 }
 
 .wall {
   transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))
-    translateZ(calc(-1 * var(--dist) + 1px));
+    translateZ(calc(-1 * var(--D) + 1px));
 }
-.wall.face-n { --ry: 0deg; }
-.wall.face-s { --ry: 180deg; }
-.wall.face-e { --ry: -90deg; }
-.wall.face-w { --ry: 90deg; }
-.wall.face-u { --rx: 90deg; }
-.wall.face-d { --rx: -90deg; }
+.wall.fn { --ry: 0deg; }
+.wall.fs { --ry: 180deg; }
+.wall.fe { --ry: -90deg; }
+.wall.fw { --ry: 90deg; }
+.wall.fu { --rx: 90deg; }
+.wall.fd { --rx: -90deg; }
 
-body.rewarding::after,
+body.rw::after,
 .ds::before,
 .pmc::before,
 .pmc::after,
@@ -205,19 +205,19 @@ body.rewarding::after,
   content: "";
 }
 
-#viewport.lx .face {
+#vp.lx .face {
   opacity: 0;
-  transition: opacity 0.55s var(--ease);
+  transition: opacity 0.55s var(--E);
 }
 
-#viewport.le .face {
+#vp.le .face {
   opacity: 0;
   transition: none;
 }
 
-#viewport.le.li .face {
+#vp.le.li .face {
   opacity: 1;
-  transition: opacity 0.65s var(--ease);
+  transition: opacity .78s var(--E);
 }
 
 .face .wm,
@@ -232,7 +232,7 @@ body.rewarding::after,
 
 .face .wm {
   pointer-events: none;
-  transition: filter 0.45s var(--ease);
+  transition: filter 0.45s var(--E);
 }
 .face.it .wm {
   filter: grayscale(1);
@@ -262,9 +262,15 @@ body.rewarding::after,
   overflow: visible;
 }
 
-#viewport.inspecting .face.it .cl,
-.face.it .cl.hiding {
+#vp.ins .face.it .cl,
+.face.it .cl.hd {
   opacity: 1;
+}
+
+.cl.rv,
+.cl.rd,
+.cl.hd {
+  filter: var(--Ts);
 }
 
 .wl {
@@ -272,7 +278,7 @@ body.rewarding::after,
   pointer-events: none;
 }
 
-#viewport.inspecting .face.it .wl {
+#vp.ins .face.it .wl {
   visibility: hidden;
 }
 
@@ -286,12 +292,12 @@ body.rewarding::after,
   }
 }
 
-#istage {
+#is {
   z-index: 5;
   pointer-events: none;
 }
 
-#istage .ihit {
+#is .ihit {
   position: absolute;
   border: none;
   background: transparent;
@@ -299,11 +305,11 @@ body.rewarding::after,
   pointer-events: auto;
 }
 
-body.rewarding::after {
+body.rw::after {
   z-index: 80;
 }
 
-#proot {
+#pr {
   position: absolute;
   left: 50%;
   bottom: 0;
@@ -314,7 +320,7 @@ body.rewarding::after {
   pointer-events: none;
 }
 
-#ctabs {
+#tb {
   position: relative;
   display: flex;
   justify-content: center;
@@ -339,31 +345,31 @@ body.rewarding::after {
   cursor: default;
   overflow: hidden;
   --sh: inset 0 0 0 var(--line) color-mix(in srgb, var(--tab) 45%, transparent);
-  background: var(--tab-dark);
+  background: var(--tabd);
   box-shadow: var(--sh);
-  transition: 0.8s var(--ease);
+  transition: 0.8s var(--E);
 }
 
-.ct.ready {
+.ct.ry {
   box-shadow: var(--sh), 0 0 0 var(--line) var(--tab);
 }
 
-.ct.sealing {
+.ct.sl {
   z-index: 121;
   min-width: 0;
   padding: 0;
   border-radius: 0.35rem;
   background: var(--tab);
   box-shadow: 0 0 1.2rem var(--tab);
-  animation: tab-seal 0.8s var(--ease) both;
+  animation: tab-seal 0.8s var(--E) both;
 }
 
-.ct.sealing .tps {
+.ct.sl .tps {
   opacity: 0;
   transform: scale(0.15);
 }
 
-.ct.sealed {
+.ct.sd {
   width: 0;
   min-width: 0;
   height: 0;
@@ -382,7 +388,7 @@ body.rewarding::after {
   position: relative;
   width: 1.85rem;
   height: 1.85rem;
-  transition: opacity 0.4s ease, transform 0.7s var(--ease);
+  transition: opacity 0.4s ease, transform 0.7s var(--E);
 }
 
 .tpw {
@@ -470,25 +476,30 @@ body.won #prk { display: none; }
   z-index: 210;
   pointer-events: none;
   overflow: visible;
-  filter: brightness(0.65) drop-shadow(0 0 0 #fff);
-  transition: 0.5s var(--ease);
+  filter: brightness(0.65);
+  transition: 0.5s var(--E);
 }
 #uni svg {
   transform: scaleX(-1);
   transform-origin: 50% 80%;
-  overflow: visible;
 }
 #uni.go,
+#uni.act,
 body.hi #uni,
 body.won #uni {
-  filter: brightness(1) drop-shadow(0 0 0 #fff);
+  filter: brightness(1);
+}
+#uni.act {
+  --u: 28vmin;
+  animation: none;
+  transform: rotate(-12deg) translate(-14%, -7%) scale(1.18);
 }
 #uni.go {
   animation: uni-gallop 0.5s ease;
 }
 body.hi #uni,
 body.won #uni {
-  --u: 38vmin;
+  --u: 42vmin;
 }
 body.won #uni {
   animation: uni-gallop 0.74s ease infinite;
@@ -502,19 +513,19 @@ body.won #uni {
 .ds,
 .ps,
 .ppk {
-  width: var(--side-orb);
-  height: var(--side-orb);
-  font-size: var(--orb-font);
+  width: var(--O);
+  height: var(--O);
+  font-size: var(--Of);
   display: grid;
   place-items: center;
-  background: var(--orb-base);
-  box-shadow: inset 0 0 0 var(--line) var(--orb-ring);
+  background: var(--Ob);
+  box-shadow: inset 0 0 0 var(--line) var(--Or);
 }
 .ds {
   position: relative;
   overflow: visible;
-  --orb-base: var(--slot-dark);
-  --orb-ring: color-mix(in srgb, var(--slot) 50%, transparent);
+  --Ob: var(--slotd);
+  --Or: color-mix(in srgb, var(--slot) 50%, transparent);
 }
 .ds::before {
   position: absolute;
@@ -524,7 +535,7 @@ body.won #uni {
   width: 0;
   background: var(--slot);
   border-radius: 0;
-  transition: width 0.8s var(--ease) var(--d, 0s);
+  transition: width 0.8s var(--E) var(--d, 0s);
   pointer-events: none;
 }
 body.won .ds::before {
@@ -537,7 +548,7 @@ body.won .ds::before {
 }
 
 .ds .cube {
-  font-size: calc(var(--side-orb) * 0.2);
+  font-size: calc(var(--O) * 0.2);
   z-index: 1;
 }
 
@@ -556,18 +567,18 @@ body.won .ds::before {
   left: 50%;
   transform-style: preserve-3d;
   backface-visibility: visible;
-  width: 2em;
-  height: 2em;
-  margin: -1em 0 0 -1em;
+  width: calc(2em - 4px);
+  height: calc(2em - 4px);
+  margin: calc(2px - 1em) 0 0 calc(2px - 1em);
   opacity: 0.7;
   transition: background 0.45s ease, opacity 0.45s ease;
 }
 
-.cf.pending { opacity: 0.85; }
+.cf.pd { opacity: 0.85; }
 .cf.lit { opacity: 1; }
-.cf.lit.ignite { animation: cube-ignite 0.6s ease; }
+.cf.lit.ig { animation: cube-ig 0.6s ease; }
 
-@keyframes cube-ignite {
+@keyframes cube-ig {
   35% { filter: brightness(1.65); }
 }
 
@@ -597,40 +608,36 @@ body.won .ds::before {
   border: none;
   cursor: pointer;
   color: #fff;
-  --orb-base: var(--pow-dark);
-  --orb-ring: var(--pow);
+  --Ob: var(--powd);
+  --Or: var(--pow);
 }
 
 .ps {
   transition: transform 0.4s ease, filter 0.3s ease, opacity 0.3s ease;
 }
 
-.ps.locked,
-body.rewarding #prk .ps,
-.ppk.locked,
+.ps.lk,
+body.rw #prk .ps,
+.ppk.lk,
 .ppk:disabled {
   filter: var(--dim);
   opacity: 0.5;
   cursor: default;
-}
-
-.ps.locked,
-body.rewarding #prk .ps {
   pointer-events: none;
 }
 
-.ps.active,
-.ps.cooling:not(.active) {
+.ps.on,
+.ps.co:not(.on) {
   transform: translateX(50%);
   cursor: default;
 }
 
-.ps.active {
+.ps.on {
   filter: none;
   opacity: 1;
 }
 
-.ps.cooling:not(.active) {
+.ps.co:not(.on) {
   filter: grayscale(1) brightness(0.7);
   opacity: 0.55;
 }
@@ -693,16 +700,16 @@ body.rewarding #prk .ps {
 }
 
 .pmc::before {
-  inset: calc(-1 * var(--bow-line));
+  inset: calc(-1 * var(--Bl));
 }
 
 .wall:has(.it)::before {
-  --bow-line: 1.5rem;
-  width: calc(var(--face) + 2 * var(--bow-line));
-  height: calc(var(--face) + 2 * var(--bow-line));
-  left: calc(var(--face) / -2 - var(--bow-line));
-  top: calc(var(--face) / -2 - var(--bow-line));
-  border-radius: var(--radius);
+  --Bl: 1.5rem;
+  width: calc(var(--F) + 2 * var(--Bl));
+  height: calc(var(--F) + 2 * var(--Bl));
+  left: calc(var(--F) / -2 - var(--Bl));
+  top: calc(var(--F) / -2 - var(--Bl));
+  border-radius: var(--R);
 }
 
 @keyframes bow {
@@ -757,7 +764,7 @@ body.rewarding #prk .ps {
   gap: 0.7rem;
 }
 
-.ppk.picked {
+.ppk.pk {
   animation: ppk-pop 0.5s ease;
   filter: brightness(1.7);
 }
@@ -770,46 +777,33 @@ body.rewarding #prk .ps {
 }
 `);
 ;
-const OPTS = {
-  time: {
-    turnMs: 450,
-    camMs: 550,
-    levelExitMs: 580,
-    levelEnterMs: 700,
-    solveHoldMs: 400,
-    sealMs: 800,
-  },
-  fly: {
-    ms: 1100,
-    trophyMs: 1400,
-    crazy: 0.55,
-    trophyCrazy: 0.9,
-  },
-  powers: {
-    rallyFromLevel: 4,
-    washFadeMs: 3e4,
-    cd: [24e3, 4e3, 5e3],
-    evokeCd: [48e3, 4e3, 16e3],
-    rallyCd: [12e4, 16e3, 28e3],
-  },
-  reveal: { ms: 4e3, rMax: 80 },
-  level: {
-    perColor: 4,
-    maxMazeSize: 4,
-    maxMazeRows: 3,
-    defs: [
-      { mazeSize: 0, colorCount: 1 },
-      { mazeSize: 2, colorCount: 2 },
-      { mazeSize: 2, mazeRows: 3, colorCount: 2 },
-      { mazeSize: 3, colorCount: 3 },
-      { mazeSize: 4, colorCount: 4 },
-    ],
-  },
-  cube: { minLightness: 58 },
+const O = {
+  turn: 405,
+  cam: 495,
+  lx: 580,
+  li: 840,
+  hold: 400,
+  seal: 800,
+  fly: 1100,
+  tfly: 1400,
+  crazy: 0.55,
+  tcrazy: 0.9,
+  rallyLv: 4,
+  washMs: 3e4,
+  rev: 3e3,
+  rMax: 80,
+  per: 4,
+  maxC: 4,
+  maxR: 3,
+  defs: [[0, 1], [2, 2], [2, 2, 3], [3, 3], [4, 4]],
+  minL: 58,
 };
 
 ;
 const ac = new AudioContext();
+const out = ac.createGain();
+out.gain.value = 0.88;
+out.connect(ac.destination);
 let beat = 600,
   lift = 0;
 const musicWin = () => {
@@ -823,17 +817,17 @@ function startMusic() {
   if (startMusic._on) return;
   startMusic._on = 1;
   const R = X.sampleRate,
-    n = (R * 2.5) | 0,
+    n = (R * 1.25) | 0,
     buf = X.createBuffer(2, n, R);
   for (let c = 0; c < 2; c++) {
     const d = buf.getChannelData(c);
-    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n) ** 2.5;
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n) ** 3.5;
   }
   const conv = X.createConvolver();
   conv.buffer = buf;
   const wet = X.createGain();
-  wet.gain.value = 0.4;
-  conv.connect(wet).connect(X.destination);
+  wet.gain.value = 1.2;
+  conv.connect(wet).connect(out);
   const bassOsc = X.createOscillator(),
     bassGain = X.createGain(),
     melOsc = X.createOscillator(),
@@ -841,9 +835,9 @@ function startMusic() {
   bassOsc.type = "triangle";
   melOsc.type = "sine";
   bassGain.gain.value = melGain.gain.value = 0;
-  bassOsc.connect(bassGain).connect(X.destination);
+  bassOsc.connect(bassGain).connect(out);
   bassGain.connect(conv);
-  melOsc.connect(melGain).connect(X.destination);
+  melOsc.connect(melGain).connect(out);
   melGain.connect(conv);
   bassOsc.start();
   melOsc.start();
@@ -856,6 +850,13 @@ function startMusic() {
   ];
   let step = 0;
   const midi = (m) => 440 * 2 ** ((m - 69) / 12);
+  const env = (g, v, d, t) => {
+    g.cancelScheduledValues(t);
+    g.setValueAtTime(g.value, t);
+    g.linearRampToValueAtTime(v, t + 0.01);
+    g.exponentialRampToValueAtTime(1e-4, t + d);
+  };
+  const pitch = (o, f, t) => o.frequency.setTargetAtTime(f, t, 0.015);
   const tick = () => {
     const t = X.currentTime;
     const ci = ((step / 16) | 0) % 4,
@@ -864,16 +865,12 @@ function startMusic() {
     const p = s % 4;
     if (p & 1) bn += 7;
     if (p === 2) bn += 12;
-    bassGain.gain.cancelScheduledValues(t);
-    bassGain.gain.setValueAtTime(0.06, t);
-    bassGain.gain.exponentialRampToValueAtTime(1e-4, t + 1);
-    bassOsc.frequency.setValueAtTime(midi(bn - 12), t);
+    env(bassGain.gain, 0.06, 1, t);
+    pitch(bassOsc, midi(bn - 12), t);
     const ch = phrases[ci][s];
     if (ch !== "x") {
-      melGain.gain.cancelScheduledValues(t);
-      melGain.gain.setValueAtTime(0.05, t);
-      melGain.gain.exponentialRampToValueAtTime(1e-4, t + 1.6);
-      melOsc.frequency.setValueAtTime(midi(52 + parseInt(ch, 16) + lift), t);
+      env(melGain.gain, 0.05, 1.6, t);
+      pitch(melOsc, midi(52 + parseInt(ch, 16) + lift), t);
     }
     setTimeout(tick, beat);
   };
@@ -900,9 +897,10 @@ const beep = (f, d, ty = "sine", v = 0.12, wait = 0, to) => {
   o.type = ty;
   o.frequency.setValueAtTime(f, t);
   to && o.frequency.exponentialRampToValueAtTime(to, t + d);
-  g.gain.setValueAtTime(v, t);
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(v, t + 0.006);
   g.gain.exponentialRampToValueAtTime(1e-4, t + d);
-  o.connect(g).connect(ac.destination);
+  o.connect(g).connect(out);
   o.start(t);
   o.stop(t + d);
 };
@@ -910,7 +908,6 @@ const sfxLand = () => (
   beep(1600, 0.02, "sine", 0.1),
   beep(620, 0.055, "sine", 0.05, 0, 220)
 );
-const sfxPick = () => beep(880, 0.07, "square", 0.07);
 const sfxReward = (m = 1, v = 0.1) => (
   beep(523 * m, 0.16, "triangle", v),
   beep(784 * m, 0.28, "triangle", v, 0.12)
@@ -953,7 +950,7 @@ const bodyOn = (...c) => on(document.body, ...c);
 const bodyOff = (...c) => off(document.body, ...c);
 const bodyHas = (c) => document.body.classList.contains(c);
 const showModal = (kids, ding) => {
-  if (bodyHas("won")) return qs(".pmod");
+  if (isWon()) return qs(".pmod");
   const card = div(
     { className: "pmc" },
     ...(typeof kids === "string" ? [div({ className: "ph" }, kids)] : [].concat(kids))
@@ -964,7 +961,7 @@ const showModal = (kids, ding) => {
     modal.replaceChildren(card);
   } else {
     modal = div({ className: "pmod" }, card);
-    bodyOn("rewarding");
+    bodyOn("rw");
     document.body.append(modal);
     void modal.offsetWidth;
     on(modal, "show");
@@ -972,6 +969,9 @@ const showModal = (kids, ding) => {
   ding && sfxReward(ding);
   return modal;
 };
+const isWon = () => bodyHas("won");
+const hasRw = () => bodyHas("rw");
+const rect = (el) => el.getBoundingClientRect();
 const px = (n) => n + "px";
 const easeOut3 = (t) => 1 - (1 - t) ** 3;
 const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
@@ -1031,15 +1031,15 @@ const applyLevelMood = (i) => {
   const h = (a + ((b - a + 360) % 360) * (0.35 + Math.random() * 0.3)) % 360;
   const st = document.documentElement.style;
   st.setProperty("--bg", colorHsl({ h, s: 14, l: 10 }));
-  st.setProperty("--wall-lo", colorHsl({ h, s: 8, l: 21 }));
-  st.setProperty("--wall-hi", colorHsl({ h, s: 8, l: 37 }));
+  st.setProperty("--W1", colorHsl({ h, s: 8, l: 21 }));
+  st.setProperty("--W2", colorHsl({ h, s: 8, l: 37 }));
 };
 
 const colorPair = (c) => ({ ...c, l: 33 });
 
 const toneStyle = (prefix, color, dark = colorPair(color)) => ({
   [`--${prefix}`]: colorHsl(color),
-  [`--${prefix}-dark`]: colorHsl(dark),
+  [`--${prefix}d`]: colorHsl(dark),
 });
 
 const uniPink = "#f9a0e5";
@@ -1047,7 +1047,7 @@ const uniCyan = "#7fdbff";
 const uniGold = "#ffdc00";
 
 const uni = div({ id: "uni" });
-uni.innerHTML = `<svg viewBox="0 0 128 128"><ellipse cx="63" cy="49.4" fill="${uniPink}" rx="24" ry="16.4" transform="rotate(-19 63 49)"/><path fill="#fff" d="m37 130 23-84 31 2 7 37-18 4 7 41z"/><path fill="${uniCyan}" d="M39 78c-5-2-6-13-2-24q9-19 18-17c5 2 6 13 2 24q-8 19-18 17"/><path fill="#fff" d="m58 57 4-22 12 18zm20-5 11-17 3 21z"/><circle cx="67.9" cy="64" r="5" fill="#222"/><circle cx="87.9" cy="64" r="5" fill="#222"/><ellipse cx="86.9" cy="84" fill="#fde8f6" rx="11" ry="10"/><path fill="${uniGold}" d="m71 49 7-35 2 36z"/><circle cx="66.6" cy="62.9" r="1.4" fill="#fff"/><circle cx="86.2" cy="62.9" r="1.4" fill="#fff"/><ellipse cx="85.1" cy="81.6" fill="${uniPink}" rx="2.4" ry="2.2"/><g fill="none" stroke-linecap="round" stroke-width="21"><path stroke="${uniPink}" d="m46 62-12 59"/><path stroke="${uniCyan}" d="m41 86-12 60"/></g><path fill="${uniPink}" d="m94 84-2-2q0-3 2-3t2 3z"/><path fill="none" stroke="#fff" stroke-linecap="round" stroke-width="39" d="m61 112-64 8"/></svg>`;
+uni.innerHTML = `<svg viewBox="0 0 128 128"><ellipse cx="63" cy="49.4" fill="${uniPink}" rx="24" ry="16.4" transform="rotate(-19 63 49)"/><path fill="#fff" d="m37 130 23-84 31 2 7 37-18 4 7 41z"/><path fill="${uniCyan}" d="M39 78c-5-2-6-13-2-24q9-19 18-17c5 2 6 13 2 24q-8 19-18 17"/><path fill="#fff" d="m58 57 4-22 12 18zm20-5 11-17 3 21z"/><circle cx="67.9" cy="64" r="5" fill="#222"/><circle cx="87.9" cy="64" r="5" fill="#222"/><ellipse cx="86.9" cy="84" fill="#fde8f6" rx="11" ry="10"/><path fill="${uniGold}" d="m71 49 7-35 2 35z"/><circle cx="66.6" cy="62.9" r="1.4" fill="#fff"/><circle cx="86.2" cy="62.9" r="1.4" fill="#fff"/><ellipse cx="85.1" cy="81.6" fill="${uniPink}" rx="2.4" ry="2.2"/><g fill="none" stroke-linecap="round" stroke-width="21"><path stroke="${uniPink}" d="m46 62-12 59"/><path stroke="${uniCyan}" d="m41 86-12 60"/></g><path fill="${uniPink}" d="m94 84-2-2q0-3 2-3t2 3z"/><path fill="none" stroke="#fff" stroke-linecap="round" stroke-width="39" d="m61 112-64 8"/></svg>`;
 document.body.append(uni);
 const uniDone = () => off(uni, "go");
 const uniGo = () => {
@@ -1064,7 +1064,7 @@ const generatePathData = (x1, y1, x2, y2, crazy) => {
   const dx = x2 - x1;
   const dy = y2 - y1;
   const len = Math.hypot(dx, dy) || 80;
-  const j = len * (crazy ?? OPTS.fly.crazy);
+  const j = len * (crazy ?? O.crazy);
   const nx = -dy / len;
   const ny = dx / len;
   const side = Math.random() < 0.5 ? 1 : -1;
@@ -1087,7 +1087,7 @@ const flyStartPoint = (fromEl, opts, node) => {
   if (opts.fromOffscreen) return offscreenUpperThird();
   const origin = fromEl || node;
   if (!origin?.getBoundingClientRect) return offscreenUpperThird();
-  const a = origin.getBoundingClientRect();
+  const a = rect(origin);
   const x = a.left + a.width / 2;
   const y = a.top + a.height / 2;
   const tiny = a.width < 4 || a.height < 4;
@@ -1107,19 +1107,19 @@ const flyOnPath = (fromEl, toEl, opts = {}) =>
       return;
     }
 
-    const b = toEl.getBoundingClientRect();
+    const b = rect(toEl);
     const { x: x1, y: y1 } = flyStartPoint(fromEl, opts, node);
     const x2 = b.left + b.width / 2;
     const y2 = b.top + b.height / 2;
-    const ms = opts.ms ?? (node ? OPTS.fly.trophyMs : OPTS.fly.ms);
-    const crazy = opts.crazy ?? (node ? OPTS.fly.trophyCrazy : OPTS.fly.crazy);
+    const ms = opts.ms ?? (node ? O.tfly : O.fly);
+    const crazy = opts.crazy ?? (node ? O.tcrazy : O.crazy);
     const delay = opts.delay ?? 0;
 
     const mover = div({
       className: node ? "fly flyn" : "fly",
     });
     if (node) {
-      const nr = node.getBoundingClientRect();
+      const nr = rect(node);
       const size = Math.max(nr.width, nr.height, 8);
       mover.style.width = `${size}px`;
       mover.style.height = `${size}px`;
@@ -1259,12 +1259,12 @@ const createMeshData = (seed) => {
     preserveAspectRatio: "none",
     class: "wm",
   });
-  svg.append(svgEl("rect", { width: 100, height: 100, fill: "var(--wall-lo)" }));
+  svg.append(svgEl("rect", { width: 100, height: 100, fill: "var(--W1)" }));
   for (const [a, b, c] of tris) {
     svg.append(
       svgEl("polygon", {
         points: [a, b, c].map(([x, y]) => `${x * 100},${y * 100}`).join(" "),
-        fill: `color-mix(in srgb,var(--wall-lo) ${(rand() * 100) | 0}%,var(--wall-hi))`,
+        fill: `color-mix(in srgb,var(--W1) ${(rand() * 100) | 0}%,var(--W2))`,
       })
     );
   }
@@ -1348,8 +1348,8 @@ const paintWall = (face, items = []) => {
 let revealRaf = null;
 let revealLayers = [];
 
-const REVEAL_MS = OPTS.reveal.ms;
-const R_MAX = OPTS.reveal.rMax;
+const REVEAL_MS = O.rev;
+const R_MAX = O.rMax;
 const filt = (id, seed, freq = ".03") =>
   `<filter id="${id}" x="-50%" y="-50%" width="200%" height="200%"><feTurbulence type="fractalNoise" baseFrequency="${freq}" numOctaves="2" seed="${seed}" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="48" xChannelSelector="R" yChannelSelector="G"/></filter>`;
 
@@ -1361,9 +1361,9 @@ const readCircleR = (circle, fallback = 0) => {
 };
 
 function ensureRevealDefs() {
-  if (document.getElementById("reveal-defs")) return;
+  if (document.getElementById("rd")) return;
   const wrap = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  wrap.id = "reveal-defs";
+  wrap.id = "rd";
   wrap.setAttribute("aria-hidden", "true");
   wrap.style.cssText =
     "position:absolute;width:0;height:0;overflow:hidden;pointer-events:none";
@@ -1380,7 +1380,7 @@ function stopRevealRaf() {
 
 function resetLayerMask(layer) {
   if (!layer) return;
-  off(layer, "revealing", "hiding", "revealed");
+  off(layer, "rv", "hd", "rd");
   setCircleR(layer.querySelector(".rc"), 0);
 }
 
@@ -1403,8 +1403,8 @@ function playRevealMask(layerOrLayers) {
   }
   revealLayers = layers;
   const circles = layers.map((layer) => {
-    off(layer, "revealed", "hiding");
-    on(layer, "revealing");
+    off(layer, "rd", "hd");
+    on(layer, "rv");
     const c = layer.querySelector(".rc");
     setCircleR(c, 0);
     return c;
@@ -1418,8 +1418,8 @@ function playRevealMask(layerOrLayers) {
     onDone: () =>
       layers.forEach((layer, i) => {
         setCircleR(circles[i], R_MAX);
-        off(layer, "revealing");
-        on(layer, "revealed");
+        off(layer, "rv");
+        on(layer, "rd");
       }),
   });
 }
@@ -1431,8 +1431,8 @@ function playHideMask(layerOrLayers, onDone) {
   if (!layers.length) return void onDone?.();
   revealLayers = layers;
   const circles = layers.map((layer) => {
-    off(layer, "revealed", "revealing");
-    on(layer, "hiding");
+    off(layer, "rd", "rv");
+    on(layer, "hd");
     return layer.querySelector(".rc");
   });
   if (circles.some((c) => !c)) return void onDone?.();
@@ -1515,11 +1515,11 @@ function playWash(cl, fill) {
     `<circle class="wc" cx="${cx}" cy="${cy}" r="0" fill="#fff" filter="url(#wf)"/>` +
     `</mask></defs>` +
     `<rect class="wr" width="100" height="100" fill="${fill}" fill-opacity="0.55" mask="url(#${mid})" ` +
-    `style="animation-duration:${OPTS.powers.washFadeMs}ms"/>`;
+    `style="animation-duration:${O.washMs}ms"/>`;
   wl.append(svg);
   face.insertBefore(wl, cl);
   const circle = wl.querySelector(".wc");
-  wl._wt = setTimeout(() => clearHintMask(id), OPTS.powers.washFadeMs);
+  wl._wt = setTimeout(() => clearHintMask(id), O.washMs);
   runTween(REVEAL_MS, {
     setRaf: (raf) => {
       wl._hintRaf = raf;
@@ -1572,8 +1572,6 @@ const generateMaze = (cols = 5, rows = cols) => {
 };
 
 ;
-const PER_COLOR = OPTS.level.perColor;
-
 const shuffle = (a) => {
   for (let i = a.length - 1; i > 0; i--) {
     const j = (Math.random() * (i + 1)) | 0;
@@ -1600,12 +1598,14 @@ const mazeRooms = (cols, rows = cols) => {
   });
 };
 
-const pickLevelColors = (count, exclude = []) => {
+const pickLevelColors = (count, exclude = [], lit = () => 0) => {
   const ban = new Set(exclude);
-  return shuffle(RAINBOW.filter((c) => !ban.has(c.i))).slice(0, count);
+  return RAINBOW.filter((c) => !ban.has(c.i))
+    .sort((a, b) => lit(a.i) - lit(b.i) || a.i - b.i)
+    .slice(0, count);
 };
 
-const placeTriangles = (rooms, colors, perColor = PER_COLOR) => {
+const placeTriangles = (rooms, colors, perColor = O.per) => {
   const slots = [];
   for (const r of rooms) {
     for (const face of ["N", "E", "S", "W", "U", "D"]) {
@@ -1631,28 +1631,19 @@ const placeTriangles = (rooms, colors, perColor = PER_COLOR) => {
   return tris;
 };
 
-const buildLevel = (index, exclude = []) => {
-  const maxC = OPTS.level.maxMazeSize;
-  const maxR = OPTS.level.maxMazeRows;
-  const raw =
-    OPTS.level.defs[index] || {
-      mazeSize: maxC,
-      mazeRows: maxR,
-      colorCount: 1 + index,
-    };
-  const cols = raw.mazeSize <= 0 ? 0 : Math.min(maxC, raw.mazeSize);
-  const rows = cols ? Math.min(maxR, raw.mazeRows || raw.mazeSize) : 0;
+const buildLevel = (index, exclude = [], lit = () => 0) => {
+  const raw = O.defs[index] || [O.maxC, 1 + index];
+  const cols = raw[0] <= 0 ? 0 : Math.min(O.maxC, raw[0]);
+  const rows = cols ? Math.min(O.maxR, raw[2] || raw[0]) : 0;
   const rooms = cols ? mazeRooms(cols, rows) : tutorialRooms();
-  const colors = pickLevelColors(Math.min(6, raw.colorCount || 1), exclude);
+  const colors = pickLevelColors(Math.min(6, raw[1] || 1), exclude, lit);
   return {
     index,
     mazeSize: cols,
     rooms,
     colors,
-    triangles: colors.length
-      ? placeTriangles(rooms, colors, PER_COLOR)
-      : [],
-    perColor: PER_COLOR,
+    triangles: colors.length ? placeTriangles(rooms, colors) : [],
+    perColor: O.per,
   };
 };
 
@@ -1669,7 +1660,7 @@ const CUBE_TURNS = [
 ];
 
 const cubeFill = (c) =>
-  colorHsl({ ...c, l: Math.max(c.l, OPTS.cube.minLightness) });
+  colorHsl({ ...c, l: Math.max(c.l, O.minL) });
 
 const makeGem = (color, slot) => {
   const fill = cubeFill(color);
@@ -1677,7 +1668,7 @@ const makeGem = (color, slot) => {
   const endSize = Math.max(
     16,
     cubeFace?.getBoundingClientRect?.().width ||
-      (slot?.getBoundingClientRect?.().width || 52) * 0.34
+      (slot ? rect(slot).width : 52) * 0.34
   );
   const gem = div({ className: "gem" });
   gem.style.setProperty("--fly", fill);
@@ -1686,16 +1677,16 @@ const makeGem = (color, slot) => {
   return { gem, fill, endSize };
 };
 
-function createCube({ color, unlockedFaces = [], pendingFaces = [] }) {
-  const lit = new Set(unlockedFaces);
-  const pending = new Set(pendingFaces);
+function createCube({ color, lit = [], pd = [] }) {
+  const litSet = new Set(lit);
+  const pending = new Set(pd);
   const fill = cubeFill(color);
 
   const faces = CUBE_TURNS.map(([ry, rx], i) => {
     const isPending = pending.has(i);
-    const on = lit.has(i) && !isPending;
+    const on = litSet.has(i) && !isPending;
     const face = div({
-      className: on ? "cf lit" : isPending ? "cf pending" : "cf",
+      className: on ? "cf lit" : isPending ? "cf pd" : "cf",
       style: {
         background: on ? fill : "#3a3a42",
         transform: `rotateY(${ry}deg) rotateX(${rx}deg) translateZ(1em)`,
@@ -1736,8 +1727,8 @@ function createCubeRack() {
     slot.replaceChildren(
       createCube({
         color: rainbow,
-        unlockedFaces: [...new Set([...lit, ...pending])],
-        pendingFaces: [...pending],
+        lit: [...new Set([...lit, ...pending])],
+        pd: [...pending],
       })
     );
     return slot;
@@ -1752,9 +1743,9 @@ function createCubeRack() {
   function igniteFace(slot, faceIndex) {
     const face = slot?.querySelector?.(`.cf[data-i="${faceIndex}"]`);
     if (!face) return;
-    off(face, "pending");
+    off(face, "pd");
     void face.offsetWidth;
-    on(face, "lit", "ignite");
+    on(face, "lit", "ig");
     const fill = slot.querySelector(".cube")?.style.getPropertyValue("--cube");
     if (fill) face.style.background = fill;
   }
@@ -1771,8 +1762,8 @@ function createCubeRack() {
     if (!slot) return null;
     const face = nextFace(color.i);
     if (face < 0) return retireFull(color, slot, gemEl);
-    await flyThen(gemEl, slot, { node: gemEl, ms: OPTS.fly.trophyMs, sfx: sfxReward });
-    if (bodyHas("won")) return null;
+    await flyThen(gemEl, slot, { node: gemEl, ms: O.tfly, sfx: sfxReward });
+    if (isWon()) return null;
     return settleFace(color, face);
   }
 
@@ -1823,7 +1814,7 @@ function createCubeRack() {
         const slot = slotFor(c);
         const { gem } = makeGem(c, slot);
         return flyIn(null, slot, { node: gem, sfx: sfxReward }, () => {
-          if (bodyHas("won")) return;
+          if (isWon()) return;
           igniteFace(slot, f);
           if (isFull(c.i)) retireColorFromLevel(c.i);
         });
@@ -1845,6 +1836,7 @@ function createCubeRack() {
     addFaces,
     rallyRoom,
     isColorComplete,
+    lit: (i) => litByColor[i].size,
     completed,
     allComplete,
   };
@@ -1898,7 +1890,7 @@ function createPuzzleUI(opts) {
           i < n ? fill : "#333"
         );
     });
-    tog(tab, "ready", n >= total && !solved);
+    tog(tab, "ry", n >= total && !solved);
   }
 
   function tryComplete() {
@@ -1907,7 +1899,7 @@ function createPuzzleUI(opts) {
     solved = true;
     ids.forEach(clearHintMask);
     pruneWashes();
-    on(tab, "ready");
+    on(tab, "ry");
     syncPow();
     onComplete();
   }
@@ -1932,7 +1924,7 @@ function createPuzzleUI(opts) {
     solved = false;
     completing = false;
     ids.length = 0;
-    off(tab, "ready", "sealing", "sealed");
+    off(tab, "ry", "sl", "sd");
     clrTab();
     if (tab.parentNode !== hold) hold.append(tab);
     tab.hidden = false;
@@ -1942,14 +1934,14 @@ function createPuzzleUI(opts) {
 
   function removeTab() {
     hold.remove();
-    const root = tabsBar.closest("#proot");
+    const root = tabsBar.closest("#pr");
     if (tabsBar && !tabsBar.childElementCount) root?.remove();
   }
 
   async function collapseToGem() {
     const slot = cubeRack.slots[color.i];
     const { gem, endSize } = makeGem(color, slot);
-    const r0 = tab.getBoundingClientRect();
+    const r0 = rect(tab);
     hold.style.width = hold.style.minWidth = `${r0.width}px`;
     hold.style.height = `${r0.height}px`;
     tab.style.transition = "none";
@@ -1961,14 +1953,14 @@ function createPuzzleUI(opts) {
     tab.style.width = `${r0.width}px`;
     tab.style.height = `${r0.height}px`;
     tab.style.margin = "0";
-    const r1 = tab.getBoundingClientRect();
+    const r1 = rect(tab);
     tab.style.transition = "";
-    on(tab, "sealing");
+    on(tab, "sl");
     tab.style.width = tab.style.height = `${endSize}px`;
     tab.style.left = `${r1.left + r1.width / 2 - endSize / 2}px`;
     tab.style.top = `${r1.top + r1.height / 2 - endSize / 2}px`;
-    await wait(OPTS.time.sealMs);
-    const r = tab.getBoundingClientRect();
+    await wait(O.seal);
+    const r = rect(tab);
     gem.style.position = "fixed";
     gem.style.zIndex = "121";
     gem.style.width = gem.style.height = `${endSize}px`;
@@ -1976,8 +1968,8 @@ function createPuzzleUI(opts) {
     gem.style.top = `${r.top + r.height / 2 - endSize / 2}px`;
     document.body.append(gem);
     clrTab();
-    off(tab, "sealing", "ready");
-    on(tab, "sealed");
+    off(tab, "sl", "ry");
+    on(tab, "sd");
     hold.append(tab);
     await nextFrame();
     return gem;
@@ -1995,8 +1987,8 @@ function createPuzzleUI(opts) {
 }
 
 function createPuzzleSet(colors, perColor, onColorComplete) {
-  const root = div({ id: "proot" });
-  const tabsBar = div({ id: "ctabs" });
+  const root = div({ id: "pr" });
+  const tabsBar = div({ id: "tb" });
   root.append(tabsBar);
   document.body.append(root);
   const map = {};
@@ -2020,34 +2012,42 @@ function createPuzzleSet(colors, perColor, onColorComplete) {
 }
 
 ;
+const W = 0,
+  E = 1,
+  R = 2;
 const POWERS = [
-  ["wash", "W", uniCyan],
-  ["evoke", "E", uniPink],
-  ["rally", "R", uniGold],
+  ["W", uniCyan],
+  ["E", uniPink],
+  ["R", uniGold],
 ];
-const POWER_IDS = POWERS.map((p) => p[0]);
-const POWER_KEY = { w: "wash", e: "evoke", r: "rally" };
+const PK = { w: W, e: E, r: R };
+const PCD = [
+  [24e3, 4e3, 5e3],
+  [48e3, 4e3, 16e3],
+  [12e4, 16e3, 28e3],
+];
 const powStyle = (fill) => ({
   "--pow": `color-mix(in srgb, ${fill} 65%, #000)`,
-  "--pow-dark": `color-mix(in srgb, ${fill} 27%, #201018)`,
+  "--powd": `color-mix(in srgb, ${fill} 27%, #201018)`,
 });
 
-const powerState = Object.fromEntries(
-  POWER_IDS.map((id) => [id, { level: 0, active: false, cooling: false }])
-);
+const powerState = [
+  { l: 0, a: 0, c: 0 },
+  { l: 0, a: 0, c: 0 },
+  { l: 0, a: 0, c: 0 },
+];
 
 const lv1 = (n) => Math.max(1, n | 0);
 const powerCd = (id, level) => {
-  const [base, step, min] = OPTS.powers[id + "Cd"] || OPTS.powers.cd;
+  const [base, step, min] = PCD[id];
   return Math.max(min, base - (lv1(level) - 1) * step);
 };
 
-const powerBtn = ([id, glyph, fill], n, extra) => {
+const powerBtn = ([glyph, fill], n, extra) => {
   const btn = button({
     className: extra ? `ps ${extra}` : "ps",
     style: powStyle(fill),
   });
-  btn.dataset.power = id;
   btn.append(div({ className: "pg" }, glyph), div({ className: "pl" }, String(n)));
   return btn;
 };
@@ -2056,17 +2056,16 @@ let upgradeQueue = Promise.resolve();
 let upgradeWait = 0;
 
 function createPowerSystem() {
-  const slots = POWERS.map((p) => {
-    const slot = powerBtn(p, 0, "locked");
+  const slots = POWERS.map((p, id) => {
+    const slot = powerBtn(p, 0, "lk");
     slot.disabled = true;
-    slot.onclick = () => activatePower(p[0]);
+    slot.onclick = () => activatePower(id);
     return slot;
   });
   document.body.append(div({ id: "prk" }, ...slots));
 
-  const gate = (id) =>
-    id === "rally" ? levelIndex >= OPTS.powers.rallyFromLevel : true;
-  const unlocked = (id) => powerState[id].level > 0 && gate(id);
+  const gate = (id) => (id === R ? levelIndex >= O.rallyLv : true);
+  const unlocked = (id) => powerState[id].l > 0 && gate(id);
 
   const openPool = () => {
     const ids = new Set(levelColors.map((c) => c.i));
@@ -2083,39 +2082,38 @@ function createPowerSystem() {
 
   function syncSlot(id) {
     const st = powerState[id];
-    const slot = slots[POWER_IDS.indexOf(id)];
-    slot.querySelector(".pl").textContent = String(st.level);
+    const slot = slots[id];
+    slot.querySelector(".pl").textContent = String(st.l);
     const lock = !unlocked(id);
     const empty =
       !lock &&
-      ((id === "evoke" && !openPool().length) ||
-        (id === "rally" && !(cubeRack.rallyRoom() > 0)));
-    const held = bodyHas("rewarding");
-    tog(slot, "locked", lock || empty);
-    tog(slot, "active", st.active);
-    tog(slot, "cooling", st.cooling);
-    slot.disabled = lock || empty || st.active || st.cooling || held;
+      ((id === E && !openPool().length) || (id === R && !(cubeRack.rallyRoom() > 0)));
+    const held = hasRw();
+    tog(slot, "lk", lock || empty);
+    tog(slot, "on", st.a);
+    tog(slot, "co", st.c);
+    slot.disabled = lock || empty || st.a || st.c || held;
   }
-  const syncAll = () => POWER_IDS.forEach(syncSlot);
+  const syncAll = () => POWERS.forEach((_, id) => syncSlot(id));
 
   function beginBusy(id, activeMs) {
     const st = powerState[id];
-    st.active = st.cooling = true;
+    st.a = st.c = true;
     syncSlot(id);
-    const cd = powerCd(id, st.level);
+    const cd = powerCd(id, st.l);
     setTimeout(() => {
-      st.active = false;
+      st.a = false;
       syncSlot(id);
     }, Math.min(activeMs, cd));
     setTimeout(() => {
-      st.cooling = false;
+      st.c = false;
       syncSlot(id);
     }, cd);
   }
 
   function showUpgrade() {
     return new Promise((resolve) => {
-      if (bodyHas("won")) {
+      if (isWon()) {
         upgradeWait--;
         resolve();
         return;
@@ -2124,14 +2122,9 @@ function createPowerSystem() {
       let picked = false;
       let onKey;
 
-      const choices = POWERS.map((p) => {
-        const [id] = p;
+      const choices = POWERS.map((p, id) => {
         const ok = canPick(id);
-        const btn = powerBtn(
-          p,
-          "+",
-          ok ? "ppk" : "ppk locked"
-        );
+        const btn = powerBtn(p, "+", ok ? "ppk" : "ppk lk");
         btn.disabled = !ok;
         if (ok) btn.onclick = () => commit(id);
         return btn;
@@ -2141,7 +2134,7 @@ function createPowerSystem() {
 
       const finish = (id) => {
         upgradeWait--;
-        if (bodyHas("won")) {
+        if (isWon()) {
           resolve(id);
           return;
         }
@@ -2150,12 +2143,12 @@ function createPowerSystem() {
           return;
         }
         modal?.remove();
-        bodyOff("rewarding");
+        bodyOff("rw");
         syncAll();
         resolve(id);
       };
       const close = (id) => {
-        if (picked || bodyHas("won")) return;
+        if (picked || isWon()) return;
         picked = true;
         removeEventListener("keydown", onKey);
         const more = upgradeWait > 1;
@@ -2163,19 +2156,18 @@ function createPowerSystem() {
         setTimeout(() => finish(id), more ? 400 : 520);
       };
       const commit = (id) => {
-        if (picked || bodyHas("won") || !canPick(id)) return;
-        sfxPick();
-        on(choices[POWER_IDS.indexOf(id)], "picked");
+        if (picked || isWon() || !canPick(id)) return;
+        sfxReward(16 / 9);
+        on(choices[id], "pk");
         close(id);
-        const st = powerState[id];
-        st.level++;
+        powerState[id].l++;
         syncSlot(id);
       };
 
       onKey = (e) => {
         if (e.metaKey || e.ctrlKey || e.altKey) return;
-        const id = POWER_KEY[e.key.toLowerCase()];
-        if (!id) return;
+        const id = PK[e.key.toLowerCase()];
+        if (id == null) return;
         e.preventDefault();
         commit(id);
       };
@@ -2184,7 +2176,7 @@ function createPowerSystem() {
   }
 
   const offerUpgrade = () => {
-    if (bodyHas("won")) return Promise.resolve();
+    if (isWon()) return Promise.resolve();
     upgradeWait++;
     const p = upgradeQueue.then(showUpgrade, showUpgrade);
     upgradeQueue = p.catch(() => {});
@@ -2217,10 +2209,7 @@ function createPowerSystem() {
     const pool = openPool();
     if (!pool.length) return;
     const i = shuffle([...new Set(pool.map((t) => t.color.i))])[0];
-    const picks = shuffle(pool.filter((t) => t.color.i === i)).slice(
-      0,
-      lv1(level)
-    );
+    const picks = shuffle(pool.filter((t) => t.color.i === i)).slice(0, lv1(level));
     const puzzle = puzzles.map[i];
     if (!puzzle) return;
 
@@ -2246,19 +2235,19 @@ function createPowerSystem() {
 
   function activatePower(id) {
     const st = powerState[id];
-    if (!unlocked(id) || st.active || st.cooling || bodyHas("rewarding") || bodyHas("won")) return;
-    if (id === "evoke" && !openPool().length) return;
-    if (id === "rally" && !(cubeRack.rallyRoom() > 0)) return;
+    if (!unlocked(id) || st.a || st.c || hasRw() || isWon()) return;
+    if (id === E && !openPool().length) return;
+    if (id === R && !(cubeRack.rallyRoom() > 0)) return;
 
     uniGo();
     sfxReward(4 / 3);
 
-    if (id === "rally") {
-      runRally(lv1(st.level));
-      beginBusy(id, OPTS.fly.trophyMs + 400);
+    if (id === R) {
+      runRally(lv1(st.l));
+      beginBusy(id, O.tfly + 400);
     } else {
-      if (id === "wash") runWash(st.level);
-      else runEvoke(st.level);
+      if (id === W) runWash(st.l);
+      else runEvoke(st.l);
       beginBusy(id, 900);
     }
   }
@@ -2275,20 +2264,13 @@ function createPowerSystem() {
 ;
 const player = {
   room: 0,
-  inspecting: false,
+  ins: false,
   right: [1, 0, 0],
   up: [0, 1, 0],
   forward: [0, 0, -1],
 };
 
-const FACES = [
-  ["N", "face-n"],
-  ["E", "face-e"],
-  ["S", "face-s"],
-  ["W", "face-w"],
-  ["U", "face-u"],
-  ["D", "face-d"],
-];
+const FACE_KEYS = "NESWUD";
 
 let levelIndex = 0;
 let rooms = [];
@@ -2346,7 +2328,7 @@ const pumpQ = () => turnQ.length && doTurn(turnQ.shift());
 
 const animateTurn = (fr, fu, ff, axis, s) => {
   turnBusy = 1;
-  runTween(OPTS.time.turnMs, {
+  runTween(O.turn, {
     ease: easeInOut,
     setRaf: (id) => (turnRaf = id),
     onTick: (eased) => {
@@ -2376,34 +2358,36 @@ function facingFaceKey() {
 }
 
 function buildRoom(spec) {
-  const walls = FACES.filter(([key]) => !(key in spec.doors)).map(([key, cls]) => {
-    const face = div({ className: "face" });
-    face.dataset.face = key;
-    const hides = hiddensOn(spec.id, key);
-    paintWall(
-      face,
-      hides.map((h) => ({ id: h.id, color: h.color }))
-    );
-    return div({ className: `wall ${cls}` }, face);
-  });
+  const walls = [...FACE_KEYS]
+    .filter((key) => !(key in spec.doors))
+    .map((key) => {
+      const face = div({ className: "face" });
+      face.dataset.f = key;
+      const hides = hiddensOn(spec.id, key);
+      paintWall(
+        face,
+        hides.map((h) => ({ id: h.id, color: h.color }))
+      );
+      return div({ className: `wall f${key.toLowerCase()}` }, face);
+    });
 
   return div(
     {
-      id: `room-${spec.id}`,
+      id: `r${spec.id}`,
       className: "room",
       style: {
-        transform: `translate3d(calc(${spec.x} * var(--span)), 0px, calc(${spec.z} * var(--span)))`,
+        transform: `translate3d(calc(${spec.x} * var(--S)), 0px, calc(${spec.z} * var(--S)))`,
       },
     },
     ...walls
   );
 }
 
-const world = div({ id: "world" });
-const pivot = div({ id: "pivot" }, world);
-const camera = div({ id: "camera" }, pivot);
-const viewport = div({ id: "viewport" }, camera);
-const inspectStage = div({ id: "istage", hidden: true });
+const world = div({ id: "w" });
+const pivot = div({ id: "pv" }, world);
+const camera = div({ id: "cam" }, pivot);
+const viewport = div({ id: "vp" }, camera);
+const inspectStage = div({ id: "is", hidden: true });
 
 document.body.append(viewport, inspectStage);
 
@@ -2413,27 +2397,20 @@ const tryChromeless = () => {
   document.documentElement.requestFullscreen?.().catch?.(() => {});
 };
 
-let sx, sy, swiped;
-viewport.addEventListener("click", () => {
+viewport.addEventListener("click", (e) => {
   tryChromeless();
-  if (swiped) return void (swiped = 0);
-  if (turnBusy || bodyHas("rewarding") || bodyHas("won")) return;
+  if (turnBusy || hasRw() || isWon()) return;
+  const r = rect(viewport);
+  const x = (e.clientX - r.left) / r.width;
+  const y = (e.clientY - r.top) / r.height;
+  const t = 1 / 3;
+  if (x < t || x > 1 - t || y < t || y > 1 - t) {
+    const dx = Math.abs(x - 0.5);
+    const dy = Math.abs(y - 0.5);
+    if (dx >= dy) return doTurn(+(x > 0.5));
+    return doTurn(2 + +(y > 0.5));
+  }
   primaryAction();
-});
-viewport.addEventListener("touchstart", (e) => {
-  const t = e.changedTouches[0];
-  sx = t.clientX;
-  sy = t.clientY;
-  swiped = 0;
-}, { passive: true });
-viewport.addEventListener("touchend", (e) => {
-  if (bodyHas("rewarding") || bodyHas("won")) return;
-  const t = e.changedTouches[0];
-  const dx = t.clientX - sx;
-  const dy = t.clientY - sy;
-  if (dx * dx + dy * dy < 576) return;
-  swiped = 1;
-  doTurn(Math.abs(dx) > Math.abs(dy) ? +(dx > 0) : 2 + (dy > 0));
 });
 
 const cubeRack = createCubeRack();
@@ -2461,7 +2438,7 @@ function retireColorFromLevel(i) {
   puzzles?.map?.[i]?.remove();
   if (puzzles?.map) delete puzzles.map[i];
   levelColors = levelColors.filter((c) => c.i !== i);
-  if (stripped && player.inspecting) {
+  if (stripped && player.ins) {
     const layers = faceLayers(inspectFace());
     if (layers.length) trackInspectHits(layers);
     else stopHitTracking();
@@ -2472,7 +2449,7 @@ function retireColorFromLevel(i) {
 let rewardInflight = 0;
 
 async function onColorComplete(color, puzzle) {
-  if (bodyHas("won")) return;
+  if (isWon()) return;
   rewardInflight++;
   solvedColors.add(color.i);
   sfxReward(3 / 4, 0.2);
@@ -2481,29 +2458,29 @@ async function onColorComplete(color, puzzle) {
       (t) => t.color.i === color.i && !collected.has(t.id)
     ).length;
 
-    await wait(OPTS.time.solveHoldMs);
-    if (bodyHas("won")) return;
+    await wait(O.hold);
+    if (isWon()) return;
 
     const gem = await puzzle.collapseToGem();
-    if (bodyHas("won")) return;
+    if (isWon()) return;
     await cubeRack.deliver(color, gem);
-    if (bodyHas("won") || cubeRack.allComplete()) {
+    if (isWon() || cubeRack.allComplete()) {
       endGameWon();
       return;
     }
 
     if (cubeRack.isColorComplete(color)) {
       retireColorFromLevel(color.i);
-    } else if (left >= PER_COLOR) {
+    } else if (left >= O.per) {
       puzzle.reset();
     } else {
       puzzle.remove();
     }
 
     await wait(300);
-    if (bodyHas("won")) return;
+    if (isWon()) return;
     await powers.offerUpgrade();
-    if (bodyHas("won") || rewardInflight > 1) return;
+    if (isWon() || rewardInflight > 1) return;
 
     if (cubeRack.allComplete()) {
       endGameWon();
@@ -2512,17 +2489,17 @@ async function onColorComplete(color, puzzle) {
     if (levelCleared()) await transitionToLevel(levelIndex + 1);
   } finally {
     rewardInflight--;
-    if (!bodyHas("won") && !qs(".pmod")) bodyOff("rewarding");
+    if (!isWon() && !qs(".pmod")) bodyOff("rw");
     powers.syncAll();
   }
 }
 
 function endGameWon() {
-  if (bodyHas("won")) return;
+  if (isWon()) return;
   bodyOn("won");
   qs(".pmod")?.remove();
-  bodyOff("rewarding");
-  document.body.append(div({ id: "win" }, "You Won!"));
+  bodyOff("rw");
+  document.body.append(div({ id: "win" }, "Winner!"));
   musicWin();
   cubeRack.slots.forEach((_, i) =>
     setTimeout(() => sfxReward(4 / 3), i * 200)
@@ -2539,7 +2516,7 @@ function showHelp() {
     ),
     div(
       { className: "ph" },
-      "Swipe or arrows to turn\nTap or space to move\nPowerups will help"
+      "Tap edges or arrows to turn\nTap center or space to move\nPowerups will help"
     ),
   ]);
   const go = () => {
@@ -2549,7 +2526,7 @@ function showHelp() {
     on(modal, "out");
     setTimeout(() => {
       modal.remove();
-      bodyOff("rewarding", "hi");
+      bodyOff("rw", "hi");
       powers.syncAll();
     }, 520);
   };
@@ -2558,30 +2535,29 @@ function showHelp() {
 }
 
 async function transitionToLevel(index) {
-  bodyOff("rewarding");
-  player.inspecting = false;
+  bodyOff("rw");
+  player.ins = false;
   clearInspectTarget();
   stopHitTracking();
-  off(viewport, "inspecting");
+  off(viewport, "ins");
+  off(uni, "act");
 
   haltTurns();
   doTurn((Math.random() * 4) | 0);
   on(viewport, "lx");
-  await wait(OPTS.time.levelExitMs);
+  await wait(O.lx);
 
-  startLevel(index);
-
-  off(viewport, "lx");
   on(viewport, "le");
+  startLevel(index);
+  off(viewport, "lx");
   void world.offsetWidth;
   on(viewport, "li");
-  await wait(OPTS.time.levelEnterMs);
+  await wait(O.li);
   off(viewport, "le", "li");
 }
 
 function startLevel(index) {
-  const exclude = cubeRack.completed();
-  const L = buildLevel(index, exclude);
+  const L = buildLevel(index, cubeRack.completed(), cubeRack.lit);
   if (!L.colors.length) {
     endGameWon();
     return;
@@ -2595,7 +2571,7 @@ function startLevel(index) {
   solvedColors = new Set();
   haltTurns();
   player.room = 0;
-  player.inspecting = false;
+  player.ins = false;
   player.right = [1, 0, 0];
   player.up = [0, 1, 0];
   player.forward = [0, 0, -1];
@@ -2606,7 +2582,7 @@ function startLevel(index) {
   clearAllHintMasks();
   world.replaceChildren(...rooms.map(buildRoom));
   updateView(false);
-  if (index === 0 && powerState.wash.level < 1) powerState.wash.level = 1;
+  if (index === 0 && powerState[0].l < 1) powerState[0].l = 1;
   powers.syncAll();
 }
 
@@ -2619,9 +2595,7 @@ function passageTarget() {
 
 function getFacingFaceEl() {
   const key = facingFaceKey();
-  return qs(
-    `#room-${player.room} .face[data-face="${key}"]`
-  );
+  return qs(`#r${player.room} .face[data-f="${key}"]`);
 }
 
 function updateView(animate = true) {
@@ -2631,8 +2605,9 @@ function updateView(animate = true) {
   if (!turnBusy) look();
   const r = rooms[player.room];
   if (!r) return;
-  world.style.transform = `translate3d(calc(${-r.x} * var(--span)), 0px, calc(${-r.z} * var(--span)))`;
-  tog(viewport, "inspecting", player.inspecting);
+  world.style.transform = `translate3d(calc(${-r.x} * var(--S)), 0px, calc(${-r.z} * var(--S)))`;
+  tog(viewport, "ins", player.ins);
+  tog(uni, "act", player.ins);
 }
 
 function navigateFromView(applyBasis, axis, s) {
@@ -2644,7 +2619,7 @@ function navigateFromView(applyBasis, axis, s) {
     animateTurn(fr, fu, ff, axis, s);
   };
 
-  if (!player.inspecting) {
+  if (!player.ins) {
     kick();
     return;
   }
@@ -2655,16 +2630,17 @@ function navigateFromView(applyBasis, axis, s) {
   stopHitTracking();
   resetRevealMask();
   layers.forEach(resetLayerMask);
-  player.inspecting = false;
+  player.ins = false;
   clearInspectTarget();
 
   off(camera, "na");
   off(world, "na");
-  off(viewport, "inspecting");
+  off(viewport, "ins");
+  off(uni, "act");
 
   onceEndOrTimeout(
     camera,
-    OPTS.time.camMs + 80,
+    O.cam + 80,
     () => {
       turnBusy = 0;
       kick();
@@ -2727,14 +2703,14 @@ function trackInspectHits(layers) {
   inspectStage.replaceChildren(...inspectHits.map((h) => h.hit));
 
   const sync = () => {
-    if (!player.inspecting || !inspectHits.length) return;
-    const stage = inspectStage.getBoundingClientRect();
+    if (!player.ins || !inspectHits.length) return;
+    const stage = rect(inspectStage);
     const pad = 6;
     for (const { hit, layer } of inspectHits) {
       const poly = layer.querySelector(".ctri");
       const face = layer.closest(".face");
       const target = poly || face || layer;
-      const r = target.getBoundingClientRect();
+      const r = rect(target);
       box(hit, {
         x: r.left - stage.left - pad,
         y: r.top - stage.top - pad,
@@ -2751,7 +2727,7 @@ function trackInspectHits(layers) {
 function enterInspect() {
   if (passageTarget() !== null) return;
   pruneWashes();
-  player.inspecting = true;
+  player.ins = true;
   clearInspectTarget();
 
   const face = getFacingFaceEl();
@@ -2773,7 +2749,7 @@ function exitInspect() {
   const face = inspectFace();
   const layers = faceLayers(face);
 
-  player.inspecting = false;
+  player.ins = false;
   stopHitTracking();
   updateView();
 
@@ -2789,7 +2765,7 @@ function exitInspect() {
 
 function primaryAction() {
   if (turnBusy) return;
-  if (player.inspecting) {
+  if (player.ins) {
     exitInspect();
     return;
   }
@@ -2832,20 +2808,19 @@ function collectTriangle(id, el) {
     ? faceLayers(face).filter((l) => l !== layer)
     : [];
 
-  if (player.inspecting && others.length) {
+  if (player.ins && others.length) {
     for (const l of others) {
       const c = l.querySelector(".rc");
       setCircleR(c, R_MAX);
-      on(l, "revealed");
-      off(l, "revealing", "hiding");
-      l.style.filter = "none";
+      on(l, "rd");
+      off(l, "rv", "hd");
     }
     revealLayers = others;
     trackInspectHits(others);
   } else {
     stopHitTracking();
     resetRevealMask();
-    player.inspecting = false;
+    player.ins = false;
     clearInspectTarget();
     updateView();
   }
@@ -2855,8 +2830,8 @@ function collectTriangle(id, el) {
 
 window.addEventListener("keydown", (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
-  if (bodyHas("rewarding") || bodyHas("won")) return;
-  const powerId = POWER_KEY[e.key.toLowerCase()];
+  if (hasRw() || isWon()) return;
+  const powerId = PK[e.key.toLowerCase()];
   if (powerId) {
     e.preventDefault();
     powers.activatePower(powerId);

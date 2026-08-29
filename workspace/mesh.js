@@ -66,12 +66,12 @@ const createMeshData = (seed) => {
     preserveAspectRatio: "none",
     class: "wm",
   });
-  svg.append(svgEl("rect", { width: 100, height: 100, fill: "var(--wall-lo)" }));
+  svg.append(svgEl("rect", { width: 100, height: 100, fill: "var(--W1)" }));
   for (const [a, b, c] of tris) {
     svg.append(
       svgEl("polygon", {
         points: [a, b, c].map(([x, y]) => `${x * 100},${y * 100}`).join(" "),
-        fill: `color-mix(in srgb,var(--wall-lo) ${(rand() * 100) | 0}%,var(--wall-hi))`,
+        fill: `color-mix(in srgb,var(--W1) ${(rand() * 100) | 0}%,var(--W2))`,
       })
     );
   }

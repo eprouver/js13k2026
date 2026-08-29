@@ -3,7 +3,7 @@ const generatePathData = (x1, y1, x2, y2, crazy) => {
   const dx = x2 - x1;
   const dy = y2 - y1;
   const len = Math.hypot(dx, dy) || 80;
-  const j = len * (crazy ?? OPTS.fly.crazy);
+  const j = len * (crazy ?? O.crazy);
   const nx = -dy / len;
   const ny = dx / len;
   const side = Math.random() < 0.5 ? 1 : -1;
@@ -26,7 +26,7 @@ const flyStartPoint = (fromEl, opts, node) => {
   if (opts.fromOffscreen) return offscreenUpperThird();
   const origin = fromEl || node;
   if (!origin?.getBoundingClientRect) return offscreenUpperThird();
-  const a = origin.getBoundingClientRect();
+  const a = rect(origin);
   const x = a.left + a.width / 2;
   const y = a.top + a.height / 2;
   const tiny = a.width < 4 || a.height < 4;
@@ -46,19 +46,19 @@ const flyOnPath = (fromEl, toEl, opts = {}) =>
       return;
     }
 
-    const b = toEl.getBoundingClientRect();
+    const b = rect(toEl);
     const { x: x1, y: y1 } = flyStartPoint(fromEl, opts, node);
     const x2 = b.left + b.width / 2;
     const y2 = b.top + b.height / 2;
-    const ms = opts.ms ?? (node ? OPTS.fly.trophyMs : OPTS.fly.ms);
-    const crazy = opts.crazy ?? (node ? OPTS.fly.trophyCrazy : OPTS.fly.crazy);
+    const ms = opts.ms ?? (node ? O.tfly : O.fly);
+    const crazy = opts.crazy ?? (node ? O.tcrazy : O.crazy);
     const delay = opts.delay ?? 0;
 
     const mover = div({
       className: node ? "fly flyn" : "fly",
     });
     if (node) {
-      const nr = node.getBoundingClientRect();
+      const nr = rect(node);
       const size = Math.max(nr.width, nr.height, 8);
       mover.style.width = `${size}px`;
       mover.style.height = `${size}px`;
