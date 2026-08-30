@@ -48,9 +48,10 @@ document.head.appendChild(document.createElement("style")).append(`*,
 
 html,
 body {
-  width: 100vw;
-  height: 100dvh;
+  position: fixed;
+  inset: 0;
   overflow: hidden;
+  overscroll-behavior: none;
   font-family: Arial;
   background: var(--bg);
   color: var(--fg);
@@ -465,8 +466,8 @@ body.rw::after {
 
 #tcl {
   position: fixed;
-  left: 0.85rem;
-  bottom: 0.65rem;
+  right: 0.85rem;
+  top: 0.65rem;
   z-index: 65;
   color: #a1a1a1;
   font: 700 1.1rem/1 monospace;
@@ -483,7 +484,7 @@ body.won #prk { display: none; }
 
 #uni {
   --u: 25vmin;
-  position: absolute;
+  position: fixed;
   right: calc(-3vmin - var(--u) / 16);
   bottom: -5vmin;
   width: var(--u);
