@@ -454,6 +454,21 @@ body.rw::after {
 #drk { left: 0.35rem; }
 #prk { right: 0.35rem; }
 
+#tcl {
+  position: fixed;
+  left: 0.85rem;
+  bottom: 0.65rem;
+  z-index: 65;
+  color: #a1a1a1;
+  font: 700 1.1rem/1 monospace;
+  pointer-events: none;
+}
+body.won #tcl {
+  z-index: 90;
+  color: #fff;
+  font-size: 1.32rem;
+}
+
 body.won #drk { z-index: 85; }
 body.won #prk { display: none; }
 
@@ -759,6 +774,17 @@ body.rw #prk .ps,
   font-size: 1.05rem;
   line-height: 1.45;
   white-space: pre-line;
+}
+
+body.hi .pmc {
+  max-width: calc(100vw - 1.2rem);
+  padding: 1rem 1.1rem;
+}
+body.hi .pmc h2 {
+  font-size: 1.25rem;
+}
+body.hi .ph {
+  font-size: 0.92rem;
 }
 
 .ppks {

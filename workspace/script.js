@@ -230,8 +230,21 @@ async function onColorComplete(color, puzzle) {
   }
 }
 
+let t0, tid;
+const tcl = div({ id: "tcl" });
+const tFmt = (s) =>
+  ((s / 60 | 0) + 100 + "").slice(1) + ":" + ((s % 60) + 100 + "").slice(1);
+const tTick = () => (tcl.textContent = tFmt(((Date.now() - t0) / 1e3) | 0));
+const tStart = () => {
+  t0 = Date.now();
+  tid = setInterval(tTick, 1e3);
+  tTick();
+};
+const tStop = () => clearInterval(tid);
+
 function endGameWon() {
   if (isWon()) return;
+  tStop();
   bodyOn("won");
   qs(".pmod")?.remove();
   bodyOff("rw");
@@ -248,7 +261,7 @@ function showHelp() {
   const modal = showModal([
     v.h2(
       { className: "ph" },
-      "Find the Triangles: Save the Rainbow"
+      "Find the Rainbow's Triangles"
     ),
     div(
       { className: "ph" },
@@ -264,6 +277,7 @@ function showHelp() {
       modal.remove();
       bodyOff("rw", "hi");
       powers.syncAll();
+      tStart();
     }, 520);
   };
   addEventListener("keydown", go);
@@ -591,5 +605,6 @@ window.addEventListener("keydown", (e) => {
 });
 
 ensureRevealDefs();
+document.body.append(tcl);
 startLevel(0);
 showHelp();

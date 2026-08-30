@@ -463,6 +463,21 @@ body.rw::after {
 #drk { left: 0.35rem; }
 #prk { right: 0.35rem; }
 
+#tcl {
+  position: fixed;
+  left: 0.85rem;
+  bottom: 0.65rem;
+  z-index: 65;
+  color: #a1a1a1;
+  font: 700 1.1rem/1 monospace;
+  pointer-events: none;
+}
+body.won #tcl {
+  z-index: 90;
+  color: #fff;
+  font-size: 1.32rem;
+}
+
 body.won #drk { z-index: 85; }
 body.won #prk { display: none; }
 
@@ -768,6 +783,17 @@ body.rw #prk .ps,
   font-size: 1.05rem;
   line-height: 1.45;
   white-space: pre-line;
+}
+
+body.hi .pmc {
+  max-width: calc(100vw - 1.2rem);
+  padding: 1rem 1.1rem;
+}
+body.hi .pmc h2 {
+  font-size: 1.25rem;
+}
+body.hi .ph {
+  font-size: 0.92rem;
 }
 
 .ppks {
@@ -2509,8 +2535,21 @@ async function onColorComplete(color, puzzle) {
   }
 }
 
+let t0, tid;
+const tcl = div({ id: "tcl" });
+const tFmt = (s) =>
+  ((s / 60 | 0) + 100 + "").slice(1) + ":" + ((s % 60) + 100 + "").slice(1);
+const tTick = () => (tcl.textContent = tFmt(((Date.now() - t0) / 1e3) | 0));
+const tStart = () => {
+  t0 = Date.now();
+  tid = setInterval(tTick, 1e3);
+  tTick();
+};
+const tStop = () => clearInterval(tid);
+
 function endGameWon() {
   if (isWon()) return;
+  tStop();
   bodyOn("won");
   qs(".pmod")?.remove();
   bodyOff("rw");
@@ -2527,7 +2566,7 @@ function showHelp() {
   const modal = showModal([
     v.h2(
       { className: "ph" },
-      "Find the Triangles: Save the Rainbow"
+      "Find the Rainbow's Triangles"
     ),
     div(
       { className: "ph" },
@@ -2543,6 +2582,7 @@ function showHelp() {
       modal.remove();
       bodyOff("rw", "hi");
       powers.syncAll();
+      tStart();
     }, 520);
   };
   addEventListener("keydown", go);
@@ -2870,6 +2910,7 @@ window.addEventListener("keydown", (e) => {
 });
 
 ensureRevealDefs();
+document.body.append(tcl);
 startLevel(0);
 showHelp();
 
