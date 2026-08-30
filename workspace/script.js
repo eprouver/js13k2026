@@ -546,7 +546,7 @@ function claimTriangle(id, el) {
     layerById(id);
   const face = layer?.closest?.(".face");
   powers.noteCollected(id);
-  if (layer) layer.style.visibility = "hidden";
+  if (layer) hide(layer);
   return { tri, layer, face };
 }
 
@@ -592,15 +592,10 @@ window.addEventListener("keydown", (e) => {
     primaryAction();
     return;
   }
-  const map = {
-    ArrowLeft: 0,
-    ArrowRight: 1,
-    ArrowUp: 2,
-    ArrowDown: 3,
-  };
-  if (map[e.key] != null) {
+  const d = { Left: 0, Right: 1, Up: 2, Down: 3 }[e.key.slice(5)];
+  if (d != null) {
     e.preventDefault();
-    if (!e.repeat) doTurn(map[e.key]);
+    if (!e.repeat) doTurn(d);
   }
 });
 

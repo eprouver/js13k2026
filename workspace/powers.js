@@ -60,8 +60,7 @@ function createPowerSystem() {
       return (
         !collected.has(t.id) &&
         ids.has(t.color.i) &&
-        el &&
-        el.style.visibility !== "hidden"
+        el && !isHid(el)
       );
     });
   };
@@ -186,7 +185,7 @@ function createPowerSystem() {
     picks.forEach((t) => {
       if (collected.has(t.id)) return;
       const layer = layerById(t.id);
-      if (!layer || layer.style.visibility === "hidden") return;
+      if (!layer || isHid(layer)) return;
       playWash(layer, colorHsl(colorPair(t.color)));
     });
   }

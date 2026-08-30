@@ -10,10 +10,7 @@ const bodyOff = (...c) => off(document.body, ...c);
 const bodyHas = (c) => document.body.classList.contains(c);
 const showModal = (kids, ding) => {
   if (isWon()) return qs(".pmod");
-  const card = div(
-    { className: "pmc" },
-    ...(typeof kids === "string" ? [div({ className: "ph" }, kids)] : [].concat(kids))
-  );
+  const card = div({ className: "pmc" }, ...[].concat(kids));
   let modal = qs(".pmod");
   if (modal) {
     off(modal, "out");
@@ -58,11 +55,12 @@ const SVG100 = {
   viewBox: "0 0 100 100",
   width: "100%",
   height: "100%",
+  preserveAspectRatio: "none",
 };
+const isHid = (el) => el.style.visibility == "hidden";
+const hide = (el) => (el.style.visibility = "hidden");
 
 const inspectFace = () => qs(".face.it");
 const faceLayers = (face) =>
-  face
-    ? qsa(".cl", face).filter((l) => l.style.visibility !== "hidden")
-    : [];
+  face ? qsa(".cl", face).filter((l) => !isHid(l)) : [];
 const layerById = (id) => qs(`.cl[data-id="${id}"]`);

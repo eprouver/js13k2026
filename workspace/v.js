@@ -4,7 +4,7 @@ const v = new Proxy(
     get: (_, t) =>
       (...args) => {
         const e = document.createElement(t);
-        args.flat(0xff).forEach((a) => {
+        args.flat().forEach((a) => {
           if (a?.constructor == Object && !a.nodeType) {
             let { style, ...r } = a;
             Object.assign(e, r);

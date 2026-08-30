@@ -3,7 +3,7 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 const svgEl = (name, attrs = {}, ...kids) => {
   const e = document.createElementNS(SVG_NS, name);
   for (const k in attrs) e.setAttribute(k, attrs[k]);
-  for (const c of kids.flat(0xff)) if (c != null) e.append(c);
+  for (const c of kids.flat()) if (c != null) e.append(c);
   return e;
 };
 
@@ -63,7 +63,6 @@ const createMeshData = (seed) => {
   const tris = buildMesh(rand, 3);
   const svg = svgEl("svg", {
     ...SVG100,
-    preserveAspectRatio: "none",
     class: "wm",
   });
   svg.append(svgEl("rect", { width: 100, height: 100, fill: "var(--W1)" }));
@@ -126,10 +125,7 @@ const createCollectLayer = (id, tri, color) => {
   layer.append(
     svgEl(
       "svg",
-      {
-        ...SVG100,
-        preserveAspectRatio: "none",
-      },
+      SVG100,
       svgEl("defs", {}, mask),
       svgEl("polygon", {
         class: "ctri",

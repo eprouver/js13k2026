@@ -65,7 +65,6 @@ const buildLevel = (index, exclude = [], lit = () => 0) => {
   const colors = pickLevelColors(Math.min(6, raw[1] || 1), exclude, lit);
   return {
     index,
-    mazeSize: cols,
     rooms,
     colors,
     triangles: colors.length ? placeTriangles(rooms, colors) : [],

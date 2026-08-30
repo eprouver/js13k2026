@@ -22,7 +22,7 @@ document.head.appendChild(document.createElement("style")).append(`*,
   --D: 40vmin;
   --F: calc(2 * var(--D) - 10vmin);
   --R: 100%;
-  --Pr: 2rem;
+  --Pr: 1.5rem;
   --P: 40vmin;
   --S: calc(2 * var(--D));
   --bg: #121621;
@@ -30,12 +30,12 @@ document.head.appendChild(document.createElement("style")).append(`*,
   --W2: #4f576d;
   --fg: #f8e8ff;
   --bow: repeating-linear-gradient(90deg,var(--c0),var(--c1),var(--c2),var(--c3),var(--c4),var(--c5),var(--c0) 50%);
-  --E: cubic-bezier(0.4, 0.05, 0.2, 1);
+  --E: cubic-bezier(.4,.05,.2,1);
   --O: max(7.25vmin, 3rem);
-  --Of: calc(var(--O) * 0.36);
-  --dim: grayscale(1) brightness(0.55);
-  --line: 0.2rem;
-  --Bl: 0.6rem;
+  --Of: calc(var(--O) * .36);
+  --dim: grayscale(1) brightness(.55);
+  --line: .2rem;
+  --Bl: .6rem;
   --Ts: drop-shadow(0 .2em .45em rgba(0,0,0,.55));
   font-size: 120%;
 }
@@ -57,6 +57,24 @@ body {
   color: var(--fg);
 }
 
+.face .wm,
+.cl,
+.wl,
+#is,
+#pr,
+#tb,
+.fly,
+#drk,
+#prk,
+#tcl,
+#uni,
+#win,
+.ds::before,
+.pmc::before,
+.pmc::after,
+.wall:has(.it)::before {
+}
+
 .pmc {
   border-radius: var(--Pr);
   corner-shape: round;
@@ -64,7 +82,7 @@ body {
   z-index: 1;
   padding: 1.35rem 1.55rem;
   background: #222;
-  animation: pmc-in 0.7s cubic-bezier(0.2, 1.4, 0.3, 1) both;
+  animation: pmc-in .7s cubic-bezier(.2,1.4,.3,1) both;
 }
 
 .ct,
@@ -208,7 +226,7 @@ body.rw::after,
 
 #vp.lx .face {
   opacity: 0;
-  transition: opacity 0.55s var(--E);
+  transition: opacity .55s var(--E);
 }
 
 #vp.le .face {
@@ -232,8 +250,7 @@ body.rw::after,
 }
 
 .face .wm {
-  pointer-events: none;
-  transition: filter 0.45s var(--E);
+  transition: filter .45s var(--E);
 }
 .face.it .wm {
   filter: grayscale(1);
@@ -254,7 +271,6 @@ body.rw::after,
 .cl {
   z-index: 2;
   opacity: 0;
-  pointer-events: none;
 }
 
 .cl svg,
@@ -276,7 +292,6 @@ body.rw::after,
 
 .wl {
   z-index: 1;
-  pointer-events: none;
 }
 
 #vp.ins .face.it .wl {
@@ -295,7 +310,6 @@ body.rw::after,
 
 #is {
   z-index: 5;
-  pointer-events: none;
 }
 
 #is .ihit {
@@ -318,7 +332,6 @@ body.rw::after {
   z-index: 60;
   width: max-content;
   max-width: 100%;
-  pointer-events: none;
 }
 
 #tb {
@@ -326,8 +339,7 @@ body.rw::after {
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  gap: 0.5rem;
-  pointer-events: none;
+  gap: .5rem;
 }
 
 .cth {
@@ -340,7 +352,7 @@ body.rw::after {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: calc(var(--line) * 2 + 0.4rem);
+  padding: calc(var(--line) * 2 + .4rem);
   border: none;
   font-size: 1rem;
   cursor: default;
@@ -348,7 +360,7 @@ body.rw::after {
   --sh: inset 0 0 0 var(--line) color-mix(in srgb, var(--tab) 45%, transparent);
   background: var(--tabd);
   box-shadow: var(--sh);
-  transition: 0.8s var(--E);
+  transition: .8s var(--E);
 }
 
 .ct.ry {
@@ -359,15 +371,15 @@ body.rw::after {
   z-index: 121;
   min-width: 0;
   padding: 0;
-  border-radius: 0.35rem;
+  border-radius: .35rem;
   background: var(--tab);
   box-shadow: 0 0 1.2rem var(--tab);
-  animation: tab-seal 0.8s var(--E) both;
+  animation: tab-seal .8s var(--E) both;
 }
 
 .ct.sl .tps {
   opacity: 0;
-  transform: scale(0.15);
+  transform: scale(.15);
 }
 
 .ct.sd {
@@ -389,7 +401,7 @@ body.rw::after {
   position: relative;
   width: 1.85rem;
   height: 1.85rem;
-  transition: opacity 0.4s ease, transform 0.7s var(--E);
+  transition: opacity .4s ease, transform .7s var(--E);
 }
 
 .tpw {
@@ -415,7 +427,6 @@ body.rw::after {
   left: 0;
   top: 0;
   z-index: 120;
-  pointer-events: none;
   offset-anchor: center;
   offset-rotate: 0deg;
   offset-distance: 0%;
@@ -434,7 +445,7 @@ body.rw::after {
 .gem {
   position: relative;
   flex-shrink: 0;
-  transition: width 0.55s ease, height 0.55s ease;
+  transition: width .55s ease, height .55s ease;
 }
 
 .flyn .gem {
@@ -456,22 +467,20 @@ body.rw::after {
   z-index: 70;
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: .55rem;
   align-items: center;
-  pointer-events: none;
 }
 
-#drk { left: 0.35rem; }
-#prk { right: 0.35rem; }
+#drk { left: .35rem; }
+#prk { right: .35rem; }
 
 #tcl {
   position: fixed;
-  right: 0.85rem;
-  top: 0.65rem;
+  right: .85rem;
+  top: .65rem;
   z-index: 65;
   color: #a1a1a1;
   font: 700 1.1rem/1 monospace;
-  pointer-events: none;
 }
 body.won #tcl {
   z-index: 90;
@@ -490,10 +499,9 @@ body.won #prk { display: none; }
   width: var(--u);
   height: var(--u);
   z-index: 210;
-  pointer-events: none;
   overflow: visible;
-  filter: brightness(0.65);
-  transition: 0.5s var(--E);
+  filter: brightness(.65);
+  transition: .5s var(--E);
 }
 #uni svg {
   transform: scaleX(-1);
@@ -511,14 +519,14 @@ body.won #uni {
   transform: rotate(-12deg) translate(-14%, -7%) scale(1.18);
 }
 #uni.go {
-  animation: uni-gallop 0.5s ease;
+  animation: uni-gallop .5s ease;
 }
 body.hi #uni,
 body.won #uni {
   --u: 42vmin;
 }
 body.won #uni {
-  animation: uni-gallop 0.74s ease infinite;
+  animation: uni-gallop .74s ease infinite;
 }
 @keyframes uni-gallop {
   45% {
@@ -551,14 +559,13 @@ body.won #uni {
   width: 0;
   background: var(--slot);
   border-radius: 0;
-  transition: width 0.8s var(--E) var(--d, 0s);
-  pointer-events: none;
+  transition: width .8s var(--E) var(--d, 0s);
 }
 body.won .ds::before {
-  left: -0.35rem;
+  left: -.35rem;
   width: 100vw;
   background: linear-gradient(
-      90deg,
+      100deg,
       color-mix(in srgb, var(--slot) 55%, #000),
       var(--slot) 50%,
       color-mix(in srgb, var(--slot) 55%, #000)
@@ -573,11 +580,11 @@ body.won .ds::before {
 }
 
 .ds:not(:has(.cube)) {
-  opacity: 0.45;
+  opacity: .45;
 }
 
 .ds .cube {
-  font-size: calc(var(--O) * 0.2);
+  font-size: calc(var(--O) * .2);
   z-index: 1;
 }
 
@@ -599,13 +606,13 @@ body.won .ds::before {
   width: calc(2em - 4px);
   height: calc(2em - 4px);
   margin: calc(2px - 1em) 0 0 calc(2px - 1em);
-  opacity: 0.7;
-  transition: background 0.45s ease, opacity 0.45s ease;
+  opacity: .7;
+  transition: background .45s ease, opacity .45s ease;
 }
 
-.cf.pd { opacity: 0.85; }
+.cf.pd { opacity: .85; }
 .cf.lit { opacity: 1; }
-.cf.lit.ig { animation: cube-ig 0.6s ease; }
+.cf.lit.ig { animation: cube-ig .6s ease; }
 
 @keyframes cube-ig {
   35% { filter: brightness(1.65); }
@@ -622,7 +629,6 @@ body.won .ds::before {
   z-index: 100;
   white-space: nowrap;
   transform: translate(-50%, -50%) rotate(-16deg);
-  pointer-events: none;
   text-align: center;
   font-weight: 700;
   font-size: 19vmin;
@@ -642,7 +648,7 @@ body.won .ds::before {
 }
 
 .ps {
-  transition: transform 0.4s ease, filter 0.3s ease, opacity 0.3s ease;
+  transition: transform .4s ease, filter .3s ease, opacity .3s ease;
 }
 
 .ps.lk,
@@ -650,7 +656,7 @@ body.rw #prk .ps,
 .ppk.lk,
 .ppk:disabled {
   filter: var(--dim);
-  opacity: 0.5;
+  opacity: .5;
   cursor: default;
   pointer-events: none;
 }
@@ -667,23 +673,23 @@ body.rw #prk .ps,
 }
 
 .ps.co:not(.on) {
-  filter: grayscale(1) brightness(0.7);
-  opacity: 0.55;
+  filter: grayscale(1) brightness(.7);
+  opacity: .55;
 }
 
 .pg {
-  font-size: 0.75em;
+  font-size: .75em;
   font-weight: 700;
   line-height: 1;
 }
 
 .pl {
   position: absolute;
-  left: -0.15em;
-  bottom: -0.1em;
+  left: -.15em;
+  bottom: -.1em;
   min-width: 1.2em;
-  padding: 0.1em 0.25em;
-  font-size: 0.95em;
+  padding: .1em .25em;
+  font-size: .95em;
   background: #111;
   box-shadow: 0 0 0 var(--line) var(--pow);
 }
@@ -693,9 +699,9 @@ body.rw #prk .ps,
   display: grid;
   place-items: center;
   pointer-events: auto;
-  background: rgba(60, 60, 64, 0.82);
+  background: rgba(60, 60, 64, .82);
   opacity: 0;
-  transition: opacity 0.45s ease;
+  transition: opacity .45s ease;
 }
 
 .pmod.show {
@@ -716,7 +722,6 @@ body.rw #prk .ps,
   position: absolute;
   inset: 0;
   background: #222;
-  pointer-events: none;
 }
 
 .pmc::before,
@@ -724,7 +729,6 @@ body.rw #prk .ps,
   position: absolute;
   background: var(--bow) 0 / 200%;
   animation: bow 8s linear infinite;
-  pointer-events: none;
   z-index: -1;
 }
 
@@ -746,12 +750,12 @@ body.rw #prk .ps,
 }
 
 .pmod.out .pmc {
-  animation: pmc-out 0.5s ease both;
+  animation: pmc-out .5s ease both;
 }
 
 @keyframes pmc-in {
   0% {
-    transform: scale(0.45);
+    transform: scale(.45);
     filter: brightness(2.2);
   }
   100% {
@@ -773,7 +777,7 @@ body.rw #prk .ps,
 }
 
 .pmc h2 {
-  margin: 0 0 0.45em;
+  margin: 0 0 .45em;
   font-size: 1.55rem;
   font-weight: 700;
   line-height: 1.2;
@@ -794,18 +798,18 @@ body.hi .pmc h2 {
   font-size: 1.25rem;
 }
 body.hi .ph {
-  font-size: 0.92rem;
+  font-size: .92rem;
 }
 
 .ppks {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.7rem;
+  gap: .7rem;
 }
 
 .ppk.pk {
-  animation: ppk-pop 0.5s ease;
+  animation: ppk-pop .5s ease;
   filter: brightness(1.7);
 }
 
@@ -960,7 +964,7 @@ const v = new Proxy(
     get: (_, t) =>
       (...args) => {
         const e = document.createElement(t);
-        args.flat(0xff).forEach((a) => {
+        args.flat().forEach((a) => {
           if (a?.constructor == Object && !a.nodeType) {
             let { style, ...r } = a;
             Object.assign(e, r);
@@ -991,10 +995,7 @@ const bodyOff = (...c) => off(document.body, ...c);
 const bodyHas = (c) => document.body.classList.contains(c);
 const showModal = (kids, ding) => {
   if (isWon()) return qs(".pmod");
-  const card = div(
-    { className: "pmc" },
-    ...(typeof kids === "string" ? [div({ className: "ph" }, kids)] : [].concat(kids))
-  );
+  const card = div({ className: "pmc" }, ...[].concat(kids));
   let modal = qs(".pmod");
   if (modal) {
     off(modal, "out");
@@ -1039,13 +1040,14 @@ const SVG100 = {
   viewBox: "0 0 100 100",
   width: "100%",
   height: "100%",
+  preserveAspectRatio: "none",
 };
+const isHid = (el) => el.style.visibility == "hidden";
+const hide = (el) => (el.style.visibility = "hidden");
 
 const inspectFace = () => qs(".face.it");
 const faceLayers = (face) =>
-  face
-    ? qsa(".cl", face).filter((l) => l.style.visibility !== "hidden")
-    : [];
+  face ? qsa(".cl", face).filter((l) => !isHid(l)) : [];
 const layerById = (id) => qs(`.cl[data-id="${id}"]`);
 
 ;
@@ -1087,7 +1089,7 @@ const uniCyan = "#7fdbff";
 const uniGold = "#ffdc00";
 
 const uni = div({ id: "uni" });
-uni.innerHTML = `<svg viewBox="0 0 128 128"><ellipse cx="63" cy="49.4" fill="${uniPink}" rx="24" ry="16.4" transform="rotate(-19 63 49)"/><path fill="#fff" d="m37 130 23-84 31 2 7 37-18 4 7 41z"/><path fill="${uniCyan}" d="M39 78c-5-2-6-13-2-24q9-19 18-17c5 2 6 13 2 24q-8 19-18 17"/><path fill="#fff" d="m58 57 4-22 12 18zm20-5 11-17 3 21z"/><circle cx="67.9" cy="64" r="5" fill="#222"/><circle cx="87.9" cy="64" r="5" fill="#222"/><ellipse cx="86.9" cy="84" fill="#fde8f6" rx="11" ry="10"/><path fill="${uniGold}" d="m71 49 7-35 2 35z"/><circle cx="66.6" cy="62.9" r="1.4" fill="#fff"/><circle cx="86.2" cy="62.9" r="1.4" fill="#fff"/><ellipse cx="85.1" cy="81.6" fill="${uniPink}" rx="2.4" ry="2.2"/><ellipse cx="94" cy="81.6" fill="${uniPink}" rx="2.4" ry="2.2"/><g fill="none" stroke-linecap="round" stroke-width="21"><path stroke="${uniPink}" d="m46 62-12 59"/><path stroke="${uniCyan}" d="m41 86-12 60"/></g><path fill="none" stroke="#fff" stroke-linecap="round" stroke-width="39" d="m61 112-64 8"/></svg>`;
+uni.innerHTML = `<svg viewBox="0 0 128 128"><ellipse cx="63" cy="49" fill="${uniPink}" rx="24" ry="16" transform="rotate(-19 63 49)"/><path fill="#fff" d="m37 130 23-84 31 2 7 37-18 4 7 41z"/><path fill="${uniCyan}" d="M39 78q-7-4-2-24 9-19 18-17c7 3 5 13 2 24q-8 19-18 17"/><path fill="#fff" d="m58 57 4-22 12 18zm20-5 11-17 3 21z"/><circle cx="68" cy="64" r="5" fill="#222"/><circle cx="88" cy="64" r="5" fill="#222"/><ellipse cx="87" cy="84" fill="#fde8f6" rx="11" ry="10"/><path fill="${uniGold}" d="m71 49 7-35 2 35z"/><circle cx="67" cy="63" r="1" fill="#fff"/><circle cx="86" cy="63" r="1" fill="#fff"/><ellipse cx="85" cy="82" fill="${uniPink}" rx="2" ry="2"/><ellipse cx="94" cy="82" fill="${uniPink}" rx="2" ry="2"/><g fill="none" stroke-linecap="round" stroke-width="21"><path stroke="${uniPink}" d="m46 62-12 59"/><path stroke="${uniCyan}" d="m41 86-12 60"/></g><path fill="none" stroke="#fff" stroke-linecap="round" stroke-width="39" d="m61 112-64 8"/><path fill="${uniCyan}" d="m80 43-8 8h5l-4 4 6-2-4 5s7-1 9-4q3-6 1-11c-1-2-6-6-5 0"/></svg>`;
 document.body.append(uni);
 const uniDone = () => off(uni, "go");
 const uniGo = () => {
@@ -1184,7 +1186,7 @@ const flyOnPath = (fromEl, toEl, opts = {}) =>
       mover.style.width = `${size}px`;
       mover.style.height = `${size}px`;
       if (fromEl) {
-        fromEl.style.visibility = "hidden";
+        hide(fromEl);
         clearHintMask(fromEl);
       }
     }
@@ -1236,7 +1238,7 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 const svgEl = (name, attrs = {}, ...kids) => {
   const e = document.createElementNS(SVG_NS, name);
   for (const k in attrs) e.setAttribute(k, attrs[k]);
-  for (const c of kids.flat(0xff)) if (c != null) e.append(c);
+  for (const c of kids.flat()) if (c != null) e.append(c);
   return e;
 };
 
@@ -1296,7 +1298,6 @@ const createMeshData = (seed) => {
   const tris = buildMesh(rand, 3);
   const svg = svgEl("svg", {
     ...SVG100,
-    preserveAspectRatio: "none",
     class: "wm",
   });
   svg.append(svgEl("rect", { width: 100, height: 100, fill: "var(--W1)" }));
@@ -1359,10 +1360,7 @@ const createCollectLayer = (id, tri, color) => {
   layer.append(
     svgEl(
       "svg",
-      {
-        ...SVG100,
-        preserveAspectRatio: "none",
-      },
+      SVG100,
       svgEl("defs", {}, mask),
       svgEl("polygon", {
         class: "ctri",
@@ -1402,9 +1400,8 @@ const readCircleR = (circle, fallback = 0) => {
 
 function ensureRevealDefs() {
   if (document.getElementById("rd")) return;
-  const wrap = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  const wrap = document.createElementNS(SVG_NS, "svg");
   wrap.id = "rd";
-  wrap.setAttribute("aria-hidden", "true");
   wrap.style.cssText =
     "position:absolute;width:0;height:0;overflow:hidden;pointer-events:none";
   wrap.innerHTML = `<defs>${filt("df", 1, ".05")}${filt("wf", 9)}</defs>`;
@@ -1430,7 +1427,7 @@ function resetRevealMask() {
   revealLayers = [];
 }
 
-const asLayers = (x) => (Array.isArray(x) ? x : [x]).filter(Boolean);
+const asLayers = (x) => [].concat(x).filter(Boolean);
 
 function playRevealMask(layerOrLayers) {
   ensureRevealDefs();
@@ -1513,7 +1510,7 @@ function pruneWashes() {
   qsa(".wl").forEach((wl) => {
     const id = wl.dataset.id;
     const cl = layerById(id);
-    if (collected.has(id) || !cl || cl.style.visibility === "hidden")
+    if (collected.has(id) || !cl || isHid(cl))
       clearHintMask(id);
   });
 }
@@ -1531,7 +1528,7 @@ function playWash(cl, fill) {
     !face ||
     !rc ||
     collected.has(id) ||
-    cl.style.visibility === "hidden"
+    isHid(cl)
   )
     return;
   ensureRevealDefs();
@@ -1548,7 +1545,7 @@ function playWash(cl, fill) {
     ) + 50;
   const wl = div({ className: "wl" });
   wl.dataset.id = id;
-  const svg = svgEl("svg", { ...SVG100, preserveAspectRatio: "none" });
+  const svg = svgEl("svg", SVG100);
   svg.innerHTML =
     `<defs>` +
     `<mask id="${mid}" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">` +
@@ -1679,7 +1676,6 @@ const buildLevel = (index, exclude = [], lit = () => 0) => {
   const colors = pickLevelColors(Math.min(6, raw[1] || 1), exclude, lit);
   return {
     index,
-    mazeSize: cols,
     rooms,
     colors,
     triangles: colors.length ? placeTriangles(rooms, colors) : [],
@@ -1924,14 +1920,9 @@ function createPuzzleUI(opts) {
 
   function refreshPips() {
     const n = ids.length;
-    pips.forEach((pip, i) => {
-      pip.hidden = i >= total;
-      if (i < total)
-        pip.querySelector("polygon")?.setAttribute(
-          "fill",
-          i < n ? fill : "#333"
-        );
-    });
+    pips.forEach((pip, i) =>
+      pip.querySelector("polygon")?.setAttribute("fill", i < n ? fill : "#333")
+    );
     tog(tab, "ry", n >= total && !solved);
   }
 
@@ -1969,7 +1960,6 @@ function createPuzzleUI(opts) {
     off(tab, "ry", "sl", "sd");
     clrTab();
     if (tab.parentNode !== hold) hold.append(tab);
-    tab.hidden = false;
     refreshPips();
     syncPow();
   }
@@ -2116,8 +2106,7 @@ function createPowerSystem() {
       return (
         !collected.has(t.id) &&
         ids.has(t.color.i) &&
-        el &&
-        el.style.visibility !== "hidden"
+        el && !isHid(el)
       );
     });
   };
@@ -2242,7 +2231,7 @@ function createPowerSystem() {
     picks.forEach((t) => {
       if (collected.has(t.id)) return;
       const layer = layerById(t.id);
-      if (!layer || layer.style.visibility === "hidden") return;
+      if (!layer || isHid(layer)) return;
       playWash(layer, colorHsl(colorPair(t.color)));
     });
   }
@@ -2852,7 +2841,7 @@ function claimTriangle(id, el) {
     layerById(id);
   const face = layer?.closest?.(".face");
   powers.noteCollected(id);
-  if (layer) layer.style.visibility = "hidden";
+  if (layer) hide(layer);
   return { tri, layer, face };
 }
 
@@ -2898,15 +2887,10 @@ window.addEventListener("keydown", (e) => {
     primaryAction();
     return;
   }
-  const map = {
-    ArrowLeft: 0,
-    ArrowRight: 1,
-    ArrowUp: 2,
-    ArrowDown: 3,
-  };
-  if (map[e.key] != null) {
+  const d = { Left: 0, Right: 1, Up: 2, Down: 3 }[e.key.slice(5)];
+  if (d != null) {
     e.preventDefault();
-    if (!e.repeat) doTurn(map[e.key]);
+    if (!e.repeat) doTurn(d);
   }
 });
 

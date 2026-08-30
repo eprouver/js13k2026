@@ -83,7 +83,7 @@ const flyOnPath = (fromEl, toEl, opts = {}) =>
       mover.style.width = `${size}px`;
       mover.style.height = `${size}px`;
       if (fromEl) {
-        fromEl.style.visibility = "hidden";
+        hide(fromEl);
         clearHintMask(fromEl);
       }
     }

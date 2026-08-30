@@ -15,9 +15,8 @@ const readCircleR = (circle, fallback = 0) => {
 
 function ensureRevealDefs() {
   if (document.getElementById("rd")) return;
-  const wrap = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  const wrap = document.createElementNS(SVG_NS, "svg");
   wrap.id = "rd";
-  wrap.setAttribute("aria-hidden", "true");
   wrap.style.cssText =
     "position:absolute;width:0;height:0;overflow:hidden;pointer-events:none";
   wrap.innerHTML = `<defs>${filt("df", 1, ".05")}${filt("wf", 9)}</defs>`;
@@ -43,7 +42,7 @@ function resetRevealMask() {
   revealLayers = [];
 }
 
-const asLayers = (x) => (Array.isArray(x) ? x : [x]).filter(Boolean);
+const asLayers = (x) => [].concat(x).filter(Boolean);
 
 function playRevealMask(layerOrLayers) {
   ensureRevealDefs();
@@ -126,7 +125,7 @@ function pruneWashes() {
   qsa(".wl").forEach((wl) => {
     const id = wl.dataset.id;
     const cl = layerById(id);
-    if (collected.has(id) || !cl || cl.style.visibility === "hidden")
+    if (collected.has(id) || !cl || isHid(cl))
       clearHintMask(id);
   });
 }
@@ -144,7 +143,7 @@ function playWash(cl, fill) {
     !face ||
     !rc ||
     collected.has(id) ||
-    cl.style.visibility === "hidden"
+    isHid(cl)
   )
     return;
   ensureRevealDefs();
@@ -161,7 +160,7 @@ function playWash(cl, fill) {
     ) + 50;
   const wl = div({ className: "wl" });
   wl.dataset.id = id;
-  const svg = svgEl("svg", { ...SVG100, preserveAspectRatio: "none" });
+  const svg = svgEl("svg", SVG100);
   svg.innerHTML =
     `<defs>` +
     `<mask id="${mid}" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">` +

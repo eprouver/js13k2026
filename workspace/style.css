@@ -13,7 +13,7 @@
   --D: 40vmin;
   --F: calc(2 * var(--D) - 10vmin);
   --R: 100%;
-  --Pr: 2rem;
+  --Pr: 1.5rem;
   --P: 40vmin;
   --S: calc(2 * var(--D));
   --bg: #121621;
@@ -21,12 +21,12 @@
   --W2: #4f576d;
   --fg: #f8e8ff;
   --bow: repeating-linear-gradient(90deg,var(--c0),var(--c1),var(--c2),var(--c3),var(--c4),var(--c5),var(--c0) 50%);
-  --E: cubic-bezier(0.4, 0.05, 0.2, 1);
+  --E: cubic-bezier(.4,.05,.2,1);
   --O: max(7.25vmin, 3rem);
-  --Of: calc(var(--O) * 0.36);
-  --dim: grayscale(1) brightness(0.55);
-  --line: 0.2rem;
-  --Bl: 0.6rem;
+  --Of: calc(var(--O) * .36);
+  --dim: grayscale(1) brightness(.55);
+  --line: .2rem;
+  --Bl: .6rem;
   --Ts: drop-shadow(0 .2em .45em rgba(0,0,0,.55));
   font-size: 120%;
 }
@@ -48,6 +48,24 @@ body {
   color: var(--fg);
 }
 
+.face .wm,
+.cl,
+.wl,
+#is,
+#pr,
+#tb,
+.fly,
+#drk,
+#prk,
+#tcl,
+#uni,
+#win,
+.ds::before,
+.pmc::before,
+.pmc::after,
+.wall:has(.it)::before {
+}
+
 .pmc {
   border-radius: var(--Pr);
   corner-shape: round;
@@ -55,7 +73,7 @@ body {
   z-index: 1;
   padding: 1.35rem 1.55rem;
   background: #222;
-  animation: pmc-in 0.7s cubic-bezier(0.2, 1.4, 0.3, 1) both;
+  animation: pmc-in .7s cubic-bezier(.2,1.4,.3,1) both;
 }
 
 .ct,
@@ -199,7 +217,7 @@ body.rw::after,
 
 #vp.lx .face {
   opacity: 0;
-  transition: opacity 0.55s var(--E);
+  transition: opacity .55s var(--E);
 }
 
 #vp.le .face {
@@ -223,8 +241,7 @@ body.rw::after,
 }
 
 .face .wm {
-  pointer-events: none;
-  transition: filter 0.45s var(--E);
+  transition: filter .45s var(--E);
 }
 .face.it .wm {
   filter: grayscale(1);
@@ -245,7 +262,6 @@ body.rw::after,
 .cl {
   z-index: 2;
   opacity: 0;
-  pointer-events: none;
 }
 
 .cl svg,
@@ -267,7 +283,6 @@ body.rw::after,
 
 .wl {
   z-index: 1;
-  pointer-events: none;
 }
 
 #vp.ins .face.it .wl {
@@ -286,7 +301,6 @@ body.rw::after,
 
 #is {
   z-index: 5;
-  pointer-events: none;
 }
 
 #is .ihit {
@@ -309,7 +323,6 @@ body.rw::after {
   z-index: 60;
   width: max-content;
   max-width: 100%;
-  pointer-events: none;
 }
 
 #tb {
@@ -317,8 +330,7 @@ body.rw::after {
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  gap: 0.5rem;
-  pointer-events: none;
+  gap: .5rem;
 }
 
 .cth {
@@ -331,7 +343,7 @@ body.rw::after {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: calc(var(--line) * 2 + 0.4rem);
+  padding: calc(var(--line) * 2 + .4rem);
   border: none;
   font-size: 1rem;
   cursor: default;
@@ -339,7 +351,7 @@ body.rw::after {
   --sh: inset 0 0 0 var(--line) color-mix(in srgb, var(--tab) 45%, transparent);
   background: var(--tabd);
   box-shadow: var(--sh);
-  transition: 0.8s var(--E);
+  transition: .8s var(--E);
 }
 
 .ct.ry {
@@ -350,15 +362,15 @@ body.rw::after {
   z-index: 121;
   min-width: 0;
   padding: 0;
-  border-radius: 0.35rem;
+  border-radius: .35rem;
   background: var(--tab);
   box-shadow: 0 0 1.2rem var(--tab);
-  animation: tab-seal 0.8s var(--E) both;
+  animation: tab-seal .8s var(--E) both;
 }
 
 .ct.sl .tps {
   opacity: 0;
-  transform: scale(0.15);
+  transform: scale(.15);
 }
 
 .ct.sd {
@@ -380,7 +392,7 @@ body.rw::after {
   position: relative;
   width: 1.85rem;
   height: 1.85rem;
-  transition: opacity 0.4s ease, transform 0.7s var(--E);
+  transition: opacity .4s ease, transform .7s var(--E);
 }
 
 .tpw {
@@ -406,7 +418,6 @@ body.rw::after {
   left: 0;
   top: 0;
   z-index: 120;
-  pointer-events: none;
   offset-anchor: center;
   offset-rotate: 0deg;
   offset-distance: 0%;
@@ -425,7 +436,7 @@ body.rw::after {
 .gem {
   position: relative;
   flex-shrink: 0;
-  transition: width 0.55s ease, height 0.55s ease;
+  transition: width .55s ease, height .55s ease;
 }
 
 .flyn .gem {
@@ -447,22 +458,20 @@ body.rw::after {
   z-index: 70;
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: .55rem;
   align-items: center;
-  pointer-events: none;
 }
 
-#drk { left: 0.35rem; }
-#prk { right: 0.35rem; }
+#drk { left: .35rem; }
+#prk { right: .35rem; }
 
 #tcl {
   position: fixed;
-  right: 0.85rem;
-  top: 0.65rem;
+  right: .85rem;
+  top: .65rem;
   z-index: 65;
   color: #a1a1a1;
   font: 700 1.1rem/1 monospace;
-  pointer-events: none;
 }
 body.won #tcl {
   z-index: 90;
@@ -481,10 +490,9 @@ body.won #prk { display: none; }
   width: var(--u);
   height: var(--u);
   z-index: 210;
-  pointer-events: none;
   overflow: visible;
-  filter: brightness(0.65);
-  transition: 0.5s var(--E);
+  filter: brightness(.65);
+  transition: .5s var(--E);
 }
 #uni svg {
   transform: scaleX(-1);
@@ -502,14 +510,14 @@ body.won #uni {
   transform: rotate(-12deg) translate(-14%, -7%) scale(1.18);
 }
 #uni.go {
-  animation: uni-gallop 0.5s ease;
+  animation: uni-gallop .5s ease;
 }
 body.hi #uni,
 body.won #uni {
   --u: 42vmin;
 }
 body.won #uni {
-  animation: uni-gallop 0.74s ease infinite;
+  animation: uni-gallop .74s ease infinite;
 }
 @keyframes uni-gallop {
   45% {
@@ -542,14 +550,13 @@ body.won #uni {
   width: 0;
   background: var(--slot);
   border-radius: 0;
-  transition: width 0.8s var(--E) var(--d, 0s);
-  pointer-events: none;
+  transition: width .8s var(--E) var(--d, 0s);
 }
 body.won .ds::before {
-  left: -0.35rem;
+  left: -.35rem;
   width: 100vw;
   background: linear-gradient(
-      90deg,
+      100deg,
       color-mix(in srgb, var(--slot) 55%, #000),
       var(--slot) 50%,
       color-mix(in srgb, var(--slot) 55%, #000)
@@ -564,11 +571,11 @@ body.won .ds::before {
 }
 
 .ds:not(:has(.cube)) {
-  opacity: 0.45;
+  opacity: .45;
 }
 
 .ds .cube {
-  font-size: calc(var(--O) * 0.2);
+  font-size: calc(var(--O) * .2);
   z-index: 1;
 }
 
@@ -590,13 +597,13 @@ body.won .ds::before {
   width: calc(2em - 4px);
   height: calc(2em - 4px);
   margin: calc(2px - 1em) 0 0 calc(2px - 1em);
-  opacity: 0.7;
-  transition: background 0.45s ease, opacity 0.45s ease;
+  opacity: .7;
+  transition: background .45s ease, opacity .45s ease;
 }
 
-.cf.pd { opacity: 0.85; }
+.cf.pd { opacity: .85; }
 .cf.lit { opacity: 1; }
-.cf.lit.ig { animation: cube-ig 0.6s ease; }
+.cf.lit.ig { animation: cube-ig .6s ease; }
 
 @keyframes cube-ig {
   35% { filter: brightness(1.65); }
@@ -613,7 +620,6 @@ body.won .ds::before {
   z-index: 100;
   white-space: nowrap;
   transform: translate(-50%, -50%) rotate(-16deg);
-  pointer-events: none;
   text-align: center;
   font-weight: 700;
   font-size: 19vmin;
@@ -633,7 +639,7 @@ body.won .ds::before {
 }
 
 .ps {
-  transition: transform 0.4s ease, filter 0.3s ease, opacity 0.3s ease;
+  transition: transform .4s ease, filter .3s ease, opacity .3s ease;
 }
 
 .ps.lk,
@@ -641,7 +647,7 @@ body.rw #prk .ps,
 .ppk.lk,
 .ppk:disabled {
   filter: var(--dim);
-  opacity: 0.5;
+  opacity: .5;
   cursor: default;
   pointer-events: none;
 }
@@ -658,23 +664,23 @@ body.rw #prk .ps,
 }
 
 .ps.co:not(.on) {
-  filter: grayscale(1) brightness(0.7);
-  opacity: 0.55;
+  filter: grayscale(1) brightness(.7);
+  opacity: .55;
 }
 
 .pg {
-  font-size: 0.75em;
+  font-size: .75em;
   font-weight: 700;
   line-height: 1;
 }
 
 .pl {
   position: absolute;
-  left: -0.15em;
-  bottom: -0.1em;
+  left: -.15em;
+  bottom: -.1em;
   min-width: 1.2em;
-  padding: 0.1em 0.25em;
-  font-size: 0.95em;
+  padding: .1em .25em;
+  font-size: .95em;
   background: #111;
   box-shadow: 0 0 0 var(--line) var(--pow);
 }
@@ -684,9 +690,9 @@ body.rw #prk .ps,
   display: grid;
   place-items: center;
   pointer-events: auto;
-  background: rgba(60, 60, 64, 0.82);
+  background: rgba(60, 60, 64, .82);
   opacity: 0;
-  transition: opacity 0.45s ease;
+  transition: opacity .45s ease;
 }
 
 .pmod.show {
@@ -707,7 +713,6 @@ body.rw #prk .ps,
   position: absolute;
   inset: 0;
   background: #222;
-  pointer-events: none;
 }
 
 .pmc::before,
@@ -715,7 +720,6 @@ body.rw #prk .ps,
   position: absolute;
   background: var(--bow) 0 / 200%;
   animation: bow 8s linear infinite;
-  pointer-events: none;
   z-index: -1;
 }
 
@@ -737,12 +741,12 @@ body.rw #prk .ps,
 }
 
 .pmod.out .pmc {
-  animation: pmc-out 0.5s ease both;
+  animation: pmc-out .5s ease both;
 }
 
 @keyframes pmc-in {
   0% {
-    transform: scale(0.45);
+    transform: scale(.45);
     filter: brightness(2.2);
   }
   100% {
@@ -764,7 +768,7 @@ body.rw #prk .ps,
 }
 
 .pmc h2 {
-  margin: 0 0 0.45em;
+  margin: 0 0 .45em;
   font-size: 1.55rem;
   font-weight: 700;
   line-height: 1.2;
@@ -785,18 +789,18 @@ body.hi .pmc h2 {
   font-size: 1.25rem;
 }
 body.hi .ph {
-  font-size: 0.92rem;
+  font-size: .92rem;
 }
 
 .ppks {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.7rem;
+  gap: .7rem;
 }
 
 .ppk.pk {
-  animation: ppk-pop 0.5s ease;
+  animation: ppk-pop .5s ease;
   filter: brightness(1.7);
 }
 

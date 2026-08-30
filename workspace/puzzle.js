@@ -37,14 +37,9 @@ function createPuzzleUI(opts) {
 
   function refreshPips() {
     const n = ids.length;
-    pips.forEach((pip, i) => {
-      pip.hidden = i >= total;
-      if (i < total)
-        pip.querySelector("polygon")?.setAttribute(
-          "fill",
-          i < n ? fill : "#333"
-        );
-    });
+    pips.forEach((pip, i) =>
+      pip.querySelector("polygon")?.setAttribute("fill", i < n ? fill : "#333")
+    );
     tog(tab, "ry", n >= total && !solved);
   }
 
@@ -82,7 +77,6 @@ function createPuzzleUI(opts) {
     off(tab, "ry", "sl", "sd");
     clrTab();
     if (tab.parentNode !== hold) hold.append(tab);
-    tab.hidden = false;
     refreshPips();
     syncPow();
   }
