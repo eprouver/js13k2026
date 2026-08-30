@@ -84,7 +84,7 @@ function wrapPacked(js) {
 }
 
 function wrapPages(js) {
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#121621"><link rel="manifest" href="manifest.webmanifest"><title>${TITLE}</title></head>${wrapPacked(js)}</html>`;
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#121621"><link rel="manifest" href="manifest.webmanifest"><title>${TITLE}</title></head>${wrapPacked(js)}</html>`;
 }
 
 function kb(n) {
