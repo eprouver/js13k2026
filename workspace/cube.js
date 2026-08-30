@@ -151,7 +151,9 @@ function createCubeRack() {
         (c) => litByColor[c.i].size > 0 && !isFull(c.i)
       );
       if (!targets.length) break;
-      const c = shuffle(targets.slice())[0];
+      const c = targets.sort(
+        (a, b) => litByColor[a.i].size - litByColor[b.i].size
+      )[0];
       const f = nextFace(c.i);
       if (f < 0) continue;
       litByColor[c.i].add(f);

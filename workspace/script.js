@@ -252,7 +252,7 @@ function showHelp() {
     ),
     div(
       { className: "ph" },
-      "Tap edges or arrows to turn\nTap center or space to move\nPowerups will help"
+      "Tap edges or arrows to turn\nTap center or space to move\nW / E / R are powerups"
     ),
   ]);
   const go = () => {
@@ -568,7 +568,7 @@ window.addEventListener("keydown", (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   if (hasRw() || isWon()) return;
   const powerId = PK[e.key.toLowerCase()];
-  if (powerId) {
+  if (powerId != null) {
     e.preventDefault();
     powers.activatePower(powerId);
     return;

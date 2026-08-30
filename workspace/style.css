@@ -532,6 +532,19 @@ body.won #uni {
 body.won .ds::before {
   left: -0.35rem;
   width: 100vw;
+  background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--slot) 55%, #000),
+      var(--slot) 50%,
+      color-mix(in srgb, var(--slot) 55%, #000)
+    )
+    0 / 33vw;
+  animation: band 2.4s linear infinite var(--d, 0s);
+}
+@keyframes band {
+  to {
+    background-position: 33vw;
+  }
 }
 
 .ds:not(:has(.cube)) {
