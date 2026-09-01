@@ -299,6 +299,7 @@ async function transitionToLevel(index) {
 
   on(viewport, "le");
   startLevel(index);
+  isWon() || musicRand();
   off(viewport, "lx");
   void world.offsetWidth;
   on(viewport, "li");
