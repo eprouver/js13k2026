@@ -45,8 +45,8 @@ function startMusic() {
   wet.gain.value = 0.55;
   rev.connect(wet).connect(out);
   musicRand();
-  const vo = (ty, f, v, d) => {
-    const t = X.currentTime,
+  const vo = (ty, f, v, d, w = 0) => {
+    const t = X.currentTime + w,
       o = X.createOscillator(),
       g = X.createGain();
     o.type = ty;
@@ -68,7 +68,7 @@ function startMusic() {
     const mF = F(60 + lift + scale[mI]),
       tI = TRI.reduce((p, c) => (Math.abs(c - mI) < Math.abs(p - mI) ? c : p));
     vo(wv[mW], mF, 0.1, b * 1.35);
-    vo(wv[tW], F(48 + lift + scale[tI]), 0.12, b * 2.1);
+    vo(wv[tW], F(48 + lift + scale[tI]), 0.12, b * 2.1, b * 0.5);
     if (!(ps & 3)) {
       const t = X.currentTime,
         o = X.createOscillator(),
